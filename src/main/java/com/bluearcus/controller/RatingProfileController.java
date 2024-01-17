@@ -32,10 +32,9 @@ public class RatingProfileController {
 		return ratingProfileService.createRatingProfileVoucher(ratingProfileVoucherDto);
 	}
 
-	@RequestMapping(value = "/voucher/edit", method = RequestMethod.PUT)
-	public ResponseEntity<RatingProfileVoucherDto> editRatingProfileVoucher(
-			@RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
-		return ratingProfileService.editRatingProfileVoucher(ratingProfileVoucherDto);
+	@RequestMapping(value = "/voucher/edit/{rating_profile_id}", method = RequestMethod.PUT)
+	public ResponseEntity<RatingProfileVoucherDto> editRatingProfileVoucher(@PathVariable("rating_profile_id") Integer ratingProfileId ,@RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
+		return ratingProfileService.editRatingProfileVoucher(ratingProfileId, ratingProfileVoucherDto);
 	}
 
 	@RequestMapping(value = "/voucher/get/all", method = RequestMethod.GET)

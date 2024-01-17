@@ -11,21 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FlatFileService {
-	private static final String FILE_PATH = "C:\\Users\\ajays\\OneDrive\\Documents\\Postpaid Accounts\\flatfile.txt";
-
-	public void storeData(String data) {
-//		try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
-//			// Join fields with the delimiter and write to the file
-//			data = data.replaceAll(",", " |");
-//			writer.write(data);
-//			writer.newLine(); // Move to the next line for the next record
-//			System.out.println("Data successfully stored in the flat file database.");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-	}
-
-	public void storeUserData(String packtype, String date, Integer customerId, String customerData) {
+		public void storeUserData(String packtype, String date, Integer customerId, String customerData) {
 		try {
 
 			String directory = "C:\\Users\\ajays\\OneDrive\\Documents\\Postpaid Accounts";
@@ -52,7 +38,6 @@ public class FlatFileService {
 			System.out.println("Dynamic text file created successfully at: " + filePath);
 
 		} catch (Exception e) {
-			// Handle any potential IO exceptions
 			e.printStackTrace();
 		}
 	}

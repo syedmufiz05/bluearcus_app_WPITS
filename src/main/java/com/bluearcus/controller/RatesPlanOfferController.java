@@ -31,8 +31,7 @@ public class RatesPlanOfferController {
 	}
 
 	@RequestMapping(value = "/get/{rates_plan_offer_id}", method = RequestMethod.GET)
-	public ResponseEntity<RatesPlanOfferDto> getRatesPlanOffer(
-			@PathVariable("rates_plan_offer_id") Integer ratesPlanOfferId) {
+	public ResponseEntity<RatesPlanOfferDto> getRatesPlanOffer(@PathVariable("rates_plan_offer_id") Integer ratesPlanOfferId) {
 		return ratesPlanOfferService.getRatesPlanDetail(ratesPlanOfferId);
 	}
 

@@ -14,7 +14,7 @@ public interface RatingProfileService {
 
     ResponseEntity createRatingProfileVoucher(RatingProfileVoucherDto ratingProfileVoucherDto);
 
-    ResponseEntity editRatingProfileVoucher(RatingProfileVoucherDto ratingProfileVoucherDto);
+	ResponseEntity editRatingProfileVoucher(Integer ratingProfileId, RatingProfileVoucherDto ratingProfileVoucherDto);
     
     List<RatingProfileVoucherDto> getAllRatingProfileVoucher();
 
