@@ -4,6 +4,9 @@ import com.bluearcus.dto.RatesPlanOfferDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.RatesPlanOffer;
 import com.bluearcus.repo.RatesPlanOfferRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +28,8 @@ public class RatesPlanOfferServiceImpl implements RatesPlanOfferService {
 		if (!ratesPlanOffer.isPresent()) {
 			RatesPlanOffer ratesPlanOfferDb = new RatesPlanOffer();
 			ratesPlanOfferDb.setName(ratesPlanOfferDto.getName() != null ? ratesPlanOfferDto.getName() : "");
-			ratesPlanOfferDb.setPeriod(
-					ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod() : Integer.valueOf(""));
-			ratesPlanOfferDb.setDescription(
-					ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription() : "");
+			ratesPlanOfferDb.setPeriod(ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod() : Integer.valueOf(""));
+			ratesPlanOfferDb.setDescription(ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription() : "");
 			ratesPlanOfferDb.setActive(ratesPlanOfferDto.getActive() != null ? ratesPlanOfferDto.getActive() : false);
 			ratesPlanOfferRepository.save(ratesPlanOfferDb);
 			RatesPlanOfferDto ratesPlanOfferDtoNew = new RatesPlanOfferDto(ratesPlanOfferDb.getId(),
@@ -89,5 +90,37 @@ public class RatesPlanOfferServiceImpl implements RatesPlanOfferService {
 	@Override
 	public List<RatesPlanOfferDto> getAllRatesPlan() {
 		return ratesPlanOfferRepository.fetchAllRatesPlan();
+	}
+
+	@Override
+	public ResponseEntity editRatesPlanDetail(Integer ratesPlanOfferId, RatesPlanOfferDto ratesPlanOfferDto) {
+		Optional<RatesPlanOffer> ratesPlanOffer = ratesPlanOfferRepository.findById(ratesPlanOfferId);
+		if (ratesPlanOffer.isPresent()) {
+			RatesPlanOffer ratesPlanOfferDb = ratesPlanOffer.get();
+			ratesPlanOfferDb.setName(ratesPlanOfferDto.getName() != null ? ratesPlanOfferDto.getName() : ratesPlanOfferDb.getName());
+			ratesPlanOfferDb.setPeriod(ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod() : ratesPlanOfferDb.getPeriod());
+			ratesPlanOfferDb.setDescription(ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription() : ratesPlanOfferDb.getDescription());
+			ratesPlanOfferDb.setActive(ratesPlanOfferDto.getActive() != null ? ratesPlanOfferDto.getActive() : ratesPlanOfferDb.getActive());
+			ratesPlanOfferRepository.save(ratesPlanOfferDb);
+			RatesPlanOfferDto ratesPlanOfferDtoNew = new RatesPlanOfferDto(ratesPlanOfferDb.getId(),
+					ratesPlanOfferDb.getName(), ratesPlanOfferDb.getPeriod(), ratesPlanOfferDb.getDescription(),
+					ratesPlanOfferDb.getActive());
+			return new ResponseEntity<>(ratesPlanOfferDtoNew, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Rating Plan Id does n't exist"));
+	}
+
+	@Transactional
+	@Override
+	public ResponseEntity deleteRatesPlanDetail(Integer ratesPlanOfferId) {
+		Optional<RatesPlanOffer> ratesPlanOffer = ratesPlanOfferRepository.findById(ratesPlanOfferId);
+		if (ratesPlanOffer.isPresent()) {
+			ratesPlanOfferRepository.deleteById(ratesPlanOfferId);
+			return ResponseEntity.status(HttpStatus.OK)
+					.body(new CustomMessage(HttpStatus.OK.value(), "Deleted Successfully..."));
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Rating Plan Id does n't exist"));
 	}
 }

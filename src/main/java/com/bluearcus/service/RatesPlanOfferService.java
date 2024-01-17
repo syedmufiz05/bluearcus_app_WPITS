@@ -6,11 +6,17 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface RatesPlanOfferService {
-    ResponseEntity saveRatesPlanDetail(RatesPlanOfferDto ratesPlanOfferDto);
+	
+	ResponseEntity saveRatesPlanDetail(RatesPlanOfferDto ratesPlanOfferDto);
 
-    ResponseEntity getRatesPlanDetail(Integer ratesPlanOfferId);
-    
-    List<RatesPlanOfferDto> getAllRatesPlan();
-    
-    List<String> getAllRatesPlansBulk();
+	ResponseEntity editRatesPlanDetail(Integer ratesPlanOfferId, RatesPlanOfferDto ratesPlanOfferDto);
+
+	ResponseEntity deleteRatesPlanDetail(Integer ratesPlanOfferId);
+
+	ResponseEntity getRatesPlanDetail(Integer ratesPlanOfferId);
+
+	List<RatesPlanOfferDto> getAllRatesPlan();
+
+	List<String> getAllRatesPlansBulk();
+	
 }

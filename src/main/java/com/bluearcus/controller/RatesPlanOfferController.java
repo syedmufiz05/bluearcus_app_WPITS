@@ -19,6 +19,16 @@ public class RatesPlanOfferController {
 	public ResponseEntity<RatesPlanOfferDto> saveRatesPlanOffer(@RequestBody RatesPlanOfferDto ratesPlanOfferDto) {
 		return ratesPlanOfferService.saveRatesPlanDetail(ratesPlanOfferDto);
 	}
+	
+	@RequestMapping(value = "/edit/{rates_plan_offer_id}", method = RequestMethod.POST)
+	public ResponseEntity<RatesPlanOfferDto> editRatesPlanOffer(@PathVariable("rates_plan_offer_id") Integer ratesPlanOfferId,@RequestBody RatesPlanOfferDto ratesPlanOfferDto) {
+		return ratesPlanOfferService.editRatesPlanDetail(ratesPlanOfferId, ratesPlanOfferDto);
+	}
+	
+	@RequestMapping(value = "/delete/{rates_plan_offer_id}", method = RequestMethod.DELETE)
+	public ResponseEntity<RatesPlanOfferDto> deletetRatesPlanOffer(@PathVariable("rates_plan_offer_id") Integer ratesPlanOfferId) {
+		return ratesPlanOfferService.deleteRatesPlanDetail(ratesPlanOfferId);
+	}
 
 	@RequestMapping(value = "/get/{rates_plan_offer_id}", method = RequestMethod.GET)
 	public ResponseEntity<RatesPlanOfferDto> getRatesPlanOffer(
