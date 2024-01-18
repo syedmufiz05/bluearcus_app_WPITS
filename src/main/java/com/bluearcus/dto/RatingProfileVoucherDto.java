@@ -35,7 +35,4 @@ public class RatingProfileVoucherDto {
 
 	@JsonProperty("rating_offer_list")
 	private List<String> ratesOfferDtoList;
-
-	@JsonProperty("rating_plan_list")
-	private List<String> ratingPlanDtoList;
 }

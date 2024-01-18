@@ -41,9 +41,6 @@ public class RatingProfileVoucher {
 	@Column(name = "rates_offer_list", columnDefinition = "JSON")
 	private String ratesOfferList;
 
-	@Column(name = "rates_plan_offer_list", columnDefinition = "JSON")
-	private String ratesPlanOfferList;
-
 	public void setCategoryOffer(String categoryOfferList) {
 		try {
 			this.categoryOfferList = new ObjectMapper().writeValueAsString(categoryOfferList);
@@ -55,14 +52,6 @@ public class RatingProfileVoucher {
 	public void setRatesOffer(String ratesOfferList) {
 		try {
 			this.ratesOfferList = new ObjectMapper().writeValueAsString(ratesOfferList);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void setRatesPlanOffer(String ratesPlanOfferList) {
-		try {
-			this.ratesPlanOfferList = new ObjectMapper().writeValueAsString(ratesPlanOfferList);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}

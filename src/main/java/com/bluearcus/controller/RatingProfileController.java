@@ -1,10 +1,7 @@
 package com.bluearcus.controller;
 
-import com.bluearcus.dto.RatingProfileDto;
 import com.bluearcus.dto.RatingProfileVoucherDto;
 import com.bluearcus.service.RatingProfileService;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +16,6 @@ public class RatingProfileController {
 	@Autowired
 	private RatingProfileService ratingProfileService;
 
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public RatingProfileDto createRatingProfile(@RequestBody RatingProfileDto ratingProfileDto,
-			HttpServletRequest httpServletRequest) {
-		String authToken = httpServletRequest.getHeader("Authorization").replace("Bearer", "");
-		return ratingProfileService.createRatingProfile(ratingProfileDto, authToken);
-	}
-
 	@RequestMapping(value = "/voucher/create", method = RequestMethod.POST)
 	public ResponseEntity<RatingProfileVoucherDto> createRatingProfileVoucher(
 			@RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
@@ -33,8 +23,22 @@ public class RatingProfileController {
 	}
 
 	@RequestMapping(value = "/voucher/edit/{rating_profile_id}", method = RequestMethod.PUT)
-	public ResponseEntity<RatingProfileVoucherDto> editRatingProfileVoucher(@PathVariable("rating_profile_id") Integer ratingProfileId ,@RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
+	public ResponseEntity<RatingProfileVoucherDto> editRatingProfileVoucher(
+			@PathVariable("rating_profile_id") Integer ratingProfileId,
+			@RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
 		return ratingProfileService.editRatingProfileVoucher(ratingProfileId, ratingProfileVoucherDto);
+	}
+
+	@RequestMapping(value = "/voucher/delete/{rating_profile_id}", method = RequestMethod.DELETE)
+	public ResponseEntity<RatingProfileVoucherDto> deleteRatingProfileVoucher(
+			@PathVariable("rating_profile_id") Integer ratingProfileId) {
+		return ratingProfileService.deleteRatingProfileVoucher(ratingProfileId);
+	}
+
+	@RequestMapping(value = "/voucher/get/{rating_profile_id}", method = RequestMethod.GET)
+	public ResponseEntity<RatingProfileVoucherDto> getRatingProfileVoucher(
+			@PathVariable("rating_profile_id") Integer ratingProfileId) {
+		return ratingProfileService.getRatingProfileVoucher(ratingProfileId);
 	}
 
 	@RequestMapping(value = "/voucher/get/all", method = RequestMethod.GET)
@@ -42,26 +46,4 @@ public class RatingProfileController {
 		return ratingProfileService.getAllRatingProfileVoucher();
 	}
 
-	@RequestMapping(value = "/get/all/ratingprofile", method = RequestMethod.GET)
-	public List<RatingProfileDto> getAll() {
-		return ratingProfileService.getAllRatingProfile();
-	}
-
-	@RequestMapping(value = "/get/{rating_profile_id}", method = RequestMethod.GET)
-	public ResponseEntity<RatingProfileDto> getRatingProfile(
-			@PathVariable("rating_profile_id") Integer ratingProfileId) {
-		return ratingProfileService.getRatingProfile(ratingProfileId);
-	}
-
-	@RequestMapping(value = "/edit/{rating_profile_id}", method = RequestMethod.PUT)
-	public ResponseEntity<RatingProfileDto> editRatingProfile(
-			@PathVariable("rating_profile_id") Integer ratingProfileId,
-			@RequestParam("calling_party") String callingParty) {
-		return ratingProfileService.editRatingProfile(ratingProfileId, callingParty);
-	}
-
-	@RequestMapping(value = "/delete/{rating_profile_id}", method = RequestMethod.DELETE)
-	public String deleteRatingProfile(@PathVariable("rating_profile_id") Integer ratingProfileId) {
-		return ratingProfileService.deleteRatingProfile(ratingProfileId);
-	}
 }
