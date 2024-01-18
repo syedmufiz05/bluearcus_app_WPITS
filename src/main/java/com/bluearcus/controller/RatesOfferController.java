@@ -34,5 +34,10 @@ public class RatesOfferController {
 	public List<String> getAllRatesOfferBulk() {
 		return ratesOfferService.getAllRatesOfferBulk();
 	}
+	
+	@RequestMapping(value = "/get/all/currency/iso/codes", method = RequestMethod.GET)
+	public List<String> getAllCurrencyISOCodes() {
+		return ratesOfferService.getAllCurrencyISOCodes();
+	}
 
 }

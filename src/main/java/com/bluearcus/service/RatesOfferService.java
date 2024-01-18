@@ -13,4 +13,6 @@ public interface RatesOfferService {
     public List<String> getAllRatesOfferBulk();
     
     public List<RatesOfferDto> getAllRatesOffer();
+    
+    public List<String> getAllCurrencyISOCodes();
 }

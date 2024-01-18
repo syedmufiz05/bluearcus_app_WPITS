@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class RatesOfferServiceImpl implements RatesOfferService {
@@ -86,5 +88,15 @@ public class RatesOfferServiceImpl implements RatesOfferService {
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)
 				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Rates Id does n't exist"));
+	}
+
+	@Override
+	public List<String> getAllCurrencyISOCodes() {
+		List<String> currencyISOCodes = new ArrayList<>();
+		Set<Currency> currencies = Currency.getAvailableCurrencies();
+		for (Currency currency : currencies) {
+			currencyISOCodes.add(currency.getCurrencyCode());
+		}
+		return currencyISOCodes;
 	}
 }
