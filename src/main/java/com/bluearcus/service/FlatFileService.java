@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FlatFileService {
-		public void storeUserData(String packtype, String date, Integer customerId, String customerData) {
+	public void storeUserData(String packtype, String date, Integer customerId, String customerData) {
 		try {
 
-			String directory = "C:\\Users\\ajays\\OneDrive\\Documents\\Postpaid Accounts";
+			String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Postpaid Accounts\\Call\\19-01-2024";
 
 			Path path = Paths.get(directory);
 
