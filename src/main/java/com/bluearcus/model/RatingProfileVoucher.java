@@ -44,6 +44,7 @@ public class RatingProfileVoucher {
 	public void setCategoryOffer(String categoryOfferList) {
 		try {
 			this.categoryOfferList = new ObjectMapper().writeValueAsString(categoryOfferList);
+			System.out.println(categoryOfferList);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -52,6 +53,7 @@ public class RatingProfileVoucher {
 	public void setRatesOffer(String ratesOfferList) {
 		try {
 			this.ratesOfferList = new ObjectMapper().writeValueAsString(ratesOfferList);
+			System.out.println(ratesOfferList);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}

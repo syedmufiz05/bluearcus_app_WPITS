@@ -65,9 +65,6 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
 			ratingProfileVoucherDb.setPackName(ratingProfileVoucherDto.getPackName() != null ? ratingProfileVoucherDto.getPackName() : ratingProfileVoucherDb.getPackName());
 			ratingProfileVoucherDb.setPackType(ratingProfileVoucherDto.getPackType() != null ? ratingProfileVoucherDto.getPackType() : ratingProfileVoucherDb.getPackType());
-			
-			System.out.println("Rating Profile string:"+ratingProfileVoucherDb.getCategoryOfferList().toString());
-			
 			ratingProfileVoucherDb.setCategoryOffer(ratingProfileVoucherDto.getCategoryNameDtoList() != null ? ratingProfileVoucherDto.getCategoryNameDtoList().toString() :ratingProfileVoucherDb.getCategoryOfferList());
 			ratingProfileVoucherDb.setRatesOffer(ratingProfileVoucherDto.getRatesOfferDtoList() != null ? ratingProfileVoucherDto.getRatesOfferDtoList().toString() : ratingProfileVoucherDb.getRatesOfferList());
 			ratingProfileVoucherDb.setCallBalance(ratingProfileVoucherDto.getCallBalance() != null ? ratingProfileVoucherDto.getCallBalance() : ratingProfileVoucherDb.getCallBalance());
@@ -75,8 +72,13 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDb.setDataBalance(ratingProfileVoucherDto.getDataBalance() != null ? ratingProfileVoucherDto.getDataBalance() : ratingProfileVoucherDb.getDataBalance());
 			ratingProfileVoucherRepository.save(ratingProfileVoucherDb);
 			
-			List<String> categoryList = convertStringToList(ratingProfileVoucherDb.getCategoryOfferList());
-			List<String> ratesOfferList = convertStringToList(ratingProfileVoucherDb.getRatesOfferList());
+			
+			String categoryFiltered = ratingProfileVoucherDb.getCategoryOfferList().replaceAll("[\\\\/]", "");
+			String ratesOfferFiltered =ratingProfileVoucherDb.getRatesOfferList().replaceAll("[\\\\/]", "");
+			
+			
+			List<String> categoryList = convertStringToList(categoryFiltered);
+			List<String> ratesOfferList = convertStringToList(ratesOfferFiltered);
 			
 			
 			System.out.println("categoryList:" + categoryList);
@@ -105,8 +107,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setSmsBalance(ratingProfileVoucher.getSmsBalance());
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
-			ratingProfileVoucherDto.setCategoryNameDtoList(convertStringToList(ratingProfileVoucher.getCategoryOfferList()));
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList()));
+			ratingProfileVoucherDto.setCategoryNameDtoList(convertStringToList(ratingProfileVoucher.getCategoryOfferList().replaceAll("[\\\\\"']","")));
+			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']", "")));
 			ratingProfileVoucherDtoList.add(ratingProfileVoucherDto);
 		}
 		return ratingProfileVoucherDtoList;
@@ -125,12 +127,11 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setSmsBalance(ratingProfileVoucher.getSmsBalance());
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
-			ratingProfileVoucherDto.setCategoryNameDtoList(convertStringToList(ratingProfileVoucher.getCategoryOfferList()));
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList()));
+			ratingProfileVoucherDto.setCategoryNameDtoList(convertStringToList(ratingProfileVoucher.getCategoryOfferList().replaceAll("[\\\\\"']","")));
+			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']","")));
 			return new ResponseEntity<>(ratingProfileVoucherDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Rating Profile Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Rating Profile Id"));
 	}
 
 	@Transactional
