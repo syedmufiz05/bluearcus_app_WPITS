@@ -45,23 +45,23 @@ public class RatesOfferServiceImpl implements RatesOfferService {
 		List<String> ratesVoucherList = new ArrayList<>();
 		for (RatesOfferDto ratesOfferDto : ratesOfferDtoList) {
 			if (ratesOfferDto.getPrice() == 99) {
-				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " Rs/" + "Month");
+				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " for " + ratesOfferDto.getPeriod() + " days");
 				ratesVoucherList.add(ratesOfferDto.getDescription());
 			}
 			if (ratesOfferDto.getPrice() == 199) {
-				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " Rs/" + "Month");
+				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " for " + ratesOfferDto.getPeriod() + " days");
 				ratesVoucherList.add(ratesOfferDto.getDescription());
 			}
 			if (ratesOfferDto.getPrice() == 299) {
-				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " Rs/" + "Month");
+				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " for " + ratesOfferDto.getPeriod() + " days");
 				ratesVoucherList.add(ratesOfferDto.getDescription());
 			}
 			if (ratesOfferDto.getPrice() == 399) {
-				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " Rs/" + "Month");
+				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " for " + ratesOfferDto.getPeriod() + " days");
 				ratesVoucherList.add(ratesOfferDto.getDescription());
 			}
 			if (ratesOfferDto.getPrice() == 499) {
-				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " Rs/" + "Month");
+				ratesOfferDto.setDescription(ratesOfferDto.getPrice() + " for " + ratesOfferDto.getPeriod() + " days");
 				ratesVoucherList.add(ratesOfferDto.getDescription());
 			}
 		}
@@ -95,7 +95,7 @@ public class RatesOfferServiceImpl implements RatesOfferService {
 		List<String> currencyISOCodes = new ArrayList<>();
 		Set<Currency> currencies = Currency.getAvailableCurrencies();
 		for (Currency currency : currencies) {
-			currencyISOCodes.add(currency.getCurrencyCode());
+			currencyISOCodes.add(currency.getDisplayName() + " " + currency.getCurrencyCode());
 		}
 		return currencyISOCodes;
 	}
