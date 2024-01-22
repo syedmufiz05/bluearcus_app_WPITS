@@ -25,6 +25,9 @@ public class PrepaidAccounts {
 
 	@Column(name = "imsi")
 	private String imsi;
+	
+	@Column(name="data_parameter_type")
+	private String dataParameterType;
 
 	@Column(name = "cs_voice_call_seconds")
 	private Long csVoiceCallSeconds;

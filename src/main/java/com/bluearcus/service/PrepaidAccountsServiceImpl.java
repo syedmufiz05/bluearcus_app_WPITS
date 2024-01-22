@@ -28,24 +28,38 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountDb.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId() : Integer.valueOf(""));
 			prepaidAccountDb.setMsisdn(prepaidAccountsDto.getMsisdn() != null ? prepaidAccountsDto.getMsisdn() : "");
 			prepaidAccountDb.setImsi(prepaidAccountsDto.getImsi() != null ? prepaidAccountsDto.getImsi() : "");
+			prepaidAccountDb.setDataParameterType(prepaidAccountsDto.getDataParameterType() != null ? prepaidAccountsDto.getDataParameterType() : "");
 			prepaidAccountDb.setCsVoiceCallSeconds(convertMinsToSeconds(prepaidAccountsDto.getCsVoiceCallSeconds()));
 			prepaidAccountDb.setFourGDataOctets(prepaidAccountsDto.getFourGDataOctets() != null ? prepaidAccountsDto.getFourGDataOctets() : Integer.valueOf(""));
 			prepaidAccountDb.setFiveGDataOctets(prepaidAccountsDto.getFiveGDataOctets() != null ? prepaidAccountsDto.getFiveGDataOctets() : Integer.valueOf(""));
 			prepaidAccountDb.setVolteCallSeconds(convertMinsToSeconds(prepaidAccountsDto.getVolteCallSeconds()));
-			prepaidAccountDb.setTotalDataOctetsAvailable(convertGigabytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
-			prepaidAccountDb.setTotalInputDataOctetsAvailable(convertGigabytesToBytes(prepaidAccountsDto.getTotalInputDataOctetsAvailable()));
-			prepaidAccountDb.setTotalOutputDataOctetsAvailable(convertGigabytesToBytes(prepaidAccountsDto.getTotalOutputDataOctetsAvailable()));
-			prepaidAccountDb.setTotalDataOctetsConsumed(convertGigabytesToBytes(prepaidAccountsDto.getTotalDataOctetsConsumed()));
+			
+			if (prepaidAccountsDto.getDataParameterType().equalsIgnoreCase("GB")) {
+				prepaidAccountDb.setTotalDataOctetsAvailable(convertGigabytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
+			}
+
+			else if (prepaidAccountsDto.getDataParameterType().equalsIgnoreCase("MB")) {
+				prepaidAccountDb.setTotalDataOctetsAvailable(convertMegabytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
+			}
+
+			else {
+				prepaidAccountDb.setTotalDataOctetsAvailable(convertKilobytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
+			}
+			
+			prepaidAccountDb.setTotalInputDataOctetsAvailable(prepaidAccountsDto.getTotalInputDataOctetsAvailable());
+			prepaidAccountDb.setTotalOutputDataOctetsAvailable(prepaidAccountsDto.getTotalOutputDataOctetsAvailable());
+			prepaidAccountDb.setTotalDataOctetsConsumed(prepaidAccountsDto.getTotalDataOctetsConsumed());
 			prepaidAccountDb.setTotalCallSecondsAvailable(convertMinsToSeconds(prepaidAccountsDto.getTotalCallSecondsAvailable()));
-			prepaidAccountDb.setTotalCallSecondsConsumed(convertMinsToSeconds(prepaidAccountsDto.getTotalCallSecondsConsumed()));
+			prepaidAccountDb.setTotalCallSecondsConsumed(prepaidAccountsDto.getTotalCallSecondsConsumed());
 			prepaidAccountDb.setTotalSmsAvailable(prepaidAccountsDto.getTotalSmsAvailable());
 			prepaidAccountDb.setTotalSmsConsumed(prepaidAccountsDto.getTotalSmsConsumed());
 			prepaidAccountsRepository.save(prepaidAccountDb);
 			PrepaidAccountsDto prepaidAccountsDtoNew = new PrepaidAccountsDto(prepaidAccountDb.getAccountId(),
 					prepaidAccountDb.getCustomerId(), prepaidAccountDb.getMsisdn(), prepaidAccountDb.getImsi(),
-					prepaidAccountDb.getCsVoiceCallSeconds(), prepaidAccountDb.getFourGDataOctets(),
-					prepaidAccountDb.getFiveGDataOctets(), prepaidAccountDb.getVolteCallSeconds(),
-					prepaidAccountDb.getTotalDataOctetsAvailable(), prepaidAccountDb.getTotalInputDataOctetsAvailable(),
+					prepaidAccountDb.getDataParameterType(), prepaidAccountDb.getCsVoiceCallSeconds(),
+					prepaidAccountDb.getFourGDataOctets(), prepaidAccountDb.getFiveGDataOctets(),
+					prepaidAccountDb.getVolteCallSeconds(), prepaidAccountDb.getTotalDataOctetsAvailable(),
+					prepaidAccountDb.getTotalInputDataOctetsAvailable(),
 					prepaidAccountDb.getTotalOutputDataOctetsAvailable(), prepaidAccountDb.getTotalDataOctetsConsumed(),
 					prepaidAccountDb.getTotalCallSecondsAvailable(), prepaidAccountDb.getTotalCallSecondsConsumed(),
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
@@ -95,9 +109,10 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 
 			PrepaidAccountsDto prepaidAccountsDto = new PrepaidAccountsDto(prepaidAccounts.getAccountId(),
 					prepaidAccounts.getCustomerId(), prepaidAccounts.getMsisdn(), prepaidAccounts.getImsi(),
-					prepaidAccounts.getCsVoiceCallSeconds(), prepaidAccounts.getFourGDataOctets(),
-					prepaidAccounts.getFiveGDataOctets(), prepaidAccounts.getVolteCallSeconds(),
-					prepaidAccounts.getTotalDataOctetsAvailable(), prepaidAccounts.getTotalInputDataOctetsAvailable(),
+					prepaidAccounts.getDataParameterType(), prepaidAccounts.getCsVoiceCallSeconds(),
+					prepaidAccounts.getFourGDataOctets(), prepaidAccounts.getFiveGDataOctets(),
+					prepaidAccounts.getVolteCallSeconds(), prepaidAccounts.getTotalDataOctetsAvailable(),
+					prepaidAccounts.getTotalInputDataOctetsAvailable(),
 					prepaidAccounts.getTotalOutputDataOctetsAvailable(), prepaidAccounts.getTotalDataOctetsConsumed(),
 					prepaidAccounts.getTotalCallSecondsAvailable(), prepaidAccounts.getTotalCallSecondsConsumed(),
 					prepaidAccounts.getTotalSmsAvailable(), prepaidAccounts.getTotalSmsConsumed());
@@ -115,6 +130,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountDb.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId() : prepaidAccountDb.getCustomerId());
 			prepaidAccountDb.setMsisdn(prepaidAccountsDto.getMsisdn() != null ? prepaidAccountsDto.getMsisdn() : prepaidAccountDb.getMsisdn());
 			prepaidAccountDb.setImsi(prepaidAccountsDto.getImsi() != null ? prepaidAccountsDto.getImsi() : prepaidAccountDb.getImsi());
+			prepaidAccountDb.setDataParameterType(prepaidAccountsDto.getDataParameterType() != null ? prepaidAccountsDto.getDataParameterType() : prepaidAccountDb.getDataParameterType());
 			prepaidAccountDb.setCsVoiceCallSeconds(prepaidAccountsDto.getCsVoiceCallSeconds() != null ? prepaidAccountsDto.getCsVoiceCallSeconds() : prepaidAccountDb.getCsVoiceCallSeconds());
 			prepaidAccountDb.setFourGDataOctets(prepaidAccountsDto.getFourGDataOctets() != null ? prepaidAccountsDto.getFourGDataOctets() : prepaidAccountDb.getFourGDataOctets());
 			prepaidAccountDb.setFiveGDataOctets(prepaidAccountsDto.getFiveGDataOctets() != null ? prepaidAccountsDto.getFiveGDataOctets() : prepaidAccountDb.getFiveGDataOctets());
@@ -130,9 +146,10 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountsRepository.save(prepaidAccountDb);
 			PrepaidAccountsDto prepaidAccountsDtoNew = new PrepaidAccountsDto(prepaidAccountDb.getAccountId(),
 					prepaidAccountDb.getCustomerId(), prepaidAccountDb.getMsisdn(), prepaidAccountDb.getImsi(),
-					prepaidAccountDb.getCsVoiceCallSeconds(), prepaidAccountDb.getFourGDataOctets(),
-					prepaidAccountDb.getFiveGDataOctets(), prepaidAccountDb.getVolteCallSeconds(),
-					prepaidAccountDb.getTotalDataOctetsAvailable(), prepaidAccountDb.getTotalInputDataOctetsAvailable(),
+					prepaidAccountDb.getDataParameterType(), prepaidAccountDb.getCsVoiceCallSeconds(),
+					prepaidAccountDb.getFourGDataOctets(), prepaidAccountDb.getFiveGDataOctets(),
+					prepaidAccountDb.getVolteCallSeconds(), prepaidAccountDb.getTotalDataOctetsAvailable(),
+					prepaidAccountDb.getTotalInputDataOctetsAvailable(),
 					prepaidAccountDb.getTotalOutputDataOctetsAvailable(), prepaidAccountDb.getTotalDataOctetsConsumed(),
 					prepaidAccountDb.getTotalCallSecondsAvailable(), prepaidAccountDb.getTotalCallSecondsConsumed(),
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
@@ -162,6 +179,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountsDto.setCustomerId(prepaidAccountsDb.getCustomerId());
 			prepaidAccountsDto.setMsisdn(prepaidAccountsDb.getMsisdn());
 			prepaidAccountsDto.setImsi(prepaidAccountsDb.getImsi());
+			prepaidAccountsDto.setDataParameterType(prepaidAccountsDb.getDataParameterType());
 			prepaidAccountsDto.setCsVoiceCallSeconds(prepaidAccountsDb.getCsVoiceCallSeconds());
 			prepaidAccountsDto.setFourGDataOctets(prepaidAccountsDb.getFourGDataOctets());
 			prepaidAccountsDto.setFiveGDataOctets(prepaidAccountsDb.getFiveGDataOctets());
@@ -195,17 +213,31 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
 	}
 
-	public static long convertGigabytesToBytes(Long gigabytes) {
+	private static long convertGigabytesToBytes(Long gigaBytes) {
 		// 1 GB = 1024^3 bytes
-		BigDecimal gigabytesBigDecimal = new BigDecimal(String.valueOf(gigabytes));
-		BigDecimal bytesBigDecimal = gigabytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 3)));
+		BigDecimal gigaBytesBigDecimal = new BigDecimal(String.valueOf(gigaBytes));
+		BigDecimal bytesBigDecimal = gigaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 3)));
+		return bytesBigDecimal.longValue();
+	}
+	
+	private static long convertMegabytesToBytes(Long megaBytes) {
+		// 1 MB = 1024^2 bytes
+		BigDecimal megaBytesBigDecimal = new BigDecimal(String.valueOf(megaBytes));
+		BigDecimal bytesBigDecimal = megaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 2)));
+		return bytesBigDecimal.longValue();
+	}
+	
+	private static long convertKilobytesToBytes(Long kiloBytes) {
+		// 1 KB = 1024^1 bytes
+		BigDecimal kiloBytesBigDecimal = new BigDecimal(String.valueOf(kiloBytes));
+		BigDecimal bytesBigDecimal = kiloBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 1)));
 		return bytesBigDecimal.longValue();
 	}
 
-	public static long convertMinsToSeconds(Long mins) {
+	private static long convertMinsToSeconds(Long mins) {
 		// 1 Min = 60^1 seconds
-		BigDecimal gigabytesBigDecimal = new BigDecimal(String.valueOf(mins));
-		BigDecimal bytesBigDecimal = gigabytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
-		return bytesBigDecimal.longValue();
+		BigDecimal minsBigDecimal = new BigDecimal(String.valueOf(mins));
+		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
+		return secondsBigDecimal.longValue();
 	}
 }

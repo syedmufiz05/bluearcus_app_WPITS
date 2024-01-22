@@ -1,6 +1,7 @@
 package com.bluearcus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,9 @@ public class PrepaidAccountsDto {
 	@JsonProperty("imsi")
 	private String imsi;
 
+	@JsonProperty("data_parameter_type")
+	private String dataParameterType;
+	
 	@JsonProperty("cs_voice_call_seconds")
 	private Long csVoiceCallSeconds;
 
