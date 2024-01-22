@@ -22,8 +22,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 
 	@Override
 	public ResponseEntity savePrepaidAccount(PrepaidAccountsDto prepaidAccountsDto) {
-		Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository
-				.findByAccountId(prepaidAccountsDto.getAccountId() != null ? prepaidAccountsDto.getAccountId() : 0);
+		Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository.findByAccountId(prepaidAccountsDto.getAccountId() != null ? prepaidAccountsDto.getAccountId() : 0);
 		if (!prepaidAccount.isPresent()) {
 			PrepaidAccounts prepaidAccountDb = new PrepaidAccounts();
 			prepaidAccountDb.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId() : Integer.valueOf(""));
@@ -52,8 +51,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
 			return new ResponseEntity(prepaidAccountsDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
 	}
 
 	@Override
@@ -81,11 +79,13 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			
 			if (deductionDto.getConsumedOctets().getInput() != 0) {
 				Long availableBalance = prepaidAccounts.getTotalDataOctetsAvailable();
-				Long consumedBalance = convertGigabytesToBytes(deductionDto.getConsumedOctets().getInput());
+				//Long consumedBalance = convertGigabytesToBytes(deductionDto.getConsumedOctets().getInput());
+				Long consumedBalance = deductionDto.getConsumedOctets().getInput();
 				Long outputBalance = availableBalance - consumedBalance;
 				System.out.println(outputBalance);
 				prepaidAccounts.setTotalDataOctetsAvailable(outputBalance);
-				prepaidAccounts.setTotalInputDataOctetsAvailable(prepaidAccounts.getTotalInputDataOctetsAvailable() + convertGigabytesToBytes(deductionDto.getConsumedOctets().getInput()));
+				//prepaidAccounts.setTotalInputDataOctetsAvailable(prepaidAccounts.getTotalInputDataOctetsAvailable() + convertGigabytesToBytes(deductionDto.getConsumedOctets().getInput()));
+				prepaidAccounts.setTotalInputDataOctetsAvailable(prepaidAccounts.getTotalInputDataOctetsAvailable() + deductionDto.getConsumedOctets().getInput());
 				prepaidAccounts.setTotalOutputDataOctetsAvailable(outputBalance);
 				prepaidAccounts.setTotalDataOctetsConsumed(prepaidAccounts.getTotalInputDataOctetsAvailable());
 			}
@@ -112,51 +112,21 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository.findByAccountId(accountId);
 		if (prepaidAccount.isPresent()) {
 			PrepaidAccounts prepaidAccountDb = prepaidAccount.get();
-			prepaidAccountDb
-					.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId()
-							: prepaidAccountDb.getCustomerId());
-			prepaidAccountDb.setMsisdn(prepaidAccountsDto.getMsisdn() != null ? prepaidAccountsDto.getMsisdn()
-					: prepaidAccountDb.getMsisdn());
-			prepaidAccountDb.setImsi(
-					prepaidAccountsDto.getImsi() != null ? prepaidAccountsDto.getImsi() : prepaidAccountDb.getImsi());
-			prepaidAccountDb.setCsVoiceCallSeconds(
-					prepaidAccountsDto.getCsVoiceCallSeconds() != null ? prepaidAccountsDto.getCsVoiceCallSeconds()
-							: prepaidAccountDb.getCsVoiceCallSeconds());
-			prepaidAccountDb.setFourGDataOctets(
-					prepaidAccountsDto.getFourGDataOctets() != null ? prepaidAccountsDto.getFourGDataOctets()
-							: prepaidAccountDb.getFourGDataOctets());
-			prepaidAccountDb.setFiveGDataOctets(
-					prepaidAccountsDto.getFiveGDataOctets() != null ? prepaidAccountsDto.getFiveGDataOctets()
-							: prepaidAccountDb.getFiveGDataOctets());
-			prepaidAccountDb.setVolteCallSeconds(
-					prepaidAccountsDto.getVolteCallSeconds() != null ? prepaidAccountsDto.getVolteCallSeconds()
-							: prepaidAccountDb.getVolteCallSeconds());
-			prepaidAccountDb.setTotalDataOctetsAvailable(prepaidAccountsDto.getTotalDataOctetsAvailable() != null
-					? prepaidAccountsDto.getTotalDataOctetsAvailable()
-					: prepaidAccountDb.getTotalDataOctetsAvailable());
-			prepaidAccountDb
-					.setTotalInputDataOctetsAvailable(prepaidAccountsDto.getTotalInputDataOctetsAvailable() != null
-							? prepaidAccountsDto.getTotalInputDataOctetsAvailable()
-							: prepaidAccountDb.getTotalInputDataOctetsAvailable());
-			prepaidAccountDb
-					.setTotalOutputDataOctetsAvailable(prepaidAccountsDto.getTotalOutputDataOctetsAvailable() != null
-							? prepaidAccountsDto.getTotalOutputDataOctetsAvailable()
-							: prepaidAccountDb.getTotalOutputDataOctetsAvailable());
-			prepaidAccountDb.setTotalDataOctetsConsumed(prepaidAccountsDto.getTotalDataOctetsConsumed() != null
-					? prepaidAccountsDto.getTotalDataOctetsConsumed()
-					: prepaidAccountDb.getTotalDataOctetsConsumed());
-			prepaidAccountDb.setTotalCallSecondsAvailable(prepaidAccountsDto.getTotalCallSecondsAvailable() != null
-					? prepaidAccountsDto.getTotalCallSecondsAvailable()
-					: prepaidAccountDb.getTotalCallSecondsAvailable());
-			prepaidAccountDb.setTotalCallSecondsConsumed(prepaidAccountsDto.getTotalCallSecondsConsumed() != null
-					? prepaidAccountsDto.getTotalCallSecondsConsumed()
-					: prepaidAccountDb.getTotalCallSecondsConsumed());
-			prepaidAccountDb.setTotalSmsAvailable(
-					prepaidAccountsDto.getTotalSmsAvailable() != null ? prepaidAccountsDto.getTotalSmsAvailable()
-							: prepaidAccountDb.getTotalSmsAvailable());
-			prepaidAccountDb.setTotalSmsConsumed(
-					prepaidAccountsDto.getTotalSmsConsumed() != null ? prepaidAccountsDto.getTotalSmsConsumed()
-							: prepaidAccountDb.getTotalSmsConsumed());
+			prepaidAccountDb.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId() : prepaidAccountDb.getCustomerId());
+			prepaidAccountDb.setMsisdn(prepaidAccountsDto.getMsisdn() != null ? prepaidAccountsDto.getMsisdn() : prepaidAccountDb.getMsisdn());
+			prepaidAccountDb.setImsi(prepaidAccountsDto.getImsi() != null ? prepaidAccountsDto.getImsi() : prepaidAccountDb.getImsi());
+			prepaidAccountDb.setCsVoiceCallSeconds(prepaidAccountsDto.getCsVoiceCallSeconds() != null ? prepaidAccountsDto.getCsVoiceCallSeconds() : prepaidAccountDb.getCsVoiceCallSeconds());
+			prepaidAccountDb.setFourGDataOctets(prepaidAccountsDto.getFourGDataOctets() != null ? prepaidAccountsDto.getFourGDataOctets() : prepaidAccountDb.getFourGDataOctets());
+			prepaidAccountDb.setFiveGDataOctets(prepaidAccountsDto.getFiveGDataOctets() != null ? prepaidAccountsDto.getFiveGDataOctets() : prepaidAccountDb.getFiveGDataOctets());
+			prepaidAccountDb.setVolteCallSeconds(prepaidAccountsDto.getVolteCallSeconds() != null ? prepaidAccountsDto.getVolteCallSeconds() : prepaidAccountDb.getVolteCallSeconds());
+			prepaidAccountDb.setTotalDataOctetsAvailable(prepaidAccountsDto.getTotalDataOctetsAvailable() != null ? prepaidAccountsDto.getTotalDataOctetsAvailable() : prepaidAccountDb.getTotalDataOctetsAvailable());
+			prepaidAccountDb.setTotalInputDataOctetsAvailable(prepaidAccountsDto.getTotalInputDataOctetsAvailable() != null ? prepaidAccountsDto.getTotalInputDataOctetsAvailable() : prepaidAccountDb.getTotalInputDataOctetsAvailable());
+			prepaidAccountDb.setTotalOutputDataOctetsAvailable(prepaidAccountsDto.getTotalOutputDataOctetsAvailable() != null ? prepaidAccountsDto.getTotalOutputDataOctetsAvailable() : prepaidAccountDb.getTotalOutputDataOctetsAvailable());
+			prepaidAccountDb.setTotalDataOctetsConsumed(prepaidAccountsDto.getTotalDataOctetsConsumed() != null ? prepaidAccountsDto.getTotalDataOctetsConsumed() : prepaidAccountDb.getTotalDataOctetsConsumed());
+			prepaidAccountDb.setTotalCallSecondsAvailable(prepaidAccountsDto.getTotalCallSecondsAvailable() != null ? prepaidAccountsDto.getTotalCallSecondsAvailable() : prepaidAccountDb.getTotalCallSecondsAvailable());
+			prepaidAccountDb.setTotalCallSecondsConsumed(prepaidAccountsDto.getTotalCallSecondsConsumed() != null ? prepaidAccountsDto.getTotalCallSecondsConsumed() : prepaidAccountDb.getTotalCallSecondsConsumed());
+			prepaidAccountDb.setTotalSmsAvailable(prepaidAccountsDto.getTotalSmsAvailable() != null ? prepaidAccountsDto.getTotalSmsAvailable() : prepaidAccountDb.getTotalSmsAvailable());
+			prepaidAccountDb.setTotalSmsConsumed(prepaidAccountsDto.getTotalSmsConsumed() != null ? prepaidAccountsDto.getTotalSmsConsumed() : prepaidAccountDb.getTotalSmsConsumed());
 			prepaidAccountsRepository.save(prepaidAccountDb);
 			PrepaidAccountsDto prepaidAccountsDtoNew = new PrepaidAccountsDto(prepaidAccountDb.getAccountId(),
 					prepaidAccountDb.getCustomerId(), prepaidAccountDb.getMsisdn(), prepaidAccountDb.getImsi(),
@@ -168,8 +138,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
 			return new ResponseEntity(prepaidAccountsDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid account Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid account Id"));
 	}
 
 	@Transactional
@@ -178,11 +147,9 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByAccountId(accountId);
 		if (prepaidAccounts.isPresent()) {
 			prepaidAccountsRepository.deleteById(accountId);
-			return ResponseEntity.status(HttpStatus.OK)
-					.body(new CustomMessage(HttpStatus.OK.value(), "Deleted Successfully"));
+			return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Deleted Successfully"));
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
 	}
 
 	@Override
@@ -209,8 +176,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountsDto.setTotalSmsConsumed(prepaidAccountsDb.getTotalSmsConsumed());
 			return new ResponseEntity<>(prepaidAccountsDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
 	}
 
 	@Override
