@@ -28,8 +28,10 @@ public class RatesPlanOfferServiceImpl implements RatesPlanOfferService {
 		if (!ratesPlanOffer.isPresent()) {
 			RatesPlanOffer ratesPlanOfferDb = new RatesPlanOffer();
 			ratesPlanOfferDb.setName(ratesPlanOfferDto.getName() != null ? ratesPlanOfferDto.getName() : "");
-			ratesPlanOfferDb.setPeriod(ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod() : Integer.valueOf(""));
-			ratesPlanOfferDb.setDescription(ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription() : "");
+			ratesPlanOfferDb.setPeriod(
+					ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod() : Integer.valueOf(""));
+			ratesPlanOfferDb.setDescription(
+					ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription() : "");
 			ratesPlanOfferDb.setActive(ratesPlanOfferDto.getActive() != null ? ratesPlanOfferDto.getActive() : false);
 			ratesPlanOfferRepository.save(ratesPlanOfferDb);
 			RatesPlanOfferDto ratesPlanOfferDtoNew = new RatesPlanOfferDto(ratesPlanOfferDb.getId(),
@@ -46,26 +48,8 @@ public class RatesPlanOfferServiceImpl implements RatesPlanOfferService {
 		List<RatesPlanOfferDto> ratesPlanOfferDtoList = ratesPlanOfferRepository.fetchAllRatesPlan();
 		List<String> ratesPlanVoucherList = new ArrayList<>();
 		for (RatesPlanOfferDto ratesPlanOfferDto : ratesPlanOfferDtoList) {
-			if (ratesPlanOfferDto.getName().equals("1GB")) {
-				ratesPlanOfferDto.setDescription("1GB/Month");
-				ratesPlanVoucherList.add(ratesPlanOfferDto.getDescription());
-			}
-			if (ratesPlanOfferDto.getName().equals("2GB")) {
-				ratesPlanOfferDto.setDescription("2GB/Month");
-				ratesPlanVoucherList.add(ratesPlanOfferDto.getDescription());
-			}
-			if (ratesPlanOfferDto.getName().equals("3GB")) {
-				ratesPlanOfferDto.setDescription("3GB/Month");
-				ratesPlanVoucherList.add(ratesPlanOfferDto.getDescription());
-			}
-			if (ratesPlanOfferDto.getName().equals("4GB")) {
-				ratesPlanOfferDto.setDescription("4GB/Month");
-				ratesPlanVoucherList.add(ratesPlanOfferDto.getDescription());
-			}
-			if (ratesPlanOfferDto.getName().equals("5GB")) {
-				ratesPlanOfferDto.setDescription("5GB/Month");
-				ratesPlanVoucherList.add(ratesPlanOfferDto.getDescription());
-			}
+			ratesPlanOfferDto.setDescription(ratesPlanOfferDto.getName() + " for " + ratesPlanOfferDto.getPeriod() + " days");
+			ratesPlanVoucherList.add(ratesPlanOfferDto.getDescription());
 		}
 		return ratesPlanVoucherList;
 	}
@@ -97,10 +81,15 @@ public class RatesPlanOfferServiceImpl implements RatesPlanOfferService {
 		Optional<RatesPlanOffer> ratesPlanOffer = ratesPlanOfferRepository.findById(ratesPlanOfferId);
 		if (ratesPlanOffer.isPresent()) {
 			RatesPlanOffer ratesPlanOfferDb = ratesPlanOffer.get();
-			ratesPlanOfferDb.setName(ratesPlanOfferDto.getName() != null ? ratesPlanOfferDto.getName() : ratesPlanOfferDb.getName());
-			ratesPlanOfferDb.setPeriod(ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod() : ratesPlanOfferDb.getPeriod());
-			ratesPlanOfferDb.setDescription(ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription() : ratesPlanOfferDb.getDescription());
-			ratesPlanOfferDb.setActive(ratesPlanOfferDto.getActive() != null ? ratesPlanOfferDto.getActive() : ratesPlanOfferDb.getActive());
+			ratesPlanOfferDb.setName(
+					ratesPlanOfferDto.getName() != null ? ratesPlanOfferDto.getName() : ratesPlanOfferDb.getName());
+			ratesPlanOfferDb.setPeriod(ratesPlanOfferDto.getPeriod() != null ? ratesPlanOfferDto.getPeriod()
+					: ratesPlanOfferDb.getPeriod());
+			ratesPlanOfferDb
+					.setDescription(ratesPlanOfferDto.getDescription() != null ? ratesPlanOfferDto.getDescription()
+							: ratesPlanOfferDb.getDescription());
+			ratesPlanOfferDb.setActive(ratesPlanOfferDto.getActive() != null ? ratesPlanOfferDto.getActive()
+					: ratesPlanOfferDb.getActive());
 			ratesPlanOfferRepository.save(ratesPlanOfferDb);
 			RatesPlanOfferDto ratesPlanOfferDtoNew = new RatesPlanOfferDto(ratesPlanOfferDb.getId(),
 					ratesPlanOfferDb.getName(), ratesPlanOfferDb.getPeriod(), ratesPlanOfferDb.getDescription(),
