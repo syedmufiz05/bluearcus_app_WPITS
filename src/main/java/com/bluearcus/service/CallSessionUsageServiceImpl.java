@@ -6,7 +6,6 @@ import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.CallSessionUsage;
 import com.bluearcus.repo.CallSessionUsageRepo;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

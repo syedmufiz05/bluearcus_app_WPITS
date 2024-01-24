@@ -2,8 +2,6 @@ package com.bluearcus.service;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -13,14 +11,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FlatFileService {
-	public void storeUserData(String packtype, String date, Integer customerId, String customerData) {
+
+	public void storeUserData(String packtype, String dateFolder, Integer customerId, String customerData) {
 		try {
 
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			Date dt = simpleDateFormat.parse(date);
-			date = simpleDateFormat.format(dt);
+			Date dt = simpleDateFormat.parse(dateFolder);
+			dateFolder = simpleDateFormat.format(dt);
 
-			String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Postpaid Accounts\\" + packtype + "\\" + date + "\\";
+			//String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Postpaid Accounts\\" + packtype + "\\" + dateFolder + "\\";
+			String directory = "/home/apache-tomcat-8.5.85/webapps/Postpaid Accounts/" + packtype + "/" + dateFolder + "/";
 
 			Path path = Paths.get(directory);
 
@@ -38,6 +38,7 @@ public class FlatFileService {
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
 			customerData = customerData.replaceAll(",", " |");
+			
 			bufferedWriter.write(customerData);
 
 			bufferedWriter.close();
@@ -48,4 +49,5 @@ public class FlatFileService {
 			e.printStackTrace();
 		}
 	}
+
 }
