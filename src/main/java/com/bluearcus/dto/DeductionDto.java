@@ -9,27 +9,36 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeductionDto {
-    @JsonProperty("msisdn")
-    private String msisdn;
+	@JsonProperty("msisdn")
+	private String msisdn;
 
-    @JsonProperty("imsi")
-    private String imsi;
+	@JsonProperty("imsi")
+	private String imsi;
 
-    @JsonProperty("framed-ip")
-    private String framedIp;
+	@JsonProperty("called-station-id")
+	private String calledStationId;
 
-    @JsonProperty("pcc-rule")
-    private String pccRule;
+	@JsonProperty("accounting-type")
+	private String accountingType;
 
-    @JsonProperty("monitoring-key")
-    private String monitoringKey;
+	@JsonProperty("qos-info")
+	private String qosInfo;
 
-    @JsonProperty("consumed-octets")
-    private ConsumeOctetsDto consumedOctets;
+	@JsonProperty("framed-ip")
+	private String framedIp;
 
-    @JsonProperty("consumed-time-seconds")
-    private Long consumedTimeSeconds;
-    
+	@JsonProperty("pcc-rule")
+	private String pccRule;
+
+	@JsonProperty("monitoring-key")
+	private String monitoringKey;
+
+	@JsonProperty("consumed-octets")
+	private ConsumeOctetsDto consumedOctets;
+
+	@JsonProperty("consumed-time-seconds")
+	private Long consumedTimeSeconds;
+
 	@JsonProperty("consumed-sms")
 	private Long consumedSms;
 }

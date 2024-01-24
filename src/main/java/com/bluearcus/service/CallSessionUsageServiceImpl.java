@@ -84,7 +84,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	}
 
 	private String fetchReadableDateTime(Date date) {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String formattedDate = simpleDateFormat.format(date);
 		return formattedDate;
 	}

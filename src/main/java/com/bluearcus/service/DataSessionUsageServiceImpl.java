@@ -23,8 +23,7 @@ public class DataSessionUsageServiceImpl implements DataSessionUsageService {
 
 	@Override
 	public ResponseEntity saveDataSessionUsage(DataSessionUsageDto dataSessionUsageDto) {
-		Optional<DataSessionUsage> dataSessionUsageDb = dataSessionUsageRepo
-				.findByImsi(dataSessionUsageDto.getImsi() != null ? dataSessionUsageDto.getImsi() : "0");
+		Optional<DataSessionUsage> dataSessionUsageDb = dataSessionUsageRepo.findByImsi(dataSessionUsageDto.getImsi() != null ? dataSessionUsageDto.getImsi() : "0");
 		if (!dataSessionUsageDb.isPresent()) {
 			DataSessionUsage dataSessionUsage = new DataSessionUsage();
 			dataSessionUsage.setPeerSessionId(dataSessionUsageDto.getPeerSessionId());
@@ -83,7 +82,7 @@ public class DataSessionUsageServiceImpl implements DataSessionUsageService {
 	}
 
 	private String fetchReadableDateTime(Date date) {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String formattedDate = simpleDateFormat.format(date);
 		return formattedDate;
 	}
