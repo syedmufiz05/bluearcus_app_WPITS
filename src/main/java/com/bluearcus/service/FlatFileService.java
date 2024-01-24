@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.springframework.stereotype.Service;
 
@@ -14,25 +16,30 @@ public class FlatFileService {
 	public void storeUserData(String packtype, String date, Integer customerId, String customerData) {
 		try {
 
-			String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Postpaid Accounts\\Call\\19-01-2024";
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			Date dt = simpleDateFormat.parse(date);
+			date = simpleDateFormat.format(dt);
+
+			String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Postpaid Accounts\\" + packtype + "\\" + date + "\\";
 
 			Path path = Paths.get(directory);
+
+			if (path.toFile().exists() == false) {
+				boolean b = path.toFile().mkdirs();
+				System.out.println(b);
+			}
 
 			String fileName = "customer_id " + customerId + ".txt";
 
 			Path filePath = path.resolve(fileName);
 
-			// Create a FileWriter object with the file path
 			FileWriter fileWriter = new FileWriter(filePath.toFile());
 
-			// Create a BufferedWriter object to write text efficiently
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-			// Write the content to the file
 			customerData = customerData.replaceAll(",", " |");
 			bufferedWriter.write(customerData);
 
-			// Close the BufferedWriter to release resources
 			bufferedWriter.close();
 
 			System.out.println("Dynamic text file created successfully at: " + filePath);
