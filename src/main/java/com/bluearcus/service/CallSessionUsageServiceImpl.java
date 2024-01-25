@@ -24,7 +24,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	private CallSessionUsageRepo callSessionUsageRepo;
 	
 	@Autowired
-	private FlatFileService flatFileService;
+	private PostpaidFlatFileService flatFileService;
 
 	@Override
 	public ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto) {

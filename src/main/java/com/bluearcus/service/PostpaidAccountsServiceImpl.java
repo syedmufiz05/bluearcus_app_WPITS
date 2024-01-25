@@ -24,7 +24,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 	private PostpaidAccountsRepo postpaidAccountsRepo;
 	
 	@Autowired
-	private FlatFileService flatFileService;
+	private PostpaidFlatFileService flatFileService;
 
 	@Override
 	public ResponseEntity savePostpaidAccount(PostpaidAccountsDto postpaidAccountDto) {

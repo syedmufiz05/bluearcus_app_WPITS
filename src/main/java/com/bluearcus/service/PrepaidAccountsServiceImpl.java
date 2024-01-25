@@ -13,12 +13,16 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
 public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	@Autowired
 	private PrepaidAccountsRepository prepaidAccountsRepository;
+	
+	@Autowired
+	private PrepaidFlatFileService prepaidFlatFileService;
 
 	@Override
 	public ResponseEntity savePrepaidAccount(PrepaidAccountsDto prepaidAccountsDto) {
@@ -63,6 +67,13 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccountDb.getTotalOutputDataOctetsAvailable(), prepaidAccountDb.getTotalDataOctetsConsumed(),
 					prepaidAccountDb.getTotalCallSecondsAvailable(), prepaidAccountDb.getTotalCallSecondsConsumed(),
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
+			
+			String customerData = prepaidAccountsDtoNew.toString();
+			String date = new Date().toInstant().toString();	
+			
+			//Storing data for Flat file...
+			prepaidFlatFileService.storeUserData("Data",date, prepaidAccountsDtoNew.getCustomerId(), customerData);
+			
 			return new ResponseEntity(prepaidAccountsDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));

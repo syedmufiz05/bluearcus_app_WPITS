@@ -10,8 +10,7 @@ import java.util.Date;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FlatFileService {
-
+public class PrepaidFlatFileService {
 	public void storeUserData(String packtype, String dateFolder, Integer customerId, String customerData) {
 		try {
 
@@ -19,8 +18,8 @@ public class FlatFileService {
 			Date dt = simpleDateFormat.parse(dateFolder);
 			dateFolder = simpleDateFormat.format(dt);
 
-			//String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Postpaid Accounts\\" + packtype + "\\" + dateFolder + "\\";
-			String directory = "/home/apache-tomcat-8.5.85/webapps/Postpaid Accounts/" + packtype + "/" + dateFolder + "/";
+//			String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Prepaid Accounts\\" + packtype + "\\" + dateFolder + "\\";
+			String directory = "/home/apache-tomcat-8.5.85/webapps/Prepaid Accounts/" + packtype + "/" + dateFolder + "/";
 
 			Path path = Paths.get(directory);
 
@@ -38,7 +37,7 @@ public class FlatFileService {
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
 			customerData = customerData.replaceAll(",", " |");
-			
+
 			bufferedWriter.write(customerData);
 
 			bufferedWriter.close();
