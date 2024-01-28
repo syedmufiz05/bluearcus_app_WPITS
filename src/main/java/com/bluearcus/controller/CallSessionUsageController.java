@@ -24,7 +24,12 @@ public class CallSessionUsageController {
     public ResponseEntity<CallSessionUsageDtoNew> saveCallSession(@RequestBody CallSessionUsageDto callSessionUsageDto) {
         return callSessionUsageService.saveCallSessionUsage(callSessionUsageDto);
     }
-
+    
+	@RequestMapping(value = "/fetch/calling/time", method = RequestMethod.POST)
+	public ResponseEntity<CallSessionUsageDto> getCallDuration(@RequestBody CallSessionUsageDto callSessionUsageDto) {
+		return callSessionUsageService.fetchSecondsDuringCall(callSessionUsageDto);
+	}
+    
     @RequestMapping(value = "/get/all", method = RequestMethod.GET)
     public List<CallSessionUsageDtoNew> getAllCallSession() {
         return callSessionUsageService.getAllCallSessionUsage();

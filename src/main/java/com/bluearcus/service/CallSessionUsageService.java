@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface CallSessionUsageService {
-    ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto);
+	ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto);
 
-    List<CallSessionUsageDtoNew> getAllCallSessionUsage();
+	List<CallSessionUsageDtoNew> getAllCallSessionUsage();
+
+	ResponseEntity fetchSecondsDuringCall(CallSessionUsageDto callSessionUsageDto);
 }

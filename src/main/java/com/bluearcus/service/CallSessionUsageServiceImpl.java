@@ -12,6 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,8 +41,6 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDb.setCalledMsisdn(callSessionUsageDto.getCalledMsisdn());
 			callSessionUsageDb.setLocationInfo(callSessionUsageDto.getLocationInfo());
 			callSessionUsageDb.setSessionState(callSessionUsageDto.getSessionState());
-			callSessionUsageDb.setCallStartTs(callSessionUsageDto.getCallStartTs());
-			callSessionUsageDb.setCallEndTs(callSessionUsageDto.getCallEndTs());
 			callSessionUsageDb.setTotalSeconds(callSessionUsageDto.getTotalSeconds());
 			callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus());
 			callSessionUsageRepo.save(callSessionUsageDb);
@@ -47,17 +49,56 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
 					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getLocationInfo(),
 					callSessionUsageDb.getSessionState(), fetchReadableDateTime(callSessionUsageDb.getCallStartTs()),
-					fetchReadableDateTime(callSessionUsageDb.getCallEndTs()), callSessionUsageDb.getTotalSeconds(),
+					null, callSessionUsageDb.getTotalSeconds(),
 					callSessionUsageDb.getCallStatus());
 			
-			// Storing data for flat file...
-//			String dataForFlatFile = callSessionUsageDtoNew.toString();
-//			System.out.println(dataForFlatFile);
-//			flatFileService.storeData(dataForFlatFile);
 			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI Id already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI Id already exist"));
+	}
+	
+	@Override
+	public ResponseEntity fetchSecondsDuringCall(CallSessionUsageDto callSessionUsageDto) {
+		if (callSessionUsageDto.getCallStatus()) {
+			
+			CallSessionUsage callSessionUsageDb = new CallSessionUsage();
+			callSessionUsageDb.setPeerSessionId(callSessionUsageDto.getPeerSessionId() != null ? callSessionUsageDto.getPeerSessionId() : "");
+			callSessionUsageDb.setMsisdn(callSessionUsageDto.getMsisdn() != null ? callSessionUsageDto.getMsisdn() : "");
+			callSessionUsageDb.setImsi(callSessionUsageDto.getImsi() != null ? callSessionUsageDto.getImsi() : "");
+			callSessionUsageDb.setCalledMsisdn(callSessionUsageDto.getCalledMsisdn() != null ? callSessionUsageDto.getCalledMsisdn() : "");
+			callSessionUsageDb.setLocationInfo(callSessionUsageDto.getLocationInfo() != null ? callSessionUsageDto.getLocationInfo() : "");
+			callSessionUsageDb.setSessionState(true);
+			callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus());
+			callSessionUsageRepo.save(callSessionUsageDb);
+			
+			LocalDateTime callStart = convertDateToLocalDateTime(callSessionUsageDb.getCallStartTs());
+			System.out.println(callStart);
+			
+			LocalDateTime callEnd = callStart.plusMinutes(15);
+			System.out.println(callEnd);
+			
+			Date callEndForDb = convertLocalDateTimeToDate(callEnd);
+			System.out.println(callEndForDb);
+			
+			Duration callDuration = Duration.between(callStart,callEnd);
+			System.out.println("Call duration in seconds:" + callDuration.toSeconds());
+			
+			callSessionUsageDb.setCallEndTs(callEndForDb);
+			callSessionUsageDb.setTotalSeconds(callDuration.toSeconds());
+			
+			callSessionUsageRepo.save(callSessionUsageDb);
+			
+			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
+					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
+					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getLocationInfo(),
+					callSessionUsageDb.getSessionState(), fetchReadableDateTime(callSessionUsageDb.getCallStartTs()),
+					fetchReadableDateTime(callEndForDb), callSessionUsageDb.getTotalSeconds(),
+					callSessionUsageDb.getCallStatus());
+
+			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(new CustomMessage(HttpStatus.FORBIDDEN.value(), "Inactive call status"));
 	}
 
 	@Override
@@ -74,7 +115,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDtoNew.setLocationInfo(callSessionUsageDb.getLocationInfo());
 			callSessionUsageDtoNew.setSessionState(callSessionUsageDb.getSessionState());
 			callSessionUsageDtoNew.setCallStartTs(fetchReadableDateTime(callSessionUsageDb.getCallStartTs()));
-			callSessionUsageDtoNew.setCallEndTs(fetchReadableDateTime(callSessionUsageDb.getCallEndTs()));
+			callSessionUsageDtoNew.setCallEndTs(null);
 			callSessionUsageDtoNew.setTotalSeconds(callSessionUsageDb.getTotalSeconds());
 			callSessionUsageDtoNew.setCallStatus(callSessionUsageDb.getCallStatus());
 			callSessionUsageDtoList.add(callSessionUsageDtoNew);
@@ -87,4 +128,15 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 		String formattedDate = simpleDateFormat.format(date);
 		return formattedDate;
 	}
+	
+	private LocalDateTime convertDateToLocalDateTime(Date date) {
+		Instant instant = date.toInstant();
+		LocalDateTime localDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+		return localDateTime;
+	}
+
+	public Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
+		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+	
 }

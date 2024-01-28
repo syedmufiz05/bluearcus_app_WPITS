@@ -43,7 +43,6 @@ public class CallSessionUsage {
     @Column(name = "call_start_ts")
     private Date callStartTs;
 
-    @CreationTimestamp
     @Column(name = "call_end_ts")
     private Date callEndTs;
 
