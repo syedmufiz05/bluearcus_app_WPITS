@@ -18,9 +18,6 @@ public class DeductionDto {
 	@JsonProperty("called-station-id")
 	private String calledStationId;
 
-	@JsonProperty("accounting-type")
-	private String accountingType;
-
 	@JsonProperty("qos-info")
 	private String qosInfo;
 

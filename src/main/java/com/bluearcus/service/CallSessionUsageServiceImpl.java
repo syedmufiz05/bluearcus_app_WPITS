@@ -60,7 +60,6 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	@Override
 	public ResponseEntity fetchSecondsDuringCall(CallSessionUsageDto callSessionUsageDto) {
 		if (callSessionUsageDto.getCallStatus()) {
-			
 			CallSessionUsage callSessionUsageDb = new CallSessionUsage();
 			callSessionUsageDb.setPeerSessionId(callSessionUsageDto.getPeerSessionId() != null ? callSessionUsageDto.getPeerSessionId() : "");
 			callSessionUsageDb.setMsisdn(callSessionUsageDto.getMsisdn() != null ? callSessionUsageDto.getMsisdn() : "");

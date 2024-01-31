@@ -104,12 +104,9 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			
 			if (deductionDto.getConsumedOctets().getInput() != 0) {
 				Long availableBalance = prepaidAccounts.getTotalDataOctetsAvailable();
-				//Long consumedBalance = convertGigabytesToBytes(deductionDto.getConsumedOctets().getInput());
 				Long consumedBalance = deductionDto.getConsumedOctets().getInput();
 				Long outputBalance = availableBalance - consumedBalance;
-				System.out.println(outputBalance);
 				prepaidAccounts.setTotalDataOctetsAvailable(outputBalance);
-				//prepaidAccounts.setTotalInputDataOctetsAvailable(prepaidAccounts.getTotalInputDataOctetsAvailable() + convertGigabytesToBytes(deductionDto.getConsumedOctets().getInput()));
 				prepaidAccounts.setTotalInputDataOctetsAvailable(prepaidAccounts.getTotalInputDataOctetsAvailable() + deductionDto.getConsumedOctets().getInput());
 				prepaidAccounts.setTotalOutputDataOctetsAvailable(outputBalance);
 				prepaidAccounts.setTotalDataOctetsConsumed(prepaidAccounts.getTotalInputDataOctetsAvailable());
