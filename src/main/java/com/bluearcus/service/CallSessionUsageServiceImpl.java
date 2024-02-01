@@ -96,8 +96,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 
 			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(new CustomMessage(HttpStatus.FORBIDDEN.value(), "Inactive call status"));
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new CustomMessage(HttpStatus.FORBIDDEN.value(), "Inactive call status"));
 	}
 
 	@Override

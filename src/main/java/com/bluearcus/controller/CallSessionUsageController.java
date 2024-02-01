@@ -26,7 +26,7 @@ public class CallSessionUsageController {
     }
     
 	@RequestMapping(value = "/fetch/calling/time", method = RequestMethod.POST)
-	public ResponseEntity<CallSessionUsageDto> getCallDuration(@RequestBody CallSessionUsageDto callSessionUsageDto) {
+	public ResponseEntity<CallSessionUsageDtoNew> getCallDuration(@RequestBody CallSessionUsageDto callSessionUsageDto) {
 		return callSessionUsageService.fetchSecondsDuringCall(callSessionUsageDto);
 	}
     
