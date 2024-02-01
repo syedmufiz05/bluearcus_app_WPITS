@@ -40,7 +40,7 @@ public class PrepaidAccountController {
 
 	@RequestMapping(value = "/deduct", method = RequestMethod.POST)
 	public ResponseEntity<PrepaidAccountsDto> saveDeductionRecord(@RequestBody DeductionDto deductionDto) {
-		return prepaidAccountsService.saveDeductionRecord(deductionDto);
+		return prepaidAccountsService.savePrepaidDeduction(deductionDto);
 	}
 
 	@RequestMapping(value = "/get/all/available/balance", method = RequestMethod.GET)

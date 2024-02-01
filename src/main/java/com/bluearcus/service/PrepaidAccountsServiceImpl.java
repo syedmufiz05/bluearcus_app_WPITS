@@ -80,7 +80,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	}
 
 	@Override
-	public ResponseEntity saveDeductionRecord(DeductionDto deductionDto) {
+	public ResponseEntity savePrepaidDeduction(DeductionDto deductionDto) {
 		Optional<PrepaidAccounts> prepaidAccountsDb = prepaidAccountsRepository.findByImsi(deductionDto.getImsi() != null ? deductionDto.getImsi() : String.valueOf(0));
 		if (prepaidAccountsDb.isPresent()) {
 			PrepaidAccounts prepaidAccounts = prepaidAccountsDb.get();

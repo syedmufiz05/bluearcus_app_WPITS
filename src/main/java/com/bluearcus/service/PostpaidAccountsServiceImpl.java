@@ -1,9 +1,7 @@
 package com.bluearcus.service;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PostpaidAccountsDto;
-import com.bluearcus.dto.PostpaidAccountsDtoNew;
+import com.bluearcus.dto.PostpaidAvailBalanceDto;
+import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.PostpaidAccounts;
 import com.bluearcus.repo.PostpaidAccountsRepo;
@@ -32,90 +32,176 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		if (!postpaidAccount.isPresent()) {
 			PostpaidAccounts postpaidAccountDb = new PostpaidAccounts();
 			postpaidAccountDb.setCustomerId(postpaidAccountDto.getCustomerId() != null ? postpaidAccountDto.getCustomerId() : Integer.valueOf(""));
-			postpaidAccountDb.setCallingNumber(postpaidAccountDto.getCallingNumber() != null ? postpaidAccountDto.getCallingNumber() : "");
-			postpaidAccountDb.setCalledNumber(postpaidAccountDto.getCalledNumber() != null ? postpaidAccountDto.getCalledNumber() : "");
-			postpaidAccountDb.setCallDuration(postpaidAccountDto.getCallDuration() != null ? postpaidAccountDto.getCallDuration() : Integer.valueOf(""));
-			postpaidAccountDb.setCallType(postpaidAccountDto.getCallType() != null ? postpaidAccountDto.getCallType() : "");
-			postpaidAccountDb.setDataOctetsSessionConsumed(postpaidAccountDto.getDataOctetsSessionConsumed() != null ? postpaidAccountDto.getDataOctetsSessionConsumed() : Integer.valueOf(""));
-			postpaidAccountDb.setSmsDestinationNumber(postpaidAccountDto.getSmsDestinationNumber() != null ? postpaidAccountDto.getSmsDestinationNumber() : "");
-			postpaidAccountDb.setSmsConsumedCount(postpaidAccountDto.getSmsConsumedCount() != null ? postpaidAccountDto.getSmsConsumedCount() : Integer.valueOf(""));
+			postpaidAccountDb.setMsisdn(postpaidAccountDto.getMsisdn() != null ? postpaidAccountDto.getMsisdn() : "");
+			postpaidAccountDb.setImsi(postpaidAccountDto.getImsi() != null ? postpaidAccountDto.getImsi() : "");
+			postpaidAccountDb.setDataParameterType(postpaidAccountDto.getDataParameterType() != null ? postpaidAccountDto.getDataParameterType() : "");
+			postpaidAccountDb.setCsVoiceCallSeconds(convertMinsToSeconds(postpaidAccountDto.getCsVoiceCallSeconds()));
+			postpaidAccountDb.setFourGDataOctets(postpaidAccountDto.getFourGDataOctets() != null ? postpaidAccountDto.getFourGDataOctets() : Integer.valueOf(""));
+			postpaidAccountDb.setFiveGDataOctets(postpaidAccountDto.getFiveGDataOctets() != null ? postpaidAccountDto.getFiveGDataOctets() : Integer.valueOf(""));
+			postpaidAccountDb.setVolteCallSeconds(convertMinsToSeconds(postpaidAccountDto.getVolteCallSeconds()));
+			
+			if (postpaidAccountDto.getDataParameterType().equalsIgnoreCase("GB")) {
+				postpaidAccountDb.setTotalDataOctetsAvailable(convertGigabytesToBytes(postpaidAccountDto.getTotalDataOctetsAvailable()));
+			}
+
+			else if (postpaidAccountDto.getDataParameterType().equalsIgnoreCase("MB")) {
+				postpaidAccountDb.setTotalDataOctetsAvailable(convertMegabytesToBytes(postpaidAccountDto.getTotalDataOctetsAvailable()));
+			}
+
+			else {
+				postpaidAccountDb.setTotalDataOctetsAvailable(convertKilobytesToBytes(postpaidAccountDto.getTotalDataOctetsAvailable()));
+			}
+			
+			postpaidAccountDb.setTotalInputDataOctetsAvailable(postpaidAccountDto.getTotalInputDataOctetsAvailable());
+			postpaidAccountDb.setTotalOutputDataOctetsAvailable(postpaidAccountDto.getTotalOutputDataOctetsAvailable());
+			postpaidAccountDb.setTotalDataOctetsConsumed(postpaidAccountDto.getTotalDataOctetsConsumed());
+			postpaidAccountDb.setTotalCallSecondsAvailable(convertMinsToSeconds(postpaidAccountDto.getTotalCallSecondsAvailable()));
+			postpaidAccountDb.setTotalCallSecondsConsumed(postpaidAccountDto.getTotalCallSecondsConsumed());
+			postpaidAccountDb.setTotalSmsAvailable(postpaidAccountDto.getTotalSmsAvailable());
+			postpaidAccountDb.setTotalSmsConsumed(postpaidAccountDto.getTotalSmsConsumed());
 			postpaidAccountsRepo.save(postpaidAccountDb);
-			PostpaidAccountsDtoNew postpaidAccountsDtoNew = new PostpaidAccountsDtoNew(postpaidAccountDb.getAccountId(),
-					postpaidAccountDb.getCustomerId(), postpaidAccountDb.getCallingNumber(),
-					postpaidAccountDb.getCalledNumber(), fetchReadableDateTime(postpaidAccountDb.getCallStart()),
-					fetchReadableDateTime(postpaidAccountDb.getCallEnd()), postpaidAccountDb.getCallDuration(),
-					postpaidAccountDb.getCallType(),
-					fetchReadableDateTime(postpaidAccountDb.getDataOctetsSessionStart()),
-					fetchReadableDateTime(postpaidAccountDb.getDataOctetsSessionEnd()),
-					postpaidAccountDb.getDataOctetsSessionConsumed(), postpaidAccountDb.getSmsDestinationNumber(),
-					postpaidAccountDb.getSmsConsumedCount(),
-					fetchReadableDateTime(postpaidAccountDb.getSmsConsumedDate()));
+			PostpaidAccountsDto postpaidAccountDtoNew = new PostpaidAccountsDto(postpaidAccountDb.getAccountId(),
+					postpaidAccountDb.getCustomerId(), postpaidAccountDb.getMsisdn(), postpaidAccountDb.getImsi(),
+					postpaidAccountDb.getDataParameterType(), postpaidAccountDb.getCsVoiceCallSeconds(),
+					postpaidAccountDb.getFourGDataOctets(), postpaidAccountDb.getFiveGDataOctets(),
+					postpaidAccountDb.getVolteCallSeconds(), postpaidAccountDb.getTotalDataOctetsAvailable(),
+					postpaidAccountDb.getTotalInputDataOctetsAvailable(),
+					postpaidAccountDb.getTotalOutputDataOctetsAvailable(), postpaidAccountDb.getTotalDataOctetsConsumed(),
+					postpaidAccountDb.getTotalCallSecondsAvailable(), postpaidAccountDb.getTotalCallSecondsConsumed(),
+					postpaidAccountDb.getTotalSmsAvailable(), postpaidAccountDb.getTotalSmsConsumed());
 			
-			// Storing data for flat file
-			String dataForFlatFile = postpaidAccountsDtoNew.toString();
-			flatFileService.storeUserData("call", postpaidAccountsDtoNew.getCallStart(), postpaidAccountsDtoNew.getCustomerId(), dataForFlatFile);
+			String customerData = postpaidAccountDtoNew.toString();
+			String date = new Date().toInstant().toString();	
 			
-			return new ResponseEntity<>(postpaidAccountsDtoNew, HttpStatus.OK);
+			//Storing data for Flat file...
+			flatFileService.storeUserData("Data", date, postpaidAccountDtoNew.getCustomerId(), customerData);
+			
+			return new ResponseEntity(postpaidAccountDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
+	}
+	
+	@Override
+	public ResponseEntity savePostpaidDeduction(DeductionDto deductionDto) {
+		Optional<PostpaidAccounts> postpaidAccountsDb = postpaidAccountsRepo.findByImsi(deductionDto.getImsi() != null ? deductionDto.getImsi() : String.valueOf(0));
+		if (postpaidAccountsDb.isPresent()) {
+			PostpaidAccounts postpaidAccounts = postpaidAccountsDb.get();
+			
+			if (deductionDto.getConsumedTimeSeconds() != 0) {
+				Long availableCallSeconds = postpaidAccounts.getTotalCallSecondsAvailable();
+				Long consumedCallSeconds = convertMinsToSeconds(deductionDto.getConsumedTimeSeconds());
+				Long remainingCallSeconds = availableCallSeconds - consumedCallSeconds;
+				
+				postpaidAccounts.setTotalCallSecondsAvailable(remainingCallSeconds);
+				postpaidAccounts.setTotalCallSecondsConsumed(postpaidAccounts.getTotalCallSecondsConsumed() + consumedCallSeconds);
+			}
+			
+			if (deductionDto.getConsumedSms() != 0) {
+				Long totalSms = postpaidAccounts.getTotalSmsAvailable();
+				Long consumedSms = deductionDto.getConsumedSms();
+				Long remainingSms = totalSms - consumedSms;
+				postpaidAccounts.setTotalSmsAvailable(remainingSms);
+				postpaidAccounts.setTotalSmsConsumed(postpaidAccounts.getTotalSmsConsumed() + consumedSms);
+			}
+			
+			if (deductionDto.getConsumedOctets().getInput() != 0) {
+				Long availableBalance = postpaidAccounts.getTotalDataOctetsAvailable();
+				Long consumedBalance = deductionDto.getConsumedOctets().getInput();
+				Long outputBalance = availableBalance - consumedBalance;
+				postpaidAccounts.setTotalDataOctetsAvailable(outputBalance);
+				postpaidAccounts.setTotalInputDataOctetsAvailable(postpaidAccounts.getTotalInputDataOctetsAvailable() + deductionDto.getConsumedOctets().getInput());
+				postpaidAccounts.setTotalOutputDataOctetsAvailable(outputBalance);
+				postpaidAccounts.setTotalDataOctetsConsumed(postpaidAccounts.getTotalInputDataOctetsAvailable());
+			}
+			
+			
+			postpaidAccountsRepo.save(postpaidAccounts);
+
+			PostpaidAccountsDto postpaidAccountsDto = new PostpaidAccountsDto(postpaidAccounts.getAccountId(),
+					postpaidAccounts.getCustomerId(), postpaidAccounts.getMsisdn(), postpaidAccounts.getImsi(),
+					postpaidAccounts.getDataParameterType(), postpaidAccounts.getCsVoiceCallSeconds(),
+					postpaidAccounts.getFourGDataOctets(), postpaidAccounts.getFiveGDataOctets(),
+					postpaidAccounts.getVolteCallSeconds(), postpaidAccounts.getTotalDataOctetsAvailable(),
+					postpaidAccounts.getTotalInputDataOctetsAvailable(),
+					postpaidAccounts.getTotalOutputDataOctetsAvailable(), postpaidAccounts.getTotalDataOctetsConsumed(),
+					postpaidAccounts.getTotalCallSecondsAvailable(), postpaidAccounts.getTotalCallSecondsConsumed(),
+					postpaidAccounts.getTotalSmsAvailable(), postpaidAccounts.getTotalSmsConsumed());
+
+			return new ResponseEntity<>(postpaidAccountsDto, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Invalid MSISDN Id"));
 	}
 
 	@Override
 	public ResponseEntity getPostpaidAccount(Integer accountId) {
-		Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findById(accountId);
-		if (postpaidAccount.isPresent()) {
-			PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
-			PostpaidAccountsDtoNew postpaidAccountsDto = new PostpaidAccountsDtoNew();
-			postpaidAccountsDto.setAccountId(postpaidAccountDb.getAccountId());
-			postpaidAccountsDto.setCustomerId(postpaidAccountDb.getCustomerId());
-			postpaidAccountsDto.setCallingNumber(postpaidAccountDb.getCallingNumber());
-			postpaidAccountsDto.setCalledNumber(postpaidAccountDb.getCalledNumber());
-			postpaidAccountsDto.setCallStart(fetchReadableDateTime(postpaidAccountDb.getCallStart()));
-			postpaidAccountsDto.setCallEnd(fetchReadableDateTime(postpaidAccountDb.getCallEnd()));
-			postpaidAccountsDto.setCallDuration(postpaidAccountDb.getCallDuration());
-			postpaidAccountsDto.setCallType(postpaidAccountDb.getCallType());
-			postpaidAccountsDto.setDataOctetsSessionStart(fetchReadableDateTime(postpaidAccountDb.getDataOctetsSessionStart()));
-			postpaidAccountsDto.setDataOctetsSessionEnd(fetchReadableDateTime(postpaidAccountDb.getDataOctetsSessionEnd()));
-			postpaidAccountsDto.setDataOctetsSessionConsumed(postpaidAccountDb.getDataOctetsSessionConsumed());
-			postpaidAccountsDto.setSmsDestinationNumber(postpaidAccountDb.getSmsDestinationNumber());
-			postpaidAccountsDto.setSmsConsumedCount(postpaidAccountDb.getSmsConsumedCount());
-			postpaidAccountsDto.setSmsConsumedDate(fetchReadableDateTime(postpaidAccountDb.getSmsConsumedDate()));
+		Optional<PostpaidAccounts> postpaidAccounts =postpaidAccountsRepo.findById(accountId);
+		if (postpaidAccounts.isPresent()) {
+			PostpaidAccounts postpaidAccountsDb = postpaidAccounts.get();
+			PrepaidAccountsDto postpaidAccountsDto = new PrepaidAccountsDto();
+			postpaidAccountsDto.setAccountId(postpaidAccountsDb.getAccountId());
+			postpaidAccountsDto.setCustomerId(postpaidAccountsDb.getCustomerId());
+			postpaidAccountsDto.setMsisdn(postpaidAccountsDb.getMsisdn());
+			postpaidAccountsDto.setImsi(postpaidAccountsDb.getImsi());
+			postpaidAccountsDto.setDataParameterType(postpaidAccountsDb.getDataParameterType());
+			postpaidAccountsDto.setCsVoiceCallSeconds(postpaidAccountsDb.getCsVoiceCallSeconds());
+			postpaidAccountsDto.setFourGDataOctets(postpaidAccountsDb.getFourGDataOctets());
+			postpaidAccountsDto.setFiveGDataOctets(postpaidAccountsDb.getFiveGDataOctets());
+			postpaidAccountsDto.setVolteCallSeconds(postpaidAccountsDb.getVolteCallSeconds());
+			postpaidAccountsDto.setTotalDataOctetsAvailable(postpaidAccountsDb.getTotalDataOctetsAvailable());
+			postpaidAccountsDto.setTotalInputDataOctetsAvailable(postpaidAccountsDb.getTotalInputDataOctetsAvailable());
+			postpaidAccountsDto.setTotalOutputDataOctetsAvailable(postpaidAccountsDb.getTotalOutputDataOctetsAvailable());
+			postpaidAccountsDto.setTotalDataOctetsConsumed(postpaidAccountsDb.getTotalDataOctetsConsumed());
+			postpaidAccountsDto.setTotalCallSecondsAvailable(postpaidAccountsDb.getTotalCallSecondsAvailable());
+			postpaidAccountsDto.setTotalCallSecondsConsumed(postpaidAccountsDb.getTotalCallSecondsConsumed());
+			postpaidAccountsDto.setTotalSmsAvailable(postpaidAccountsDb.getTotalSmsAvailable());
+			postpaidAccountsDto.setTotalSmsConsumed(postpaidAccountsDb.getTotalSmsConsumed());
 			return new ResponseEntity<>(postpaidAccountsDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Account Id already exist"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Account Id already exist"));
 	}
 
 	@Override
-	public List<PostpaidAccountsDtoNew> getAllPostpaidAccounts() {
-		List<PostpaidAccountsDto> postpaidAccountsDbList = postpaidAccountsRepo.fetchAllPostpaidAccounts();
-		List<PostpaidAccountsDtoNew> postpaidAccountsDtoList = new ArrayList<>();
-		
-		for (PostpaidAccountsDto postpaidAccountsDto : postpaidAccountsDbList) {
-			PostpaidAccountsDtoNew postpaidAccountsDtoNew = new PostpaidAccountsDtoNew();
-			postpaidAccountsDtoNew.setAccountId(postpaidAccountsDto.getAccountId());
-			postpaidAccountsDtoNew.setCustomerId(postpaidAccountsDto.getCustomerId());
-			postpaidAccountsDtoNew.setCallingNumber(postpaidAccountsDto.getCallingNumber());
-			postpaidAccountsDtoNew.setCalledNumber(postpaidAccountsDto.getCalledNumber());
-			postpaidAccountsDtoNew.setCallStart(fetchReadableDateTime(postpaidAccountsDto.getCallStart()));
-			postpaidAccountsDtoNew.setCallEnd(fetchReadableDateTime(postpaidAccountsDto.getCallEnd()));
-			postpaidAccountsDtoNew.setCallDuration(postpaidAccountsDto.getCallDuration());
-			postpaidAccountsDtoNew.setCallType(postpaidAccountsDto.getCallType());
-			postpaidAccountsDtoNew.setDataOctetsSessionStart(fetchReadableDateTime(postpaidAccountsDto.getDataOctetsSessionStart()));
-			postpaidAccountsDtoNew.setDataOctetsSessionEnd(fetchReadableDateTime(postpaidAccountsDto.getDataOctetsSessionEnd()));
-			postpaidAccountsDtoNew.setDataOctetsSessionConsumed(postpaidAccountsDto.getDataOctetsSessionConsumed());
-			postpaidAccountsDtoNew.setSmsDestinationNumber(postpaidAccountsDto.getSmsDestinationNumber());
-			postpaidAccountsDtoNew.setSmsConsumedCount(postpaidAccountsDto.getSmsConsumedCount());
-			postpaidAccountsDtoNew.setSmsConsumedDate(fetchReadableDateTime(postpaidAccountsDto.getSmsConsumedDate()));
-			postpaidAccountsDtoList.add(postpaidAccountsDtoNew);
+	public ResponseEntity getAvailableBalance(String imsi) {
+		Optional<PostpaidAccounts> postpaidAccounts = postpaidAccountsRepo.findByImsi(imsi);
+		if (postpaidAccounts.isPresent()) {
+			PostpaidAccounts postpaidAccountsDb = postpaidAccounts.get();
+			PostpaidAvailBalanceDto postpaidAvailBalanceDto = new PostpaidAvailBalanceDto();
+			postpaidAvailBalanceDto.setTotalDataOctetsAvailable(postpaidAccountsDb.getTotalDataOctetsAvailable());
+			postpaidAvailBalanceDto.setTotalInputDataOctetsAvailable(postpaidAccountsDb.getTotalInputDataOctetsAvailable());
+			postpaidAvailBalanceDto.setTotalOutputDataOctetsAvailable(postpaidAccountsDb.getTotalOutputDataOctetsAvailable());
+			postpaidAvailBalanceDto.setTotalCallSecondsAvailable(postpaidAccountsDb.getTotalCallSecondsAvailable());
+			postpaidAvailBalanceDto.setTotalSmsAvailable(postpaidAccountsDb.getTotalSmsAvailable());
+			return new ResponseEntity<>(postpaidAvailBalanceDto, HttpStatus.OK);
 		}
-		return postpaidAccountsDtoList;
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
 	}
 	
-	private String fetchReadableDateTime(Date date) {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String formattedDate = simpleDateFormat.format(date);
-		return formattedDate;
+	private static long convertGigabytesToBytes(Long gigaBytes) {
+		// 1 GB = 1024^3 bytes
+		BigDecimal gigaBytesBigDecimal = new BigDecimal(String.valueOf(gigaBytes));
+		BigDecimal bytesBigDecimal = gigaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 3)));
+		return bytesBigDecimal.longValue();
 	}
+	
+	private static long convertMegabytesToBytes(Long megaBytes) {
+		// 1 MB = 1024^2 bytes
+		BigDecimal megaBytesBigDecimal = new BigDecimal(String.valueOf(megaBytes));
+		BigDecimal bytesBigDecimal = megaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 2)));
+		return bytesBigDecimal.longValue();
+	}
+	
+	private static long convertKilobytesToBytes(Long kiloBytes) {
+		// 1 KB = 1024^1 bytes
+		BigDecimal kiloBytesBigDecimal = new BigDecimal(String.valueOf(kiloBytes));
+		BigDecimal bytesBigDecimal = kiloBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 1)));
+		return bytesBigDecimal.longValue();
+	}
+
+	private static long convertMinsToSeconds(Long mins) {
+		// 1 Min = 60^1 seconds
+		BigDecimal minsBigDecimal = new BigDecimal(String.valueOf(mins));
+		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
+		return secondsBigDecimal.longValue();
+	}
+
 }

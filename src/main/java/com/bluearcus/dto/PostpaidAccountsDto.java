@@ -1,7 +1,5 @@
 package com.bluearcus.dto;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -18,39 +16,61 @@ public class PostpaidAccountsDto {
 	@JsonProperty("customer_id")
 	private Integer customerId;
 
-	@JsonProperty("calling_number")
-	private String callingNumber;
+	@JsonProperty("msisdn")
+	private String msisdn;
 
-	@JsonProperty("called_number")
-	private String calledNumber;
+	@JsonProperty("imsi")
+	private String imsi;
 
-	@JsonProperty("call_start")
-	private Date callStart;
+	@JsonProperty("data_parameter_type")
+	private String dataParameterType;
 
-	@JsonProperty("call_end")
-	private Date callEnd;
+	@JsonProperty("cs_voice_call_seconds")
+	private Long csVoiceCallSeconds;
 
-	@JsonProperty("call_duration")
-	private Integer callDuration;
+	@JsonProperty("4g_data_octets")
+	private Integer fourGDataOctets;
 
-	@JsonProperty("call_Type")
-	private String callType;
+	@JsonProperty("5g_data_octets")
+	private Integer fiveGDataOctets;
 
-	@JsonProperty("data_octets_session_start")
-	private Date dataOctetsSessionStart;
+	@JsonProperty("volte_call_seconds")
+	private Long volteCallSeconds;
 
-	@JsonProperty("data_octets_session_end")
-	private Date dataOctetsSessionEnd;
+	@JsonProperty("total_data_octets_available")
+	private Long totalDataOctetsAvailable;
 
-	@JsonProperty("data_octets_session_consumed")
-	private Integer dataOctetsSessionConsumed;
+	@JsonProperty("total_input_data_octets_available")
+	private Long totalInputDataOctetsAvailable;
 
-	@JsonProperty("sms_destination_number")
-	private String smsDestinationNumber;
+	@JsonProperty("total_output_data_octets_available")
+	private Long totalOutputDataOctetsAvailable;
 
-	@JsonProperty("sms_consumed_count")
-	private Integer smsConsumedCount;
+	@JsonProperty("total_data_octets_consumed")
+	private Long totalDataOctetsConsumed;
 
-	@JsonProperty("sms_consumed_date")
-	private Date smsConsumedDate;
+	@JsonProperty("total_call_seconds_available")
+	private Long totalCallSecondsAvailable;
+
+	@JsonProperty("total_call_seconds_consumed")
+	private Long totalCallSecondsConsumed;
+
+	@JsonProperty("total_sms_available")
+	private Long totalSmsAvailable;
+
+	@JsonProperty("total_sms_consumed")
+	private Long totalSmsConsumed;
+
+	@Override
+	public String toString() {
+		return "account_id = " + accountId + ", customer_id = " + customerId + ", msisdn = " + msisdn + ", imsi = "
+				+ imsi + ", data_parameter_type = " + dataParameterType + ", cs_voice_call_seconds = "
+				+ csVoiceCallSeconds + ", 4g_data_octets = " + fourGDataOctets + ", 5g_data_octets = " + fiveGDataOctets
+				+ ", volte_call_seconds = " + volteCallSeconds + ", total_data_octets_available = "
+				+ totalDataOctetsAvailable + ", total_input_data_octets_available = " + totalInputDataOctetsAvailable
+				+ ", total_output_data_octets_available = " + totalOutputDataOctetsAvailable
+				+ ", total_data_octets_consumed = " + totalDataOctetsConsumed + ", total_call_seconds_available = "
+				+ totalCallSecondsAvailable + ", total_call_seconds_consumed = " + totalCallSecondsConsumed
+				+ ", total_sms_available = " + totalSmsAvailable + ", total_sms_consumed = " + totalSmsConsumed;
+	}
 }

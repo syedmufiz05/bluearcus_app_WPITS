@@ -1,8 +1,5 @@
 package com.bluearcus.model;
 
-import java.util.Date;
-
-import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,44 +20,48 @@ public class PostpaidAccounts {
 	@Column(name = "customer_id")
 	private Integer customerId;
 
-	@Column(name = "calling_number")
-	private String callingNumber;
+	@Column(name = "msisdn")
+	private String msisdn;
 
-	@Column(name = "called_number")
-	private String calledNumber;
+	@Column(name = "imsi")
+	private String imsi;
+	
+	@Column(name="data_parameter_type")
+	private String dataParameterType;
 
-	@CreationTimestamp
-	@Column(name = "call_start")
-	private Date callStart;
+	@Column(name = "cs_voice_call_seconds")
+	private Long csVoiceCallSeconds;
 
-	@CreationTimestamp
-	@Column(name = "call_end")
-	private Date callEnd;
+	@Column(name = "4g_data_octets")
+	private Integer fourGDataOctets;
 
-	@Column(name = "call_duration")
-	private Integer callDuration;
+	@Column(name = "5g_data_octets")
+	private Integer fiveGDataOctets;
 
-	@Column(name = "call_Type")
-	private String callType;
+	@Column(name = "volte_call_seconds")
+	private Long volteCallSeconds;
 
-	@CreationTimestamp
-	@Column(name = "data_octets_session_start")
-	private Date dataOctetsSessionStart;
+	@Column(name = "total_data_octets_available")
+	private Long totalDataOctetsAvailable;
 
-	@CreationTimestamp
-	@Column(name = "data_octets_session_end")
-	private Date dataOctetsSessionEnd;
+	@Column(name = "total_input_data_octets_available")
+	private Long totalInputDataOctetsAvailable;
 
-	@Column(name = "data_octets_session_consumed")
-	private Integer dataOctetsSessionConsumed;
+	@Column(name = "total_output_data_octets_available")
+	private Long totalOutputDataOctetsAvailable;
 
-	@Column(name = "sms_destination_number")
-	private String smsDestinationNumber;
+	@Column(name = "total_data_octets_consumed")
+	private Long totalDataOctetsConsumed;
 
-	@Column(name = "sms_consumed_count")
-	private Integer smsConsumedCount;
+	@Column(name = "total_call_seconds_available")
+	private Long totalCallSecondsAvailable;
 
-	@CreationTimestamp
-	@Column(name = "sms_consumed_date")
-	private Date smsConsumedDate;
+	@Column(name = "total_call_seconds_consumed")
+	private Long totalCallSecondsConsumed;
+
+	@Column(name = "total_sms_available")
+	private Long totalSmsAvailable;
+
+	@Column(name = "total_sms_consumed")
+	private Long totalSmsConsumed;
 }

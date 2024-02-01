@@ -18,7 +18,6 @@ public class PrepaidFlatFileService {
 			Date dt = simpleDateFormat.parse(dateFolder);
 			dateFolder = simpleDateFormat.format(dt);
 
-//			String directory = "C:\\apache-tomcat-8.5.95\\webapps\\Prepaid Accounts\\" + packtype + "\\" + dateFolder + "\\";
 			String directory = "/home/apache-tomcat-8.5.85/webapps/Prepaid Accounts/" + packtype + "/" + dateFolder + "/";
 
 			Path path = Paths.get(directory);
