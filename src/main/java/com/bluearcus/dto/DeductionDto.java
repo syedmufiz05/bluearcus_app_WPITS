@@ -17,6 +17,9 @@ public class DeductionDto {
 
 	@JsonProperty("called-station-id")
 	private String calledStationId;
+	
+	@JsonProperty("action")
+	private String action;
 
 	@JsonProperty("qos-info")
 	private String qosInfo;

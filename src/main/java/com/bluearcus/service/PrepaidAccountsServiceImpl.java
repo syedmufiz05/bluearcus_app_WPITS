@@ -32,6 +32,9 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountDb.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId() : Integer.valueOf(""));
 			prepaidAccountDb.setMsisdn(prepaidAccountsDto.getMsisdn() != null ? prepaidAccountsDto.getMsisdn() : "");
 			prepaidAccountDb.setImsi(prepaidAccountsDto.getImsi() != null ? prepaidAccountsDto.getImsi() : "");
+			prepaidAccountDb.setCalledStationId("");
+			prepaidAccountDb.setMonitoringKey("");
+			prepaidAccountDb.setAction("");
 			prepaidAccountDb.setDataParameterType(prepaidAccountsDto.getDataParameterType() != null ? prepaidAccountsDto.getDataParameterType() : "");
 			prepaidAccountDb.setCsVoiceCallSeconds(convertMinsToSeconds(prepaidAccountsDto.getCsVoiceCallSeconds()));
 			prepaidAccountDb.setFourGDataOctets(prepaidAccountsDto.getFourGDataOctets() != null ? prepaidAccountsDto.getFourGDataOctets() : Integer.valueOf(""));
@@ -60,10 +63,11 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountsRepository.save(prepaidAccountDb);
 			PrepaidAccountsDto prepaidAccountsDtoNew = new PrepaidAccountsDto(prepaidAccountDb.getAccountId(),
 					prepaidAccountDb.getCustomerId(), prepaidAccountDb.getMsisdn(), prepaidAccountDb.getImsi(),
-					prepaidAccountDb.getDataParameterType(), prepaidAccountDb.getCsVoiceCallSeconds(),
-					prepaidAccountDb.getFourGDataOctets(), prepaidAccountDb.getFiveGDataOctets(),
-					prepaidAccountDb.getVolteCallSeconds(), prepaidAccountDb.getTotalDataOctetsAvailable(),
-					prepaidAccountDb.getTotalInputDataOctetsAvailable(),
+					prepaidAccountDb.getCalledStationId(), prepaidAccountDb.getMonitoringKey(),
+					prepaidAccountDb.getAction(), prepaidAccountDb.getDataParameterType(),
+					prepaidAccountDb.getCsVoiceCallSeconds(), prepaidAccountDb.getFourGDataOctets(),
+					prepaidAccountDb.getFiveGDataOctets(), prepaidAccountDb.getVolteCallSeconds(),
+					prepaidAccountDb.getTotalDataOctetsAvailable(), prepaidAccountDb.getTotalInputDataOctetsAvailable(),
 					prepaidAccountDb.getTotalOutputDataOctetsAvailable(), prepaidAccountDb.getTotalDataOctetsConsumed(),
 					prepaidAccountDb.getTotalCallSecondsAvailable(), prepaidAccountDb.getTotalCallSecondsConsumed(),
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
@@ -84,6 +88,10 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		Optional<PrepaidAccounts> prepaidAccountsDb = prepaidAccountsRepository.findByImsi(deductionDto.getImsi() != null ? deductionDto.getImsi() : String.valueOf(0));
 		if (prepaidAccountsDb.isPresent()) {
 			PrepaidAccounts prepaidAccounts = prepaidAccountsDb.get();
+			
+			prepaidAccounts.setCalledStationId(deductionDto.getCalledStationId());
+			prepaidAccounts.setMonitoringKey(deductionDto.getMonitoringKey());
+			prepaidAccounts.setAction(deductionDto.getAction());
 			
 			if (deductionDto.getConsumedTimeSeconds() != 0) {
 				Long availableCallSeconds = prepaidAccounts.getTotalCallSecondsAvailable();
@@ -117,14 +125,21 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 
 			PrepaidAccountsDto prepaidAccountsDto = new PrepaidAccountsDto(prepaidAccounts.getAccountId(),
 					prepaidAccounts.getCustomerId(), prepaidAccounts.getMsisdn(), prepaidAccounts.getImsi(),
-					prepaidAccounts.getDataParameterType(), prepaidAccounts.getCsVoiceCallSeconds(),
-					prepaidAccounts.getFourGDataOctets(), prepaidAccounts.getFiveGDataOctets(),
-					prepaidAccounts.getVolteCallSeconds(), prepaidAccounts.getTotalDataOctetsAvailable(),
-					prepaidAccounts.getTotalInputDataOctetsAvailable(),
+					prepaidAccounts.getCalledStationId(), prepaidAccounts.getMonitoringKey(),
+					prepaidAccounts.getAction(), prepaidAccounts.getDataParameterType(),
+					prepaidAccounts.getCsVoiceCallSeconds(), prepaidAccounts.getFourGDataOctets(),
+					prepaidAccounts.getFiveGDataOctets(), prepaidAccounts.getVolteCallSeconds(),
+					prepaidAccounts.getTotalDataOctetsAvailable(), prepaidAccounts.getTotalInputDataOctetsAvailable(),
 					prepaidAccounts.getTotalOutputDataOctetsAvailable(), prepaidAccounts.getTotalDataOctetsConsumed(),
 					prepaidAccounts.getTotalCallSecondsAvailable(), prepaidAccounts.getTotalCallSecondsConsumed(),
 					prepaidAccounts.getTotalSmsAvailable(), prepaidAccounts.getTotalSmsConsumed());
 
+			String customerData = prepaidAccountsDto.toString();
+			String date = new Date().toInstant().toString();	
+			
+			//Storing data for Flat file...
+			prepaidFlatFileService.storeUserData(prepaidAccounts.getMonitoringKey(), date, prepaidAccountsDto.getCustomerId(), customerData);
+			
 			return new ResponseEntity<>(prepaidAccountsDto, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Invalid MSISDN Id"));
@@ -154,10 +169,11 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAccountsRepository.save(prepaidAccountDb);
 			PrepaidAccountsDto prepaidAccountsDtoNew = new PrepaidAccountsDto(prepaidAccountDb.getAccountId(),
 					prepaidAccountDb.getCustomerId(), prepaidAccountDb.getMsisdn(), prepaidAccountDb.getImsi(),
-					prepaidAccountDb.getDataParameterType(), prepaidAccountDb.getCsVoiceCallSeconds(),
-					prepaidAccountDb.getFourGDataOctets(), prepaidAccountDb.getFiveGDataOctets(),
-					prepaidAccountDb.getVolteCallSeconds(), prepaidAccountDb.getTotalDataOctetsAvailable(),
-					prepaidAccountDb.getTotalInputDataOctetsAvailable(),
+					prepaidAccountDb.getCalledStationId(), prepaidAccountDb.getMonitoringKey(),
+					prepaidAccountDb.getAction(), prepaidAccountDb.getDataParameterType(),
+					prepaidAccountDb.getCsVoiceCallSeconds(), prepaidAccountDb.getFourGDataOctets(),
+					prepaidAccountDb.getFiveGDataOctets(), prepaidAccountDb.getVolteCallSeconds(),
+					prepaidAccountDb.getTotalDataOctetsAvailable(), prepaidAccountDb.getTotalInputDataOctetsAvailable(),
 					prepaidAccountDb.getTotalOutputDataOctetsAvailable(), prepaidAccountDb.getTotalDataOctetsConsumed(),
 					prepaidAccountDb.getTotalCallSecondsAvailable(), prepaidAccountDb.getTotalCallSecondsConsumed(),
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());

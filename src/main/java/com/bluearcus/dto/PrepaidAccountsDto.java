@@ -22,9 +22,18 @@ public class PrepaidAccountsDto {
 	@JsonProperty("imsi")
 	private String imsi;
 
+	@JsonProperty("called_station_id")
+	private String calledStationId;
+
+	@JsonProperty("monitoring_key")
+	private String monitoringKey;
+
+	@JsonProperty("action")
+	private String action;
+
 	@JsonProperty("data_parameter_type")
 	private String dataParameterType;
-	
+
 	@JsonProperty("cs_voice_call_seconds")
 	private Long csVoiceCallSeconds;
 
@@ -63,14 +72,16 @@ public class PrepaidAccountsDto {
 
 	@Override
 	public String toString() {
-		return "account_id = " + accountId + ", customer_id = " + customerId + ", msisdn = " + msisdn + ", imsi = " + imsi
-				+ ", data_parameter_type = " + dataParameterType + ", cs_voice_call_seconds = " + csVoiceCallSeconds
-				+ ", 4g_data_octets = " + fourGDataOctets + ", 5g_data_octets = " + fiveGDataOctets
-				+ ", volte_call_seconds = " + volteCallSeconds + ", total_data_octets_available = " 
-				+ totalDataOctetsAvailable + ", total_input_data_octets_available = " + totalInputDataOctetsAvailable
-				+ ", total_output_data_octets_available = " + totalOutputDataOctetsAvailable
-				+ ", total_data_octets_consumed = " + totalDataOctetsConsumed + ", total_call_seconds_available = "
-				+ totalCallSecondsAvailable + ", total_call_seconds_consumed = " + totalCallSecondsConsumed
-				+ ", total_sms_available = " + totalSmsAvailable + ", total_sms_consumed = " + totalSmsConsumed;
+		return "account_id = " + accountId + ", customer_id = " + customerId + ", msisdn = " + msisdn
+				+ ", imsi = " + imsi + ", called_station_id = " + calledStationId + ", monitoring_key = " + monitoringKey
+				+ ", action = " + action + ", data_parameter_type = " + dataParameterType + ", cs_voice_call_seconds = "
+				+ csVoiceCallSeconds + ", 4g_data_octets = " + fourGDataOctets + ", 5g_data_octets = " + fiveGDataOctets
+				+ ", volte_call_seconds = " + volteCallSeconds + ", total_data_octets_available = " + totalDataOctetsAvailable
+				+ ", total_input_data_octets_available = " + totalInputDataOctetsAvailable
+				+ ", total_output_data_octets_available = " + totalOutputDataOctetsAvailable + ", total_data_octets_consumed = "
+				+ totalDataOctetsConsumed + ", total_call_seconds_available = " + totalCallSecondsAvailable
+				+ ", total_call_seconds_consumed = " + totalCallSecondsConsumed + ", total_sms_available = " + totalSmsAvailable
+				+ ", total_sms_consumed = " + totalSmsConsumed;
 	}
+
 }

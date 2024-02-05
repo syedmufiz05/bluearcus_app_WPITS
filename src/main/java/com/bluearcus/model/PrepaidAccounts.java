@@ -26,6 +26,15 @@ public class PrepaidAccounts {
 	@Column(name = "imsi")
 	private String imsi;
 	
+	@Column(name = "called_station_id")
+	private String calledStationId;
+	
+	@Column(name = "monitoring_key")
+	private String monitoringKey;
+	
+	@Column(name = "action")
+	private String action;
+	
 	@Column(name="data_parameter_type")
 	private String dataParameterType;
 

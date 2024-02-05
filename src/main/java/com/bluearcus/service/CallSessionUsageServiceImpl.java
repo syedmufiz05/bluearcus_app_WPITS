@@ -27,9 +27,6 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	@Autowired
 	private CallSessionUsageRepo callSessionUsageRepo;
 	
-	@Autowired
-	private PostpaidFlatFileService flatFileService;
-
 	@Override
 	public ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto) {
 		Optional<CallSessionUsage> callSessionUsage = callSessionUsageRepo.findByImsi(callSessionUsageDto.getImsi());
