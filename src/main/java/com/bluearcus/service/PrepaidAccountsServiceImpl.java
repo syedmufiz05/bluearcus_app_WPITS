@@ -71,13 +71,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccountDb.getTotalOutputDataOctetsAvailable(), prepaidAccountDb.getTotalDataOctetsConsumed(),
 					prepaidAccountDb.getTotalCallSecondsAvailable(), prepaidAccountDb.getTotalCallSecondsConsumed(),
 					prepaidAccountDb.getTotalSmsAvailable(), prepaidAccountDb.getTotalSmsConsumed());
-			
-			String customerData = prepaidAccountsDtoNew.toString();
-			String date = new Date().toInstant().toString();	
-			
-			//Storing data for Flat file...
-			prepaidFlatFileService.storeUserData("Data",date, prepaidAccountsDtoNew.getCustomerId(), customerData);
-			
+
 			return new ResponseEntity(prepaidAccountsDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
@@ -135,6 +129,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccounts.getTotalSmsAvailable(), prepaidAccounts.getTotalSmsConsumed());
 
 			String customerData = prepaidAccountsDto.toString();
+			System.out.println(customerData);
 			String date = new Date().toInstant().toString();	
 			
 			//Storing data for Flat file...

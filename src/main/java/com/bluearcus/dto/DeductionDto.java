@@ -15,6 +15,7 @@ public class DeductionDto {
 	@JsonProperty("imsi")
 	private String imsi;
 
+	//Party B MSISDN
 	@JsonProperty("called-station-id")
 	private String calledStationId;
 	
