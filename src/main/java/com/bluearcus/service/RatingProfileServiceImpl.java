@@ -29,13 +29,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			RatingProfileVoucher ratingProfileVoucher = new RatingProfileVoucher();
 			ratingProfileVoucher.setPackName(ratingProfileVoucherDto.getPackName() != null ? ratingProfileVoucherDto.getPackName() : "");
 			ratingProfileVoucher.setPackType(ratingProfileVoucherDto.getPackType() != null ? ratingProfileVoucherDto.getPackType() : "");
-			
-			String ratesOfferDtoList = ratingProfileVoucherDto.getRatesOfferDtoList().toString().replaceAll("[\\[\\]\"]", "");
-			
-			System.out.println("ratesOfferDtoList :"+ratesOfferDtoList);
-			
 			ratingProfileVoucher.setCategoryName(ratingProfileVoucherDto.getCategoryName() != null ? ratingProfileVoucherDto.getCategoryName() : "");
-			ratingProfileVoucher.setRatesOffer(ratesOfferDtoList);
+			ratingProfileVoucher.setRatesOffer(ratingProfileVoucherDto.getRatesOffer() != null ? ratingProfileVoucherDto.getRatesOffer() : "");
 			ratingProfileVoucher.setCallBalance(ratingProfileVoucherDto.getCallBalance() != null ? ratingProfileVoucherDto.getCallBalance() : 0);
 			ratingProfileVoucher.setCallBalanceParameter(ratingProfileVoucherDto.getCallBalanceParameter() != null ? ratingProfileVoucherDto.getCallBalanceParameter() : "");
 			ratingProfileVoucher.setSmsBalance(ratingProfileVoucherDto.getSmsBalance() != null ? ratingProfileVoucherDto.getSmsBalance() : 0);
@@ -44,16 +39,15 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherRepository.save(ratingProfileVoucher);
 		
 			
-			List<String> ratesOfferList = convertStringToList(ratingProfileVoucher.getRatesOfferList());
 			RatingProfileVoucherDto ratingProfileDtoNew = new RatingProfileVoucherDto(ratingProfileVoucher.getId(),
 					ratingProfileVoucher.getPackName(), ratingProfileVoucher.getPackType(),
 					ratingProfileVoucher.getCallBalance(), ratingProfileVoucher.getCallBalanceParameter(),
 					ratingProfileVoucher.getSmsBalance(), ratingProfileVoucher.getDataBalance(),
-					ratingProfileVoucher.getDataBalanceParameter(), ratingProfileVoucher.getCategoryName(), ratesOfferList);
+					ratingProfileVoucher.getDataBalanceParameter(), ratingProfileVoucher.getCategoryName(),
+					ratingProfileVoucher.getRatesOffer());
 			return new ResponseEntity<>(ratingProfileDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(new CustomMessage(HttpStatus.CONFLICT.value(), "Duplicate Rating Profile Id"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Duplicate Rating Profile Id"));
 	}
 
 	@Override
@@ -64,7 +58,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDb.setPackName(ratingProfileVoucherDto.getPackName() != null ? ratingProfileVoucherDto.getPackName() : ratingProfileVoucherDb.getPackName());
 			ratingProfileVoucherDb.setPackType(ratingProfileVoucherDto.getPackType() != null ? ratingProfileVoucherDto.getPackType() : ratingProfileVoucherDb.getPackType());
 			ratingProfileVoucherDb.setCategoryName(ratingProfileVoucherDto.getCategoryName() != null ? ratingProfileVoucherDto.getCategoryName() :ratingProfileVoucherDb.getCategoryName());
-			ratingProfileVoucherDb.setRatesOffer(ratingProfileVoucherDto.getRatesOfferDtoList() != null ? ratingProfileVoucherDto.getRatesOfferDtoList().toString() : ratingProfileVoucherDb.getRatesOfferList());
+			ratingProfileVoucherDb.setRatesOffer(ratingProfileVoucherDto.getRatesOffer() != null ? ratingProfileVoucherDto.getRatesOffer() : ratingProfileVoucherDb.getRatesOffer());
 			ratingProfileVoucherDb.setCallBalance(ratingProfileVoucherDto.getCallBalance() != null ? ratingProfileVoucherDto.getCallBalance() : ratingProfileVoucherDb.getCallBalance());
 			ratingProfileVoucherDb.setCallBalanceParameter(ratingProfileVoucherDto.getCallBalanceParameter() != null ? ratingProfileVoucherDto.getCallBalanceParameter() :ratingProfileVoucherDb.getCallBalanceParameter());
 			ratingProfileVoucherDb.setSmsBalance(ratingProfileVoucherDto.getSmsBalance() != null ? ratingProfileVoucherDto.getSmsBalance() : ratingProfileVoucherDb.getSmsBalance());
@@ -72,24 +66,12 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDb.setDataBalanceParameter(ratingProfileVoucherDto.getDataBalanceParameter() != null ? ratingProfileVoucherDto.getDataBalanceParameter() : ratingProfileVoucherDb.getDataBalanceParameter());
 			ratingProfileVoucherRepository.save(ratingProfileVoucherDb);
 			
-			
-			
-			String ratesOfferFiltered =ratingProfileVoucherDb.getRatesOfferList().replaceAll("[\\\\/]", "");
-			
-			
-			
-			List<String> ratesOfferList = convertStringToList(ratesOfferFiltered);
-			
-			
-			
-			System.out.println("ratesOfferList:" + ratesOfferList);
-			
 			RatingProfileVoucherDto ratingProfileVoucherDtoNew = new RatingProfileVoucherDto(
 					ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
 					ratingProfileVoucherDb.getPackType(), ratingProfileVoucherDb.getCallBalance(),
 					ratingProfileVoucherDb.getCallBalanceParameter(), ratingProfileVoucherDb.getSmsBalance(),
 					ratingProfileVoucherDb.getDataBalance(), ratingProfileVoucherDb.getDataBalanceParameter(),
-					ratingProfileVoucherDb.getCategoryName(), ratesOfferList);
+					ratingProfileVoucherDb.getCategoryName(), ratingProfileVoucherDb.getRatesOffer());
 			return new ResponseEntity<>(ratingProfileVoucherDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Rating Profile Id"));
@@ -110,7 +92,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
 			ratingProfileVoucherDto.setDataBalanceParameter(ratingProfileVoucher.getDataBalanceParameter());
 			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']", "")));
+			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
 			ratingProfileVoucherDtoList.add(ratingProfileVoucherDto);
 		}
 		return ratingProfileVoucherDtoList;
@@ -131,7 +113,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
 			ratingProfileVoucherDto.setDataBalanceParameter(ratingProfileVoucher.getDataBalanceParameter());
 			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']","")));
+			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
 			return new ResponseEntity<>(ratingProfileVoucherDto, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Rating Profile Id"));
@@ -152,7 +134,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
 			ratingProfileVoucherDto.setDataBalanceParameter(ratingProfileVoucher.getDataBalanceParameter());
 			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']","")));
+			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
 			return new ResponseEntity<>(ratingProfileVoucherDto, HttpStatus.OK);	
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid pack name"));
@@ -184,7 +166,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
 			ratingProfileVoucherDto.setDataBalanceParameter(ratingProfileVoucher.getDataBalanceParameter());
 			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']", "")));
+			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
 			ratingProfileVoucherDtoList.add(ratingProfileVoucherDto);
 		}
 		return ratingProfileVoucherDtoList;
@@ -205,7 +187,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
 			ratingProfileVoucherDto.setDataBalanceParameter(ratingProfileVoucher.getDataBalanceParameter());
 			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
-			ratingProfileVoucherDto.setRatesOfferDtoList(convertStringToList(ratingProfileVoucher.getRatesOfferList().replaceAll("[\\\\\"']", "")));
+			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
 			ratingProfileVoucherDtoList.add(ratingProfileVoucherDto);
 		}
 		return ratingProfileVoucherDtoList;

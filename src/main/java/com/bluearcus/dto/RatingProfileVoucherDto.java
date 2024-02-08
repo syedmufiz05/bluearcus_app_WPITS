@@ -39,6 +39,6 @@ public class RatingProfileVoucherDto {
 	@JsonProperty("category_name")
 	private String categoryName;
 
-	@JsonProperty("rating_offer_list")
-	private List<String> ratesOfferDtoList;
+	@JsonProperty("rates_offer")
+	private String ratesOffer;
 }

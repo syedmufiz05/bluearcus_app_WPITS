@@ -1,8 +1,5 @@
 package com.bluearcus.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,15 +41,6 @@ public class RatingProfileVoucher {
 	@Column(name = "category_name")
 	private String categoryName;
 
-	@Column(name = "rates_offer_list", columnDefinition = "JSON")
-	private String ratesOfferList;
-
-	public void setRatesOffer(String ratesOfferList) {
-		try {
-			this.ratesOfferList = new ObjectMapper().writeValueAsString(ratesOfferList);
-			System.out.println(ratesOfferList);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	@Column(name = "rates_offer")
+	private String ratesOffer;
 }
