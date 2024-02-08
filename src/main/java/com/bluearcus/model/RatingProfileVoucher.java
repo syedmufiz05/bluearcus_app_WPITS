@@ -28,6 +28,9 @@ public class RatingProfileVoucher {
 
 	@Column(name = "call_balance_parameter")
 	public String callBalanceParameter;
+	
+	@Column(name = "assigned_call_balance")
+	public String assignedCallBalance;
 
 	@Column(name = "sms_balance")
 	public Integer smsBalance;
@@ -37,6 +40,9 @@ public class RatingProfileVoucher {
 
 	@Column(name = "data_balance_parameter")
 	public String dataBalanceParameter;
+	
+	@Column(name = "assigned_data_balance")
+	public String assignedDataBalance;
 
 	@Column(name = "category_name")
 	private String categoryName;
