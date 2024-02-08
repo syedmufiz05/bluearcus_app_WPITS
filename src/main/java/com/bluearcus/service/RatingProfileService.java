@@ -12,7 +12,17 @@ public interface RatingProfileService {
 
 	ResponseEntity getRatingProfileVoucher(Integer ratingProfileId);
 
+	ResponseEntity getRatingProfileVoucherByPackName(String packName);
+
 	List<RatingProfileVoucherDto> getAllRatingProfileVoucher();
 
 	ResponseEntity deleteRatingProfileVoucher(Integer ratingProfileId);
+
+	List<RatingProfileVoucherDto> searchVoucherByName(String category);
+	
+	List<RatingProfileVoucherDto> getVoucherByCtgName(String ctgName);
+	
+	List<String> getAllDataBalanceParams();
+	
+	List<String> getAllCallBalanceParams();
 }

@@ -23,15 +23,21 @@ public class RatingProfileVoucherDto {
 
 	@JsonProperty("call_balance")
 	public Integer callBalance;
+	
+	@JsonProperty("call_balance_parameter")
+	public String callBalanceParameter;
 
 	@JsonProperty("sms_balance")
 	public Integer smsBalance;
 
 	@JsonProperty("data_balance")
 	public Integer dataBalance;
+	
+	@JsonProperty("data_balance_parameter")
+	public String dataBalanceParameter;
 
-	@JsonProperty("category_name_list")
-	private List<String> categoryNameDtoList;
+	@JsonProperty("category_name")
+	private String categoryName;
 
 	@JsonProperty("rating_offer_list")
 	private List<String> ratesOfferDtoList;

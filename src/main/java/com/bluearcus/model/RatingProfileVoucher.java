@@ -29,26 +29,23 @@ public class RatingProfileVoucher {
 	@Column(name = "call_balance")
 	public Integer callBalance;
 
+	@Column(name = "call_balance_parameter")
+	public String callBalanceParameter;
+
 	@Column(name = "sms_balance")
 	public Integer smsBalance;
 
 	@Column(name = "data_balance")
 	public Integer dataBalance;
 
-	@Column(name = "category_offer_list", columnDefinition = "JSON")
-	private String categoryOfferList;
+	@Column(name = "data_balance_parameter")
+	public String dataBalanceParameter;
+
+	@Column(name = "category_name")
+	private String categoryName;
 
 	@Column(name = "rates_offer_list", columnDefinition = "JSON")
 	private String ratesOfferList;
-
-	public void setCategoryOffer(String categoryOfferList) {
-		try {
-			this.categoryOfferList = new ObjectMapper().writeValueAsString(categoryOfferList);
-			System.out.println(categoryOfferList);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	public void setRatesOffer(String ratesOfferList) {
 		try {
