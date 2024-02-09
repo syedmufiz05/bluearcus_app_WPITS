@@ -118,19 +118,19 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 		return callSessionUsageDtoList;
 	}
 
-	private String fetchReadableDateTime(Date date) {
+	public static String fetchReadableDateTime(Date date) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String formattedDate = simpleDateFormat.format(date);
 		return formattedDate;
 	}
 	
-	private LocalDateTime convertDateToLocalDateTime(Date date) {
+	public static LocalDateTime convertDateToLocalDateTime(Date date) {
 		Instant instant = date.toInstant();
 		LocalDateTime localDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
 		return localDateTime;
 	}
 
-	public Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
+	public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
 		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
 	
