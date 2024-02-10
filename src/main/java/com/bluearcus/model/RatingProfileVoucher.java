@@ -30,7 +30,7 @@ public class RatingProfileVoucher {
 
 	@Column(name = "call_balance_parameter")
 	public String callBalanceParameter;
-	
+
 	@Column(name = "assigned_call_balance")
 	public String assignedCallBalance;
 
@@ -42,7 +42,7 @@ public class RatingProfileVoucher {
 
 	@Column(name = "data_balance_parameter")
 	public String dataBalanceParameter;
-	
+
 	@Column(name = "assigned_data_balance")
 	public String assignedDataBalance;
 
@@ -51,7 +51,4 @@ public class RatingProfileVoucher {
 
 	@Column(name = "rates_offer")
 	private String ratesOffer;
-	
-	@ManyToOne
-	private PackAllocation packAllocation;
 }

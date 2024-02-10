@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +44,16 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		if (ratingProfileVoucher.isPresent()) {
 			
 			RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+			
+			int packActivationDays = findIntIntoString(ratingProfileVoucherDb.getRatesOffer());
+			
 			PackAllocation packAllocation = new PackAllocation();
 			packAllocation.setActivationDate(new Date());
 			
 			LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocation.getActivationDate());
 			System.out.println("activationDate:" + activationDate);
 
-			LocalDateTime expirationDate = activationDate.plusMonths(1);
+			LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
 			System.out.println("expirationDate:" + expirationDate);
 			
 			Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
@@ -60,8 +65,6 @@ public class PackAllocationServiceImpl implements PackAllocationService {
             
 			String expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
 			System.out.println("expirationDateDto:"+expirationDateDto);
-			
-			packAllocation.setRatingProfileVoucher(convertDtoToList(ratingProfileVoucherDb));
 			
 			PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
 			prepaidAccounts.setCustomerId(0);
@@ -132,11 +135,26 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
 	}
-	
-	private static List<RatingProfileVoucher> convertDtoToList(RatingProfileVoucher ratingProfileVoucher) {
-		List<RatingProfileVoucher> ratingProfileVoucherList = new ArrayList<>();
-		ratingProfileVoucherList.add(ratingProfileVoucher);
-		return ratingProfileVoucherList;
+	 
+	private int findIntIntoString(String value) {
+		// Define a regular expression pattern to find integers
+		Pattern pattern = Pattern.compile("\\b\\d+\\b");
+
+		// Create a matcher with the input string
+		Matcher matcher = pattern.matcher(value);
+
+		int intValue = 0;
+
+		// Find and print all integers in the string
+		while (matcher.find()) {
+			String match = matcher.group();
+			intValue = Integer.parseInt(match);
+			System.out.println("Found integer: " + intValue);
+		}
+		System.out.println("intValue:" + intValue);
+		return intValue;
 	}
+
+	
 
 }

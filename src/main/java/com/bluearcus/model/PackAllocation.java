@@ -30,9 +30,6 @@ public class PackAllocation {
 	@Column(name = "expiration_date")
 	private Date expirationDate;
 
-	@OneToMany(mappedBy ="packAllocation")
-	private List<RatingProfileVoucher> ratingProfileVoucher;
-
 	@OneToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "customer_id", referencedColumnName = "account_id")
 	private PrepaidAccounts prepaidAccount;
