@@ -1,5 +1,7 @@
 package com.bluearcus.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bluearcus.dto.DeductionDto;
@@ -28,9 +31,19 @@ public class PostpaidAccountsController {
 		return postpaidAccountsService.savePostpaidAccount(postpaidAccountsDto);
 	}
 
-	@RequestMapping(value = "/get/{account_id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/get/account/{account_id}", method = RequestMethod.GET)
 	public ResponseEntity<PostpaidAccountsDto> getPostPaidAccount(@PathVariable("account_id") Integer accountId) {
 		return postpaidAccountsService.getPostpaidAccount(accountId);
+	}
+	
+	@RequestMapping(value = "/get/customer/{customer_id}", method = RequestMethod.GET)
+	public ResponseEntity<PostpaidAccountsDto> getPostPaidAccountByCustomerId(@PathVariable("customer_id") Integer customerId) {
+		return postpaidAccountsService.getPostpaidAccountByCustomerId(customerId);
+	}
+	
+	@RequestMapping(value = "/get/all/numbers", method = RequestMethod.GET)
+	public List<String> getAllPostPaidNumbers() {
+		return postpaidAccountsService.getAllPostpaidNumbers();
 	}
 	
 	@RequestMapping(value = "/deduct", method = RequestMethod.POST)

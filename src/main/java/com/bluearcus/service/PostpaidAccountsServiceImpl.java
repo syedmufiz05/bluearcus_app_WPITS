@@ -1,7 +1,9 @@
 package com.bluearcus.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +139,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		Optional<PostpaidAccounts> postpaidAccounts =postpaidAccountsRepo.findById(accountId);
 		if (postpaidAccounts.isPresent()) {
 			PostpaidAccounts postpaidAccountsDb = postpaidAccounts.get();
-			PrepaidAccountsDto postpaidAccountsDto = new PrepaidAccountsDto();
+			PostpaidAccountsDto postpaidAccountsDto = new PostpaidAccountsDto();
 			postpaidAccountsDto.setAccountId(postpaidAccountsDb.getAccountId());
 			postpaidAccountsDto.setCustomerId(postpaidAccountsDb.getCustomerId());
 			postpaidAccountsDto.setMsisdn(postpaidAccountsDb.getMsisdn());
@@ -157,7 +159,45 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			postpaidAccountsDto.setTotalSmsConsumed(postpaidAccountsDb.getTotalSmsConsumed());
 			return new ResponseEntity<>(postpaidAccountsDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Account Id already exist"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Account Id does n't exist"));
+	}
+	
+	@Override
+	public ResponseEntity getPostpaidAccountByCustomerId(Integer customerId) {
+		Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(customerId);
+		if (postpaidAccount.isPresent()) {
+			PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
+			PostpaidAccountsDto postpaidAccountDto = new PostpaidAccountsDto();
+			postpaidAccountDto.setAccountId(postpaidAccountDb.getAccountId());
+			postpaidAccountDto.setCustomerId(postpaidAccountDb.getCustomerId());
+			postpaidAccountDto.setMsisdn(postpaidAccountDb.getMsisdn());
+			postpaidAccountDto.setImsi(postpaidAccountDb.getImsi());
+			postpaidAccountDto.setDataParameterType(postpaidAccountDb.getDataParameterType());
+			postpaidAccountDto.setCsVoiceCallSeconds(postpaidAccountDb.getCsVoiceCallSeconds());
+			postpaidAccountDto.setFourGDataOctets(postpaidAccountDb.getFourGDataOctets());
+			postpaidAccountDto.setFiveGDataOctets(postpaidAccountDb.getFiveGDataOctets());
+			postpaidAccountDto.setVolteCallSeconds(postpaidAccountDb.getVolteCallSeconds());
+			postpaidAccountDto.setTotalDataOctetsAvailable(postpaidAccountDb.getTotalDataOctetsAvailable());
+			postpaidAccountDto.setTotalInputDataOctetsAvailable(postpaidAccountDb.getTotalInputDataOctetsAvailable());
+			postpaidAccountDto.setTotalOutputDataOctetsAvailable(postpaidAccountDb.getTotalOutputDataOctetsAvailable());
+			postpaidAccountDto.setTotalDataOctetsConsumed(postpaidAccountDb.getTotalDataOctetsConsumed());
+			postpaidAccountDto.setTotalCallSecondsAvailable(postpaidAccountDb.getTotalCallSecondsAvailable());
+			postpaidAccountDto.setTotalCallSecondsConsumed(postpaidAccountDb.getTotalCallSecondsConsumed());
+			postpaidAccountDto.setTotalSmsAvailable(postpaidAccountDb.getTotalSmsAvailable());
+			postpaidAccountDto.setTotalSmsConsumed(postpaidAccountDb.getTotalSmsConsumed());
+			return new ResponseEntity<>(postpaidAccountDto, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
+	}
+	
+	@Override
+	public List<String> getAllPostpaidNumbers() {
+		List<PostpaidAccounts> postpaidAccountList = postpaidAccountsRepo.findAll();
+		List<String> postpaidNumberList = new ArrayList<>();
+		for (PostpaidAccounts postpaidAccount : postpaidAccountList) {
+			postpaidNumberList.add(postpaidAccount.getMsisdn());
+		}
+		return postpaidNumberList;
 	}
 
 	@Override
@@ -203,5 +243,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
 	}
+
+	
 
 }

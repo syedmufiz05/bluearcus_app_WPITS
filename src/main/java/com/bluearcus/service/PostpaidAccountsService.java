@@ -1,5 +1,7 @@
 package com.bluearcus.service;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 
 import com.bluearcus.dto.DeductionDto;
@@ -12,5 +14,9 @@ public interface PostpaidAccountsService {
 
 	ResponseEntity getPostpaidAccount(Integer accountId);
 	
+	ResponseEntity getPostpaidAccountByCustomerId(Integer customerId);
+	
 	ResponseEntity getAvailableBalance(String imsi);
+	
+	List<String> getAllPostpaidNumbers();
 }
