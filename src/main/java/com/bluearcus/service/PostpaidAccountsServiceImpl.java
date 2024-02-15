@@ -18,6 +18,8 @@ import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.PostpaidAccounts;
 import com.bluearcus.repo.PostpaidAccountsRepo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
@@ -72,11 +74,11 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 					postpaidAccountDb.getTotalCallSecondsAvailable(), postpaidAccountDb.getTotalCallSecondsConsumed(),
 					postpaidAccountDb.getTotalSmsAvailable(), postpaidAccountDb.getTotalSmsConsumed());
 			
-			String customerData = postpaidAccountDtoNew.toString();
-			String date = new Date().toInstant().toString();	
-			
-			//Storing data for Flat file...
-			flatFileService.storeUserData("Data", date, postpaidAccountDtoNew.getCustomerId(), customerData);
+//			String customerData = postpaidAccountDtoNew.toString();
+//			String date = new Date().toInstant().toString();	
+//			
+//			//Storing data for Flat file...
+//			flatFileService.storeUserData("Data", date, postpaidAccountDtoNew.getMsisdn(), customerData);
 			
 			return new ResponseEntity(postpaidAccountDtoNew, HttpStatus.OK);
 		}
@@ -84,7 +86,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 	}
 	
 	@Override
-	public ResponseEntity savePostpaidDeduction(DeductionDto deductionDto) {
+	public ResponseEntity savePostpaidDeduction(DeductionDto deductionDto) throws JsonProcessingException {
 		Optional<PostpaidAccounts> postpaidAccountsDb = postpaidAccountsRepo.findByImsi(deductionDto.getImsi() != null ? deductionDto.getImsi() : String.valueOf(0));
 		if (postpaidAccountsDb.isPresent()) {
 			PostpaidAccounts postpaidAccounts = postpaidAccountsDb.get();
@@ -128,6 +130,15 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 					postpaidAccounts.getTotalOutputDataOctetsAvailable(), postpaidAccounts.getTotalDataOctetsConsumed(),
 					postpaidAccounts.getTotalCallSecondsAvailable(), postpaidAccounts.getTotalCallSecondsConsumed(),
 					postpaidAccounts.getTotalSmsAvailable(), postpaidAccounts.getTotalSmsConsumed());
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String customerData = mapper.writeValueAsString(postpaidAccountsDto);
+			
+//			String customerData = postpaidAccountsDto.toString();
+			String date = new Date().toInstant().toString();
+
+			// Storing data for Flat file...
+			flatFileService.storeCustomerData("Data", date, postpaidAccountsDto.getMsisdn(), customerData);
 
 			return new ResponseEntity<>(postpaidAccountsDto, HttpStatus.OK);
 		}

@@ -1,5 +1,6 @@
 package com.bluearcus.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bluearcus.dto.ConsumedCallDataSmsDto;
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PostpaidAccountsDto;
 import com.bluearcus.service.PostpaidAccountsService;
+import com.bluearcus.service.PostpaidFlatFileService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.websocket.server.PathParam;
 
@@ -25,6 +29,9 @@ public class PostpaidAccountsController {
 
 	@Autowired
 	private PostpaidAccountsService postpaidAccountsService;
+	
+	@Autowired
+	private PostpaidFlatFileService postpaidFlatFileService;
 	
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public ResponseEntity<PostpaidAccountsDto> savePostPaidAccount(@RequestBody PostpaidAccountsDto postpaidAccountsDto) {
@@ -41,13 +48,18 @@ public class PostpaidAccountsController {
 		return postpaidAccountsService.getPostpaidAccountByCustomerId(customerId);
 	}
 	
-	@RequestMapping(value = "/get/all/numbers", method = RequestMethod.GET)
+	@RequestMapping(value = "/get/all/phone/numbers", method = RequestMethod.GET)
 	public List<String> getAllPostPaidNumbers() {
 		return postpaidAccountsService.getAllPostpaidNumbers();
 	}
 	
+	@RequestMapping(value = "/get/file", method = RequestMethod.GET)
+	public ResponseEntity<ConsumedCallDataSmsDto> getFiles(@RequestParam("file_name") String fileName,@RequestParam("start_date") String startDate, @RequestParam("end_date") String endDate) throws IOException {
+		return postpaidFlatFileService.consumedCallDataSmsByCustomer(fileName, startDate, endDate);
+	}
+	
 	@RequestMapping(value = "/deduct", method = RequestMethod.POST)
-	public ResponseEntity<PostpaidAccountsDto> saveDeductionRecord(@RequestBody DeductionDto deductionDto) {
+	public ResponseEntity<PostpaidAccountsDto> saveDeductionRecord(@RequestBody DeductionDto deductionDto) throws JsonProcessingException {
 		return postpaidAccountsService.savePostpaidDeduction(deductionDto);
 	}
 

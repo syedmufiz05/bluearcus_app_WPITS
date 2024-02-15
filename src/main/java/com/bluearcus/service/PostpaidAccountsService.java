@@ -6,11 +6,12 @@ import org.springframework.http.ResponseEntity;
 
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PostpaidAccountsDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface PostpaidAccountsService {
 	ResponseEntity savePostpaidAccount(PostpaidAccountsDto postpaidAccountsDto);
 	
-	ResponseEntity savePostpaidDeduction(DeductionDto deductionDto);
+	ResponseEntity savePostpaidDeduction(DeductionDto deductionDto) throws JsonProcessingException;
 
 	ResponseEntity getPostpaidAccount(Integer accountId);
 	
