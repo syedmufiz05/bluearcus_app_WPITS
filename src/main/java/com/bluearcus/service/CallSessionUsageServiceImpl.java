@@ -133,5 +133,11 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
 		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
+
+	@Override
+	public List<CallSessionUsageDtoNew> getLast5Calls() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }
