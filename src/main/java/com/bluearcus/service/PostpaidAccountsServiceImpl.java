@@ -74,12 +74,6 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 					postpaidAccountDb.getTotalCallSecondsAvailable(), postpaidAccountDb.getTotalCallSecondsConsumed(),
 					postpaidAccountDb.getTotalSmsAvailable(), postpaidAccountDb.getTotalSmsConsumed());
 			
-//			String customerData = postpaidAccountDtoNew.toString();
-//			String date = new Date().toInstant().toString();	
-//			
-//			//Storing data for Flat file...
-//			flatFileService.storeUserData("Data", date, postpaidAccountDtoNew.getMsisdn(), customerData);
-			
 			return new ResponseEntity(postpaidAccountDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
@@ -134,7 +128,6 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			ObjectMapper mapper = new ObjectMapper();
 			String customerData = mapper.writeValueAsString(postpaidAccountsDto);
 			
-//			String customerData = postpaidAccountsDto.toString();
 			String date = new Date().toInstant().toString();
 
 			// Storing data for Flat file...
@@ -227,6 +220,25 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
 	}
 	
+	@Override
+	public ResponseEntity generateBillForCustomer(String msisdn) {
+		Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByMsisdn(msisdn);
+		if (postpaidAccount.isPresent()) {
+			
+			PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
+			Long availableBalance = postpaidAccountDb.getTotalDataOctetsAvailable();
+			Long consumedBalance = postpaidAccountDb.getTotalDataOctetsConsumed();
+			
+			if (availableBalance == consumedBalance || availableBalance > consumedBalance) {
+				System.out.println("Generate the invoice according to pack rates...");
+			}
+			
+			System.out.println("Generate the invoice with additional charges...");
+			
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid msisdn"));
+	}
+	
 	private static long convertGigabytesToBytes(Long gigaBytes) {
 		// 1 GB = 1024^3 bytes
 		BigDecimal gigaBytesBigDecimal = new BigDecimal(String.valueOf(gigaBytes));
@@ -254,7 +266,5 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
 	}
-
-	
 
 }

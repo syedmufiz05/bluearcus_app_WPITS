@@ -1,7 +1,6 @@
 package com.bluearcus.model;
 
 import java.util.Date;
-import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -10,15 +9,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "pack_allocation")
+@Table(name ="pack_allocation_postpaid")
 @Data
-public class PackAllocation {
+public class PackAllocationPostpaid {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
@@ -29,8 +27,10 @@ public class PackAllocation {
 
 	@Column(name = "expiration_date")
 	private Date expirationDate;
+	
+	@Column(name = "msisdn")
+	private String msisdn;
 
-	@OneToOne(cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "customer_id", referencedColumnName = "account_id")
-	private PrepaidAccounts prepaidAccount;
+	@Column(name = "imsi")
+	private String imsi;
 }

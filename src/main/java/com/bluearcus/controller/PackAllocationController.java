@@ -19,8 +19,13 @@ public class PackAllocationController {
 	@Autowired
 	private PackAllocationService packAllocationService;
 
-	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public ResponseEntity<PackAllocationDto> savePackAllocationDetails(@RequestBody PackAllocationDto packAllocationDto) {
-		return packAllocationService.savePackAllocationDetail(packAllocationDto);
+	@RequestMapping(value = "/prepaid", method = RequestMethod.POST)
+	public ResponseEntity<PackAllocationDto> savePackAllocationPrepaid(@RequestBody PackAllocationDto packAllocationDto) {
+		return packAllocationService.packAllocationForPrepaid(packAllocationDto);
+	}
+
+	@RequestMapping(value = "/postpaid", method = RequestMethod.POST)
+	public ResponseEntity<PackAllocationDto> savePackAllocationPostpaid(@RequestBody PackAllocationDto packAllocationDto) {
+		return packAllocationService.packAllocationForPostpaid(packAllocationDto);
 	}
 }

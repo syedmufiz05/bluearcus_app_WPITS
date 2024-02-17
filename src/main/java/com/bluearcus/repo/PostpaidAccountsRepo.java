@@ -9,5 +9,7 @@ public interface PostpaidAccountsRepo extends JpaRepository<PostpaidAccounts, In
 	
 	Optional<PostpaidAccounts> findByImsi(String imsi);
 	
+	Optional<PostpaidAccounts> findByMsisdn(String msisdn);
+	
 	Optional<PostpaidAccounts> findByCustomerId(Integer customerId);
 }

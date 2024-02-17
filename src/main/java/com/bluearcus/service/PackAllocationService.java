@@ -5,5 +5,7 @@ import org.springframework.http.ResponseEntity;
 import com.bluearcus.dto.PackAllocationDto;
 
 public interface PackAllocationService {
-	ResponseEntity savePackAllocationDetail(PackAllocationDto packAllocationDto);
+	ResponseEntity packAllocationForPrepaid(PackAllocationDto packAllocationDto);
+	
+	ResponseEntity packAllocationForPostpaid(PackAllocationDto packAllocationDto);
 }

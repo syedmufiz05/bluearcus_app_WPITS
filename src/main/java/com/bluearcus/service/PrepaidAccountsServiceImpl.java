@@ -137,7 +137,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			
 			return new ResponseEntity<>(prepaidAccountsDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Invalid MSISDN Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid MSISDN"));
 	}
 
 	@Override

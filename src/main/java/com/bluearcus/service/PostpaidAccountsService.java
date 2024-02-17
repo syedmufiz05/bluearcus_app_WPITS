@@ -20,4 +20,6 @@ public interface PostpaidAccountsService {
 	ResponseEntity getAvailableBalance(String imsi);
 	
 	List<String> getAllPostpaidNumbers();
+	
+	ResponseEntity generateBillForCustomer(String msisdn);
 }

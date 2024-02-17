@@ -15,4 +15,6 @@ public interface CallSessionUsageRepo extends JpaRepository<CallSessionUsage, In
     
     @Query("select new com.bluearcus.dto.CallSessionUsageDto(csu.id,csu.peerSessionId,csu.msisdn,csu.imsi,csu.calledMsisdn,csu.locationInfo,csu.sessionState,csu.callStartTs,csu.callEndTs,csu.totalSeconds,csu.callStatus) from CallSessionUsage csu")
     List<CallSessionUsageDto> fetchAllCallSessionUsage();
+    
+    List<CallSessionUsage> findTop5ByOrderByIdDesc();
 }

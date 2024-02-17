@@ -11,6 +11,8 @@ public interface CallSessionUsageService {
 	ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto);
 
 	List<CallSessionUsageDtoNew> getAllCallSessionUsage();
+	
+	List<CallSessionUsageDtoNew> getLast5Calls();
 
 	ResponseEntity fetchSecondsDuringCall(CallSessionUsageDto callSessionUsageDto);
 }
