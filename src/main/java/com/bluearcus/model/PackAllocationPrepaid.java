@@ -30,7 +30,9 @@ public class PackAllocationPrepaid {
 	@Column(name = "expiration_date")
 	private Date expirationDate;
 
-	@OneToOne(cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "customer_id", referencedColumnName = "account_id")
-	private PrepaidAccounts prepaidAccount;
+	@Column(name = "msisdn")
+	private String msisdn;
+
+	@Column(name = "imsi")
+	private String imsi;
 }

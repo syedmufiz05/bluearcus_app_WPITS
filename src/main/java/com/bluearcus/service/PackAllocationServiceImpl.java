@@ -57,24 +57,64 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 			
 			int packActivationDays = findIntIntoString(ratingProfileVoucherDb.getRatesOffer());
 			
-			PackAllocationPrepaid packAllocation = new PackAllocationPrepaid();
-			packAllocation.setActivationDate(new Date());
+			PackAllocationPrepaid packAllocationPrepaid = new PackAllocationPrepaid();
+			packAllocationPrepaid.setActivationDate(new Date());
 			
-			LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocation.getActivationDate());
+			LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
 			System.out.println("activationDate:" + activationDate);
 
 			LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
 			System.out.println("expirationDate:" + expirationDate);
 			
 			Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
-			packAllocation.setExpirationDate(expirationDateDb);
+			packAllocationPrepaid.setExpirationDate(expirationDateDb);
 			System.out.println("expirationDateDb:" + expirationDateDb);
 			
-			String activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocation.getActivationDate());
+			String activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocationPrepaid.getActivationDate());
             System.out.println("activationDateDto:"+activationDateDto);
             
 			String expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
 			System.out.println("expirationDateDto:"+expirationDateDto);
+			
+			
+           Optional<PrepaidAccounts> prepaidAccountDb = prepaidAccountsRepository.findByImsi(packAllocationDto.getImsi());
+			
+			if (prepaidAccountDb.isPresent()) {
+				PrepaidAccounts prepaidAccount = prepaidAccountDb.get();
+
+				if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
+					prepaidAccount.setTotalDataOctetsAvailable(convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+				}
+
+				else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
+					prepaidAccount.setTotalDataOctetsAvailable(convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+				}
+				
+				else {
+					prepaidAccount.setTotalDataOctetsAvailable(convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+				}
+
+				prepaidAccount.setTotalCallSecondsAvailable(convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue()));
+				prepaidAccount.setTotalSmsAvailable(ratingProfileVoucherDb.getSmsBalance().longValue());
+				prepaidAccount.setTotalDataOctetsConsumed(0L);
+				prepaidAccount.setTotalOutputDataOctetsAvailable(0L);
+				prepaidAccount.setTotalInputDataOctetsAvailable(0L);
+				prepaidAccount.setTotalCallSecondsConsumed(0L);
+				prepaidAccount.setTotalSmsConsumed(0L);
+				prepaidAccountsRepository.save(prepaidAccount);
+				
+				packAllocationPrepaid.setImsi(prepaidAccount.getImsi());
+				packAllocationPrepaid.setMsisdn(prepaidAccount.getMsisdn());
+				
+				packAllocationPrepaidRepo.save(packAllocationPrepaid);
+
+				PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPrepaid.getId(),
+						packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto,
+						expirationDateDto, ratingProfileVoucherDb.getId(), prepaidAccount.getAccountId());
+
+				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
+			}
+			
 			
 			PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
 			prepaidAccounts.setCustomerId(0);
@@ -106,10 +146,12 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		    prepaidAccounts.setVolteCallSeconds(0L);
 		    prepaidAccountsRepository.save(prepaidAccounts);
 		    
-		    packAllocation.setPrepaidAccount(prepaidAccounts);
-		    packAllocationPrepaidRepo.save(packAllocation);
+		    packAllocationPrepaid.setImsi(prepaidAccounts.getImsi());
+			packAllocationPrepaid.setMsisdn(prepaidAccounts.getMsisdn());
+			
+		    packAllocationPrepaidRepo.save(packAllocationPrepaid);
 		    
-			PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocation.getId(),
+			PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPrepaid.getId(),
 					packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto, expirationDateDto,
 					ratingProfileVoucherDb.getId(), prepaidAccounts.getAccountId());
 

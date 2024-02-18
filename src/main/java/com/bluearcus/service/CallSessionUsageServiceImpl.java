@@ -117,6 +117,28 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 		}
 		return callSessionUsageDtoList;
 	}
+	
+	@Override
+	public List<CallSessionUsageDtoNew> getLast5Calls() {
+		List<CallSessionUsage> callSessionUsageDbList = callSessionUsageRepo.findTop5ByOrderByIdDesc();
+		List<CallSessionUsageDtoNew> callSessionUsageDtoList = new ArrayList<>();
+		for (CallSessionUsage callSessionUsageDb : callSessionUsageDbList) {
+			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew();
+			callSessionUsageDtoNew.setId(callSessionUsageDb.getId());
+			callSessionUsageDtoNew.setPeerSessionId(callSessionUsageDb.getPeerSessionId());
+			callSessionUsageDtoNew.setMsisdn(callSessionUsageDb.getMsisdn());
+			callSessionUsageDtoNew.setImsi(callSessionUsageDb.getImsi());
+			callSessionUsageDtoNew.setCalledMsisdn(callSessionUsageDb.getCalledMsisdn());
+			callSessionUsageDtoNew.setLocationInfo(callSessionUsageDb.getLocationInfo());
+			callSessionUsageDtoNew.setSessionState(callSessionUsageDb.getSessionState());
+			callSessionUsageDtoNew.setCallStartTs(fetchReadableDateTime(callSessionUsageDb.getCallStartTs()));
+			callSessionUsageDtoNew.setCallEndTs(fetchReadableDateTime(callSessionUsageDb.getCallEndTs()));
+			callSessionUsageDtoNew.setTotalSeconds(callSessionUsageDb.getTotalSeconds());
+			callSessionUsageDtoNew.setCallStatus(callSessionUsageDb.getCallStatus());
+			callSessionUsageDtoList.add(callSessionUsageDtoNew);
+		}
+		return callSessionUsageDtoList;
+	}
 
 	public static String fetchReadableDateTime(Date date) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -132,12 +154,6 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 
 	public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
 		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-	}
-
-	@Override
-	public List<CallSessionUsageDtoNew> getLast5Calls() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 }

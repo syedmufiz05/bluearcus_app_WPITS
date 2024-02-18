@@ -83,9 +83,9 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		if (prepaidAccountsDb.isPresent()) {
 			PrepaidAccounts prepaidAccounts = prepaidAccountsDb.get();
 			
-			prepaidAccounts.setCalledStationId(deductionDto.getCalledStationId());
-			prepaidAccounts.setMonitoringKey(deductionDto.getMonitoringKey());
-			prepaidAccounts.setAction(deductionDto.getAction());
+			prepaidAccounts.setCalledStationId(deductionDto.getCalledStationId() != null ? deductionDto.getCalledStationId() : "");
+			prepaidAccounts.setMonitoringKey(deductionDto.getMonitoringKey() != null ? deductionDto.getMonitoringKey() : "");
+			prepaidAccounts.setAction(deductionDto.getAction() != null ? deductionDto.getAction() : "");
 			
 			if (deductionDto.getConsumedTimeSeconds() != 0) {
 				Long availableCallSeconds = prepaidAccounts.getTotalCallSecondsAvailable();
@@ -133,7 +133,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			String date = new Date().toInstant().toString();	
 			
 			//Storing data for Flat file...
-			prepaidFlatFileService.storeUserData(prepaidAccounts.getMonitoringKey(), date, prepaidAccountsDto.getCustomerId(), customerData);
+			prepaidFlatFileService.storeUserData(prepaidAccounts.getMonitoringKey(), date, prepaidAccountsDto.getMsisdn(), customerData);
 			
 			return new ResponseEntity<>(prepaidAccountsDto, HttpStatus.OK);
 		}

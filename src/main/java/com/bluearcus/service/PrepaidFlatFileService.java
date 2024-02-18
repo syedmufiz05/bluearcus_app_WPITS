@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PrepaidFlatFileService {
 	
-	public void storeUserData(String packtype, String dateFolder, Integer customerId, String customerData) {
+	public void storeUserData(String packtype, String dateFolder, String msisdn, String customerData) {
 		try {
 
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -28,7 +28,7 @@ public class PrepaidFlatFileService {
 				System.out.println(b);
 			}
 
-			String fileName = "customer_id " + customerId + ".txt";
+			String fileName = msisdn + ".txt";
 
 			Path filePath = path.resolve(fileName);
 
