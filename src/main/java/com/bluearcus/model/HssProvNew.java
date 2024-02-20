@@ -1,10 +1,13 @@
 package com.bluearcus.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -67,4 +70,8 @@ public class HssProvNew {
 
     @Column(name = "apn_context")
     private String apnContext;
+    
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "access_id", referencedColumnName = "id")
+    private AccessLogs accessLogs;
 }

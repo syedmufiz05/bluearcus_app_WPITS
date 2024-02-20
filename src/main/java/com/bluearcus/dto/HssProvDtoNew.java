@@ -62,4 +62,7 @@ public class HssProvDtoNew {
 
     @JsonProperty("apn_context")
     private String apnContext;
+    
+    @JsonProperty("access_id")
+    private Integer accessId;
 }

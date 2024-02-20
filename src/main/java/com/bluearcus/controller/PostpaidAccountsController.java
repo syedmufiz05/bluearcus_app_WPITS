@@ -53,6 +53,11 @@ public class PostpaidAccountsController {
 		return postpaidAccountsService.getAllPostpaidNumbers();
 	}
 	
+	@RequestMapping(value = "/generate/customer/bill/{msisdn}", method = RequestMethod.GET)
+	public ResponseEntity generateInvoiceForCustomer(@PathVariable("msisdn") String msisdn) {
+		return postpaidAccountsService.generateBillForCustomer(msisdn);
+	}
+	
 	@RequestMapping(value = "/get/file", method = RequestMethod.GET)
 	public ResponseEntity<ConsumedCallDataSmsDto> getFiles(@RequestParam("file_name") String fileName,@RequestParam("start_date") String startDate, @RequestParam("end_date") String endDate) throws IOException {
 		return postpaidFlatFileService.consumedCallDataSmsByCustomer(fileName, startDate, endDate);

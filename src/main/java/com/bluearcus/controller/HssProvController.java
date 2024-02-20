@@ -21,14 +21,9 @@ public class HssProvController {
     private HssProvServiceImpl hssProvService;
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public ResponseEntity<HssProvDto> saveDetails(@RequestBody HssProvDto hssProvDto, HttpServletRequest httpServletRequest) throws JsonProcessingException {
-        String authCode = httpServletRequest.getHeader("Authorization").replace("Bearer", "");
-        return hssProvService.saveHssProv(hssProvDto, authCode);
-    }
-
-    @RequestMapping(value = "/new/save", method = RequestMethod.POST)
-    public ResponseEntity<HssProvDtoNew> saveHssDetails(@RequestBody HssProvDtoNew hssProvDtoNew) {
-        return hssProvService.saveHssProvNew(hssProvDtoNew, "");
+    public ResponseEntity<HssProvDtoNew> saveHssDetails(@RequestBody HssProvDtoNew hssProvDtoNew, HttpServletRequest httpServletRequest) throws JsonProcessingException {
+    	String authCode = httpServletRequest.getHeader("Authorization").replace("Bearer", "");
+        return hssProvService.saveHssProvNew(hssProvDtoNew, authCode);
     }
 
     @RequestMapping(value = "/get", method = RequestMethod.GET)
@@ -37,19 +32,18 @@ public class HssProvController {
     }
 
     @RequestMapping(value = "/get/all", method = RequestMethod.GET)
-    public List<HssProvDto> getAllDetails() {
+    public List<HssProvDtoNew> getAllDetails() {
         return hssProvService.getAllHssProvRecord();
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
-    public ResponseEntity<HssProvDto> updateDetails(@RequestParam String imsi, @RequestParam String msisdn, @RequestBody HssProvDto hssProvDto) throws JsonProcessingException {
+    public ResponseEntity<HssProvDtoNew> updateDetails(@RequestParam String imsi, @RequestParam String msisdn, @RequestBody HssProvDtoNew hssProvDto) throws JsonProcessingException {
         return hssProvService.updateHssProv(imsi, msisdn, hssProvDto);
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-    public String deleteHssProvData(@RequestParam String imsi, @RequestParam String msisdn) {
-        String msg = hssProvService.deleteHssProv(imsi, msisdn);
-        return msg;
-    }
+	@RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+	public ResponseEntity deleteHssProvData(@RequestParam String imsi, @RequestParam String msisdn) {
+		return hssProvService.deleteHssProv(imsi, msisdn);
+	}
 
 }

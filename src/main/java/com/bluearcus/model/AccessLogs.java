@@ -29,6 +29,7 @@ public class AccessLogs {
     @UpdateTimestamp
     @Column(name = "access_date_time", nullable = false)
     private Date accessDateTime;
+    
     @Column(name = "req_payload", columnDefinition = "JSON")
     private String reqPayload;
 

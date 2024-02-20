@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,9 @@ import com.bluearcus.dto.PostpaidAvailBalanceDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.PostpaidAccounts;
+import com.bluearcus.model.RatingProfileVoucher;
 import com.bluearcus.repo.PostpaidAccountsRepo;
+import com.bluearcus.repo.RatingProfileVoucherRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,6 +30,9 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 
 	@Autowired
 	private PostpaidAccountsRepo postpaidAccountsRepo;
+	
+	@Autowired
+	private RatingProfileVoucherRepository ratingProfileVoucherRepository;
 	
 	@Autowired
 	private PostpaidFlatFileService flatFileService;
@@ -226,15 +233,89 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		if (postpaidAccount.isPresent()) {
 			
 			PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
-			Long availableBalance = postpaidAccountDb.getTotalDataOctetsAvailable();
-			Long consumedBalance = postpaidAccountDb.getTotalDataOctetsConsumed();
 			
-			if (availableBalance == consumedBalance || availableBalance > consumedBalance) {
-				System.out.println("Generate the invoice according to pack rates...");
+			Long availableDataBalance = postpaidAccountDb.getTotalDataOctetsAvailable();
+			Long availableCallBalance = postpaidAccountDb.getTotalCallSecondsAvailable();
+			Long consumedDataBalance = postpaidAccountDb.getTotalDataOctetsConsumed();
+			Long consumedCallBalance = postpaidAccountDb.getTotalCallSecondsConsumed();
+			
+			int availableDataPack = 0;
+			int availableCallPack = 0;
+
+			if (postpaidAccountDb.getDataParameterType().equalsIgnoreCase("GB")) {
+				availableDataPack = convertBytesToGigabytes(availableDataBalance);
+			}
+
+			else if (postpaidAccountDb.getDataParameterType().equalsIgnoreCase("MB")) {
+				availableDataPack = convertBytesToMegabytes(availableDataBalance);
+			}
+
+			else {
+				availableDataPack = convertBytesToKilobytes(availableDataBalance);
 			}
 			
-			System.out.println("Generate the invoice with additional charges...");
+			availableCallPack = convertSecondsToMins(availableCallBalance);
 			
+			if (availableDataPack != 0 && availableCallPack != 0) {
+
+				Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByDataBalanceAndCallBalance(availableDataPack, availableCallPack);
+
+				int packPrice = 0;
+
+				if (ratingProfileVoucher.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+					String ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
+					packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				}
+
+				if (availableDataBalance == consumedDataBalance || availableDataBalance > consumedDataBalance && availableCallBalance == consumedCallBalance || availableCallBalance > consumedCallBalance) {
+					return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice));
+				}
+
+				return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice + " with extra charges"));
+
+			}
+			
+			else if (availableDataPack != 0) {
+				
+				Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByDataBalance(availableDataPack);
+
+				int packPrice = 0;
+
+				if (ratingProfileVoucher.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+					String ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
+					packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				}
+
+				if (availableDataBalance == consumedDataBalance || availableDataBalance > consumedDataBalance) {
+					return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice));
+				}
+
+				return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice + " with extra charges"));
+				
+			}
+			
+			else {
+				
+				Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByCallBalance(availableCallPack);
+
+				int packPrice = 0;
+
+				if (ratingProfileVoucher.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+					String ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
+					packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				}
+
+				if (availableCallBalance == consumedCallBalance || availableCallBalance > consumedCallBalance) {
+					return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice));
+				}
+
+				return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice + " with extra charges"));
+				
+			}
+
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid msisdn"));
 	}
@@ -246,11 +327,25 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		return bytesBigDecimal.longValue();
 	}
 	
+	private static int convertBytesToGigabytes(Long bytes) {
+		long divider = 1024 * 1024 * 1024;
+		long gigabytes = bytes / divider;
+		int gbValue = (int) gigabytes;
+		return gbValue;
+	}
+	
 	private static long convertMegabytesToBytes(Long megaBytes) {
 		// 1 MB = 1024^2 bytes
 		BigDecimal megaBytesBigDecimal = new BigDecimal(String.valueOf(megaBytes));
 		BigDecimal bytesBigDecimal = megaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 2)));
 		return bytesBigDecimal.longValue();
+	}
+	
+	private static int convertBytesToMegabytes(Long bytes) {
+		long divider = 1024 * 1024;
+		long megabytes = bytes / divider;
+		int mbValue = (int) megabytes;
+		return mbValue;
 	}
 	
 	private static long convertKilobytesToBytes(Long kiloBytes) {
@@ -259,12 +354,39 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		BigDecimal bytesBigDecimal = kiloBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 1)));
 		return bytesBigDecimal.longValue();
 	}
+	
+	private static int convertBytesToKilobytes(Long bytes) {
+		int divider = 1024;
+		long kilobytes = bytes / divider;
+		int kbValue = (int) kilobytes;
+		return kbValue;
+	}
 
 	private static long convertMinsToSeconds(Long mins) {
 		// 1 Min = 60^1 seconds
 		BigDecimal minsBigDecimal = new BigDecimal(String.valueOf(mins));
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
+	}
+	
+	private static int convertSecondsToMins(Long seconds) {
+		int divider = 60;
+		long mins = seconds / divider;
+		int minsValue = (int) mins;
+		return minsValue;
+	}
+	
+	public static int extractFirstIntValue(String value) {
+		Pattern pattern = Pattern.compile("\\b\\d+\\b");
+		Matcher matcher = pattern.matcher(value);
+
+		if (matcher.find()) {
+			int firstValue=Integer.parseInt(matcher.group());
+			System.out.println(firstValue);
+			return firstValue;
+		} else {
+			return -1;
+		}
 	}
 
 }
