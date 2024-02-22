@@ -18,7 +18,7 @@ import java.util.Date;
 @Data
 public class SimMgmt {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sim_id")
     private Integer id;
 

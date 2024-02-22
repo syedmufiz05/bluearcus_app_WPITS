@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class HssProv {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hssprov_id")
     private Integer hssprovId;
 

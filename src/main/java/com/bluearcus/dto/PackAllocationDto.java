@@ -27,7 +27,10 @@ public class PackAllocationDto {
 
 	@JsonProperty("pack_id")
 	private Integer packId;
+	
+	@JsonProperty("pack_name")
+	private String packName;
 
-	@JsonProperty("account_id")
-	private Integer accountId;
+	@JsonProperty("customer_id")
+	private Integer customerId;
 }

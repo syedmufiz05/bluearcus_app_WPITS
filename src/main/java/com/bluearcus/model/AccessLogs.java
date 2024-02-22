@@ -19,7 +19,7 @@ import java.util.Date;
 @Data
 public class AccessLogs {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 

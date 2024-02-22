@@ -19,7 +19,7 @@ import lombok.Data;
 public class Auc {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "auc_id")
 	private Integer aucId;
 

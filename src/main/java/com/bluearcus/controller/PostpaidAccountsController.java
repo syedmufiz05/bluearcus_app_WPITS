@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bluearcus.dto.ConsumedCallDataSmsDto;
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PostpaidAccountsDto;
+import com.bluearcus.dto.PostpaidCustomerBillDto;
 import com.bluearcus.service.PostpaidAccountsService;
 import com.bluearcus.service.PostpaidFlatFileService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,7 +55,7 @@ public class PostpaidAccountsController {
 	}
 	
 	@RequestMapping(value = "/generate/customer/bill/{msisdn}", method = RequestMethod.GET)
-	public ResponseEntity generateInvoiceForCustomer(@PathVariable("msisdn") String msisdn) {
+	public ResponseEntity<PostpaidCustomerBillDto> generateInvoiceForCustomer(@PathVariable("msisdn") String msisdn) {
 		return postpaidAccountsService.generateBillForCustomer(msisdn);
 	}
 	

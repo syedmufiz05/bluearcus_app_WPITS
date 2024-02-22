@@ -1,6 +1,7 @@
 package com.bluearcus.service;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,10 +17,12 @@ import org.springframework.stereotype.Service;
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PostpaidAccountsDto;
 import com.bluearcus.dto.PostpaidAvailBalanceDto;
-import com.bluearcus.dto.PrepaidAccountsDto;
+import com.bluearcus.dto.PostpaidCustomerBillDto;
 import com.bluearcus.exception.CustomMessage;
+import com.bluearcus.model.PackAllocationPostpaid;
 import com.bluearcus.model.PostpaidAccounts;
 import com.bluearcus.model.RatingProfileVoucher;
+import com.bluearcus.repo.PackAllocationPostpaidRepo;
 import com.bluearcus.repo.PostpaidAccountsRepo;
 import com.bluearcus.repo.RatingProfileVoucherRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +36,9 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 	
 	@Autowired
 	private RatingProfileVoucherRepository ratingProfileVoucherRepository;
+	
+	@Autowired
+	private PackAllocationPostpaidRepo packAllocationPostpaidRepo;
 	
 	@Autowired
 	private PostpaidFlatFileService flatFileService;
@@ -231,89 +237,129 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 	public ResponseEntity generateBillForCustomer(String msisdn) {
 		Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByMsisdn(msisdn);
 		if (postpaidAccount.isPresent()) {
-			
+
 			PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
-			
-			Long availableDataBalance = postpaidAccountDb.getTotalDataOctetsAvailable();
-			Long availableCallBalance = postpaidAccountDb.getTotalCallSecondsAvailable();
+
+			Optional<PackAllocationPostpaid> packAllocation = packAllocationPostpaidRepo.findByMsisdn(postpaidAccountDb.getMsisdn());
+			PackAllocationPostpaid packAllocationPostpaid = packAllocation.get();
+
+			Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByPackName(packAllocationPostpaid.getPackName());
+			RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+
+			int availableDataBalance = 0;
+			int availableCallBalance = 0;
+			int avaialbleSmsBalance = ratingProfileVoucherDb.getSmsBalance();
+
+			if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
+				int dataBalance = ratingProfileVoucherDb.getDataBalance();
+				long value = 1024 * 1024 * 1024;
+				long dataInBytes = dataBalance * value;
+				availableDataBalance = convertBytesToMegabytes(dataInBytes);
+			}
+
+			else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
+				int dataBalance = ratingProfileVoucherDb.getDataBalance();
+				long value = 1024 * 1024;
+				long dataInBytes = dataBalance * value;
+				availableDataBalance = convertBytesToMegabytes(dataInBytes);
+			}
+
+			else {
+				int dataBalance = ratingProfileVoucherDb.getDataBalance();
+				long value = 1024;
+				long dataInBytes = dataBalance * value;
+				availableDataBalance = convertBytesToMegabytes(dataInBytes);
+			}
+
+			if (ratingProfileVoucherDb.getCallBalanceParameter().equalsIgnoreCase("Mins")) {
+				int callBalance = ratingProfileVoucherDb.getCallBalance();
+				int value = 60;
+				int callsInSeconds = callBalance * value;
+				availableCallBalance = callsInSeconds;
+			}
+
 			Long consumedDataBalance = postpaidAccountDb.getTotalDataOctetsConsumed();
 			Long consumedCallBalance = postpaidAccountDb.getTotalCallSecondsConsumed();
-			
-			int availableDataPack = 0;
-			int availableCallPack = 0;
+			Long consumedSmsBalance = postpaidAccountDb.getTotalSmsConsumed();
+			Date activationDate = packAllocationPostpaid.getActivationDate();
+			Date expirationDate = packAllocationPostpaid.getExpirationDate();
 
-			if (postpaidAccountDb.getDataParameterType().equalsIgnoreCase("GB")) {
-				availableDataPack = convertBytesToGigabytes(availableDataBalance);
-			}
+			int packPrice = 0;
 
-			else if (postpaidAccountDb.getDataParameterType().equalsIgnoreCase("MB")) {
-				availableDataPack = convertBytesToMegabytes(availableDataBalance);
-			}
+			String fromDate = fetchReadableDateTime(activationDate);
+			String toDate = fetchReadableDateTime(expirationDate);
 
-			else {
-				availableDataPack = convertBytesToKilobytes(availableDataBalance);
-			}
-			
-			availableCallPack = convertSecondsToMins(availableCallBalance);
-			
-			if (availableDataPack != 0 && availableCallPack != 0) {
+			String offeredData = availableDataBalance + " MB";
+			String totalDataUsed = convertBytesToMegabytes(consumedDataBalance) + " MB";
 
-				Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByDataBalanceAndCallBalance(availableDataPack, availableCallPack);
+			System.out.println("totalDataUsed:" + totalDataUsed);
 
-				int packPrice = 0;
+			String offeredCalls = availableCallBalance + " Seconds";
+			String totalCallsUsed = convertSecondsToMins(consumedCallBalance) + " Mins";
 
-				if (ratingProfileVoucher.isPresent()) {
-					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
-					String ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
-					packPrice = extractFirstIntValue(ratesOfferToCustomer);
-				}
+			System.out.println("totalCallsUsed: " + totalCallsUsed);
 
-				if (availableDataBalance == consumedDataBalance || availableDataBalance > consumedDataBalance && availableCallBalance == consumedCallBalance || availableCallBalance > consumedCallBalance) {
-					return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice));
-				}
+			String packName = "";
+			String ratesOfferToCustomer = "";
 
-				return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice + " with extra charges"));
+			if (availableDataBalance != 0 && availableCallBalance != 0) {
 
-			}
-			
-			else if (availableDataPack != 0) {
-				
-				Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByDataBalance(availableDataPack);
-
-				int packPrice = 0;
-
-				if (ratingProfileVoucher.isPresent()) {
-					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
-					String ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
-					packPrice = extractFirstIntValue(ratesOfferToCustomer);
-				}
+				ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
+				packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				packName = ratingProfileVoucherDb.getPackName();
 
 				if (availableDataBalance == consumedDataBalance || availableDataBalance > consumedDataBalance) {
-					return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice));
+					PostpaidCustomerBillDto postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice,
+							0, packPrice, fromDate, toDate, offeredData, totalDataUsed, offeredCalls, totalCallsUsed,
+							avaialbleSmsBalance, consumedSmsBalance);
+					return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
 				}
 
-				return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice + " with extra charges"));
-				
+				PostpaidCustomerBillDto postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 300,
+						packPrice + 300, fromDate, toDate, offeredData, totalDataUsed, offeredCalls, totalCallsUsed,
+						avaialbleSmsBalance, consumedSmsBalance);
+				return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
+
 			}
-			
-			else {
-				
-				Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByCallBalance(availableCallPack);
 
-				int packPrice = 0;
+			else if (availableDataBalance != 0) {
 
-				if (ratingProfileVoucher.isPresent()) {
-					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
-					String ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
-					packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
+				packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				packName = ratingProfileVoucherDb.getPackName();
+
+				if (availableDataBalance == consumedDataBalance || availableDataBalance > consumedDataBalance) {
+					PostpaidCustomerBillDto postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice,
+							0, packPrice, fromDate, toDate, offeredData, totalDataUsed, offeredCalls, totalCallsUsed,
+							avaialbleSmsBalance, consumedSmsBalance);
+					return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
 				}
+
+				PostpaidCustomerBillDto postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 300,
+						packPrice + 300, fromDate, toDate, offeredData, totalDataUsed, offeredCalls, totalCallsUsed,
+						avaialbleSmsBalance, consumedSmsBalance);
+				return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
+
+			}
+
+			else {
+
+				ratesOfferToCustomer = ratingProfileVoucherDb.getRatesOffer();
+				packPrice = extractFirstIntValue(ratesOfferToCustomer);
+				packName = ratingProfileVoucherDb.getPackName();
 
 				if (availableCallBalance == consumedCallBalance || availableCallBalance > consumedCallBalance) {
-					return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice));
+					PostpaidCustomerBillDto postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice,
+							0, packPrice, fromDate, toDate, offeredData, totalDataUsed, offeredCalls, totalCallsUsed,
+							avaialbleSmsBalance, consumedSmsBalance);
+					return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
 				}
 
-				return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Total payable amount is: Rs." + packPrice + " with extra charges"));
-				
+				PostpaidCustomerBillDto postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 300,
+						packPrice + 300, fromDate, toDate, offeredData, totalDataUsed, offeredCalls, totalCallsUsed,
+						avaialbleSmsBalance, consumedSmsBalance);
+				return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
+
 			}
 
 		}
@@ -376,7 +422,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		return minsValue;
 	}
 	
-	public static int extractFirstIntValue(String value) {
+	private static int extractFirstIntValue(String value) {
 		Pattern pattern = Pattern.compile("\\b\\d+\\b");
 		Matcher matcher = pattern.matcher(value);
 
@@ -387,6 +433,12 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		} else {
 			return -1;
 		}
+	}
+	
+	private static String fetchReadableDateTime(Date date) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		String formattedDate = simpleDateFormat.format(date);
+		return formattedDate;
 	}
 
 }

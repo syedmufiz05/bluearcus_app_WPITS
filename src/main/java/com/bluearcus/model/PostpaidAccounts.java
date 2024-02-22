@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class PostpaidAccounts {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "account_id")
 	private Integer accountId;
 

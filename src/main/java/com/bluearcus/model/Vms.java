@@ -19,7 +19,7 @@ import lombok.Data;
 public class Vms {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vms_id")
     private Integer vmsId;
 

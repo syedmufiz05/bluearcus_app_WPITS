@@ -17,7 +17,7 @@ import java.util.Date;
 @Data
 public class DeviceMgmt {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "device_id")
     private Integer deviceId;
 

@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class RatingPlan {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "rating_plan_id")
     private Integer ratingPlanId;
 

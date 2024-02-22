@@ -13,7 +13,7 @@ import lombok.Data;
 @Table(name = "prepaid_roaming_accounts")
 public class PrepaidRoamingAccounts {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "roaming_account_id")
     private Integer roamingAccountId;
 

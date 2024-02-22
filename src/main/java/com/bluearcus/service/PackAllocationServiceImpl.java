@@ -110,7 +110,8 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 				PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPrepaid.getId(),
 						packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto,
-						expirationDateDto, ratingProfileVoucherDb.getId(), prepaidAccount.getAccountId());
+						expirationDateDto, ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
+						prepaidAccount.getCustomerId());
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
@@ -153,7 +154,8 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		    
 			PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPrepaid.getId(),
 					packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto, expirationDateDto,
-					ratingProfileVoucherDb.getId(), prepaidAccounts.getAccountId());
+					ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
+					prepaidAccounts.getCustomerId());
 
 			return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 		}
@@ -210,12 +212,14 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				
 				packAllocationPostpaid.setImsi(postpaidAccount.getImsi());
 				packAllocationPostpaid.setMsisdn(postpaidAccount.getMsisdn());
+				packAllocationPostpaid.setPackName(ratingProfileVoucherDb.getPackName());
 				
 				packAllocationPostpaidRepo.save(packAllocationPostpaid);
 
 				PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPostpaid.getId(),
 						packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto,
-						expirationDateDto, ratingProfileVoucherDb.getId(), postpaidAccount.getAccountId());
+						expirationDateDto, ratingProfileVoucherDb.getId(), packAllocationPostpaid.getPackName(),
+						postpaidAccount.getCustomerId());
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
@@ -250,12 +254,14 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 			packAllocationPostpaid.setImsi(postpaidAccount.getImsi());
 			packAllocationPostpaid.setMsisdn(postpaidAccount.getMsisdn());
+			packAllocationPostpaid.setPackName(ratingProfileVoucherDb.getPackName());
 			
 			packAllocationPostpaidRepo.save(packAllocationPostpaid);
 
 			PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPostpaid.getId(),
 					packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto, expirationDateDto,
-					ratingProfileVoucherDb.getId(), postpaidAccount.getAccountId());
+					ratingProfileVoucherDb.getId(), packAllocationPostpaid.getPackName(),
+					postpaidAccount.getCustomerId());
 
 			return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 		}

@@ -14,11 +14,11 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name ="pack_allocation_postpaid")
+@Table(name = "pack_allocation_postpaid")
 @Data
 public class PackAllocationPostpaid {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Integer id;
 
@@ -27,10 +27,13 @@ public class PackAllocationPostpaid {
 
 	@Column(name = "expiration_date")
 	private Date expirationDate;
-	
+
 	@Column(name = "msisdn")
 	private String msisdn;
 
 	@Column(name = "imsi")
 	private String imsi;
+
+	@Column(name = "pack_name")
+	private String packName;
 }
