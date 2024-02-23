@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/rating/plan")
-@CrossOrigin("http://172.5.10.2:8090/") 
+@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/"}) 
 public class RatingPlanController {
 	@Autowired
 	private RatingPlanService ratingPlanService;

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/prepaid/account")
-@CrossOrigin("http://172.5.10.2:8090/")
+@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/"})
 public class PrepaidAccountController {
 	@Autowired
 	private PrepaidAccountsService prepaidAccountsService;

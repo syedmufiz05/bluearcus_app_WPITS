@@ -9,7 +9,9 @@ import com.bluearcus.dto.CrmAccountsDto;
 public interface CrmAccountsService {
 	ResponseEntity saveAccount(CrmAccountsDto crmAccountsDto);
 
-	ResponseEntity editAccount(CrmAccountsDto crmAccountsDto);
+	ResponseEntity editAccount(Integer customerId,CrmAccountsDto crmAccountsDto);
+	
+	ResponseEntity deleteAccount(Integer customerId);
 
 	List<CrmAccountsDto> getAllAccounts();
 }

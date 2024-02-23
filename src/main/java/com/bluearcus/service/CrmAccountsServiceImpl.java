@@ -12,13 +12,25 @@ import org.springframework.stereotype.Service;
 import com.bluearcus.dto.CrmAccountsDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.CrmAccounts;
+import com.bluearcus.model.PostpaidAccounts;
+import com.bluearcus.model.PrepaidAccounts;
 import com.bluearcus.repo.CrmAccountsRepo;
+import com.bluearcus.repo.PostpaidAccountsRepo;
+import com.bluearcus.repo.PrepaidAccountsRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CrmAccountsServiceImpl implements CrmAccountsService {
 
 	@Autowired
 	private CrmAccountsRepo crmAccountsRepo;
+	
+	@Autowired
+	private PrepaidAccountsRepository prepaidAccountsRepository;
+	
+	@Autowired
+	private PostpaidAccountsRepo postpaidAccountsRepo;
 
 	@Override
 	public ResponseEntity saveAccount(CrmAccountsDto crmAccountsDto) {
@@ -30,27 +42,141 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			crmAccount.setImsi(crmAccountsDto.getImsi());
 			crmAccount.setMsisdn(crmAccountsDto.getMsisdn());
 			crmAccountsRepo.save(crmAccount);
-			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(),
-					crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
+			if (crmAccount.getCustomerType().equalsIgnoreCase("prepaid")) {
+				PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
+				prepaidAccounts.setCustomerId(crmAccountsDto.getCustomerId());
+				prepaidAccounts.setMsisdn(crmAccountsDto.getMsisdn());
+				prepaidAccounts.setImsi(crmAccountsDto.getImsi());
+				prepaidAccounts.setCalledStationId("");
+				prepaidAccounts.setMonitoringKey("");
+				prepaidAccounts.setAction("");
+				prepaidAccounts.setDataParameterType("");
+				prepaidAccounts.setCsVoiceCallSeconds(0l);
+				prepaidAccounts.setFourGDataOctets(0);
+				prepaidAccounts.setFiveGDataOctets(0);
+				prepaidAccounts.setVolteCallSeconds(0l);
+				prepaidAccounts.setTotalDataOctetsAvailable(0l);
+				prepaidAccounts.setTotalInputDataOctetsAvailable(0l);
+				prepaidAccounts.setTotalOutputDataOctetsAvailable(0l);
+				prepaidAccounts.setTotalDataOctetsConsumed(0l);
+				prepaidAccounts.setTotalCallSecondsAvailable(0l);
+				prepaidAccounts.setTotalCallSecondsConsumed(0l);
+				prepaidAccounts.setTotalSmsAvailable(0l);
+				prepaidAccounts.setTotalSmsConsumed(0l);
+				prepaidAccountsRepository.save(prepaidAccounts);
+			}
+			else {
+				PostpaidAccounts postpaidAccounts=new PostpaidAccounts();
+				postpaidAccounts.setCustomerId(crmAccountsDto.getCustomerId());
+				postpaidAccounts.setMsisdn(crmAccountsDto.getMsisdn());
+				postpaidAccounts.setImsi(crmAccountsDto.getImsi());
+				postpaidAccounts.setDataParameterType("");
+				postpaidAccounts.setCsVoiceCallSeconds(0l);
+				postpaidAccounts.setFourGDataOctets(0);
+				postpaidAccounts.setFiveGDataOctets(0);
+				postpaidAccounts.setVolteCallSeconds(0l);
+				postpaidAccounts.setTotalDataOctetsAvailable(0l);
+				postpaidAccounts.setTotalInputDataOctetsAvailable(0l);
+				postpaidAccounts.setTotalOutputDataOctetsAvailable(0l);
+				postpaidAccounts.setTotalDataOctetsConsumed(0l);
+				postpaidAccounts.setTotalCallSecondsAvailable(0l);
+				postpaidAccounts.setTotalCallSecondsConsumed(0l);
+				postpaidAccounts.setTotalSmsAvailable(0l);
+				postpaidAccounts.setTotalSmsConsumed(0l);
+				postpaidAccountsRepo.save(postpaidAccounts);
+			}
+			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
 			return new ResponseEntity<>(crmAccountsDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(new CustomMessage(HttpStatus.CONFLICT.value(), "MSISDN already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "MSISDN already exist"));
 	}
 
+	@Transactional
 	@Override
-	public ResponseEntity editAccount(CrmAccountsDto crmAccountsDto) {
-		Optional<CrmAccounts> crmAccountsDb = crmAccountsRepo.findByMsisdn(crmAccountsDto.getMsisdn());
+	public ResponseEntity editAccount(Integer customerId, CrmAccountsDto crmAccountsDto) {
+		Optional<CrmAccounts> crmAccountsDb = crmAccountsRepo.findById(customerId);
+		CrmAccounts crmAccount = null;
 		if (crmAccountsDb.isPresent()) {
-			CrmAccounts crmAccount = crmAccountsDb.get();
+			crmAccount = crmAccountsDb.get();
 			crmAccount.setCustomerType(crmAccountsDto.getCustomerType() != null ? crmAccountsDto.getCustomerType() : crmAccount.getCustomerType());
 			crmAccountsRepo.save(crmAccount);
-			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(),
-					crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
+			
+			if (crmAccountsDto.getCustomerType().equalsIgnoreCase("prepaid")) {
+				
+				// Delete customer record into the postpaid account
+				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findById(customerId);
+				postpaidAccountsRepo.delete(postpaidAccount.get());
+				
+				PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
+				prepaidAccounts.setCustomerId(customerId);
+				prepaidAccounts.setMsisdn(crmAccount.getMsisdn());
+				prepaidAccounts.setImsi(crmAccount.getImsi());
+				prepaidAccounts.setCalledStationId("");
+				prepaidAccounts.setMonitoringKey("");
+				prepaidAccounts.setAction("");
+				prepaidAccounts.setDataParameterType("");
+				prepaidAccounts.setCsVoiceCallSeconds(0l);
+				prepaidAccounts.setFourGDataOctets(0);
+				prepaidAccounts.setFiveGDataOctets(0);
+				prepaidAccounts.setVolteCallSeconds(0l);
+				prepaidAccounts.setTotalDataOctetsAvailable(0l);
+				prepaidAccounts.setTotalInputDataOctetsAvailable(0l);
+				prepaidAccounts.setTotalOutputDataOctetsAvailable(0l);
+				prepaidAccounts.setTotalDataOctetsConsumed(0l);
+				prepaidAccounts.setTotalCallSecondsAvailable(0l);
+				prepaidAccounts.setTotalCallSecondsConsumed(0l);
+				prepaidAccounts.setTotalSmsAvailable(0l);
+				prepaidAccounts.setTotalSmsConsumed(0l);
+				prepaidAccountsRepository.save(prepaidAccounts);
+			}
+			else {
+				
+				//delete customer record into the prepaid account
+				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findById(customerId);
+				prepaidAccountsRepository.delete(prepaidAccounts.get());
+				
+				PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
+				postpaidAccounts.setCustomerId(customerId);
+				postpaidAccounts.setMsisdn(crmAccount.getMsisdn());
+				postpaidAccounts.setImsi(crmAccount.getImsi());
+				postpaidAccounts.setDataParameterType("");
+				postpaidAccounts.setCsVoiceCallSeconds(0l);
+				postpaidAccounts.setFourGDataOctets(0);
+				postpaidAccounts.setFiveGDataOctets(0);
+				postpaidAccounts.setVolteCallSeconds(0l);
+				postpaidAccounts.setTotalDataOctetsAvailable(0l);
+				postpaidAccounts.setTotalInputDataOctetsAvailable(0l);
+				postpaidAccounts.setTotalOutputDataOctetsAvailable(0l);
+				postpaidAccounts.setTotalDataOctetsConsumed(0l);
+				postpaidAccounts.setTotalCallSecondsAvailable(0l);
+				postpaidAccounts.setTotalCallSecondsConsumed(0l);
+				postpaidAccounts.setTotalSmsAvailable(0l);
+				postpaidAccounts.setTotalSmsConsumed(0l);
+				postpaidAccountsRepo.save(postpaidAccounts);
+			}
+			
+			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
 			return new ResponseEntity<>(crmAccountsDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "MSISDN does n't exist"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
+	}
+	
+	@Override
+	public ResponseEntity deleteAccount(Integer customerId) {
+		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findById(customerId);
+		if (crmAccountDb.isPresent()) {
+			CrmAccounts crmAccount = crmAccountDb.get();
+			if (crmAccount.getCustomerType().equalsIgnoreCase("prepaid")) {
+				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findById(customerId);
+				prepaidAccountsRepository.delete(prepaidAccounts.get());
+			} else {
+				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findById(customerId);
+				postpaidAccountsRepo.delete(postpaidAccount.get());
+			}
+			crmAccountsRepo.deleteById(customerId);
+			return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Deleted successfully"));
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid customer id"));
 	}
 
 	@Override
