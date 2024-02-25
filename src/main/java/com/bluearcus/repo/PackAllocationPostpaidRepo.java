@@ -8,4 +8,6 @@ import com.bluearcus.model.PackAllocationPostpaid;
 
 public interface PackAllocationPostpaidRepo extends JpaRepository<PackAllocationPostpaid, Integer> {
 	Optional<PackAllocationPostpaid> findByMsisdn(String msisdn);
+	
+	Optional<PackAllocationPostpaid> findByCustomerId(Integer customerId);
 }

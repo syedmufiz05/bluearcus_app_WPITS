@@ -6,13 +6,15 @@ import com.bluearcus.service.PrepaidAccountsService;
 
 import jakarta.websocket.server.PathParam;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/prepaid/account")
-@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/"})
+@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/","http://localhost:5500/"})
 public class PrepaidAccountController {
 	@Autowired
 	private PrepaidAccountsService prepaidAccountsService;
@@ -46,5 +48,10 @@ public class PrepaidAccountController {
 	@RequestMapping(value = "/get/all/available/balance", method = RequestMethod.GET)
 	public ResponseEntity<PrepaidAccountsDto> getAllAvailableBalance(@PathParam("imsi") String imsi) {
 		return prepaidAccountsService.getAvailableBalance(imsi);
+	}
+	
+	@RequestMapping(value = "/get/all/prepaid/account", method = RequestMethod.GET)
+	public List<PrepaidAccountsDto> getAllPrepaidAccounts() {
+		return prepaidAccountsService.getAllPrepaidAccounts();
 	}
 }

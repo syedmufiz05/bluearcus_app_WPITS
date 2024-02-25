@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -231,6 +233,34 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
 	}
+	
+	@Override
+	public List<PrepaidAccountsDto> getAllPrepaidAccounts() {
+		List<PrepaidAccounts> prepaidAccountList = prepaidAccountsRepository.findAll();
+		List<PrepaidAccountsDto> prepaidAccountsDtoList = new ArrayList<>();
+		for (PrepaidAccounts prepaidAccountsDb : prepaidAccountList) {
+			PrepaidAccountsDto prepaidAccountsDto = new PrepaidAccountsDto();
+			prepaidAccountsDto.setAccountId(prepaidAccountsDb.getAccountId());
+			prepaidAccountsDto.setCustomerId(prepaidAccountsDb.getCustomerId());
+			prepaidAccountsDto.setMsisdn(prepaidAccountsDb.getMsisdn());
+			prepaidAccountsDto.setImsi(prepaidAccountsDb.getImsi());
+			prepaidAccountsDto.setDataParameterType(prepaidAccountsDb.getDataParameterType());
+			prepaidAccountsDto.setCsVoiceCallSeconds(prepaidAccountsDb.getCsVoiceCallSeconds());
+			prepaidAccountsDto.setFourGDataOctets(prepaidAccountsDb.getFourGDataOctets());
+			prepaidAccountsDto.setFiveGDataOctets(prepaidAccountsDb.getFiveGDataOctets());
+			prepaidAccountsDto.setVolteCallSeconds(prepaidAccountsDb.getVolteCallSeconds());
+			prepaidAccountsDto.setTotalDataOctetsAvailable(prepaidAccountsDb.getTotalDataOctetsAvailable());
+			prepaidAccountsDto.setTotalInputDataOctetsAvailable(prepaidAccountsDb.getTotalInputDataOctetsAvailable());
+			prepaidAccountsDto.setTotalOutputDataOctetsAvailable(prepaidAccountsDb.getTotalOutputDataOctetsAvailable());
+			prepaidAccountsDto.setTotalDataOctetsConsumed(prepaidAccountsDb.getTotalDataOctetsConsumed());
+			prepaidAccountsDto.setTotalCallSecondsAvailable(prepaidAccountsDb.getTotalCallSecondsAvailable());
+			prepaidAccountsDto.setTotalCallSecondsConsumed(prepaidAccountsDb.getTotalCallSecondsConsumed());
+			prepaidAccountsDto.setTotalSmsAvailable(prepaidAccountsDb.getTotalSmsAvailable());
+			prepaidAccountsDto.setTotalSmsConsumed(prepaidAccountsDb.getTotalSmsConsumed());
+			prepaidAccountsDtoList.add(prepaidAccountsDto);
+		}
+		return prepaidAccountsDtoList;
+	}
 
 	private static long convertGigabytesToBytes(Long gigaBytes) {
 		// 1 GB = 1024^3 bytes
@@ -259,4 +289,5 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
 	}
+
 }

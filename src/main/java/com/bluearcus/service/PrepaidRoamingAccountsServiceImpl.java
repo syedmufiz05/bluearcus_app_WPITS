@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -99,4 +102,28 @@ public class PrepaidRoamingAccountsServiceImpl implements PrepaidRoamingAccounts
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Roaming account id"));
     }
+
+	@Override
+	public List<PrepaidRoamingAccountsDto> getAllPrepaidRoamingAccounts() {
+		List<PrepaidRoamingAccounts> prepaidRoamingAccountDbList = prepaidRoamingAccountsRepo.findAll();
+		List<PrepaidRoamingAccountsDto> prepaidRoamingAccountsDtoList = new ArrayList<>();
+		for (PrepaidRoamingAccounts prepaidRoamingAccountsDb : prepaidRoamingAccountDbList) {
+			PrepaidRoamingAccountsDto prepaidRoamingAccountsDto = new PrepaidRoamingAccountsDto();
+			prepaidRoamingAccountsDto.setRoamingAccountId(prepaidRoamingAccountsDb.getRoamingAccountId());
+			prepaidRoamingAccountsDto.setRoamingCustomerId(prepaidRoamingAccountsDb.getRoamingCustomerId());
+			prepaidRoamingAccountsDto.setMsisdn(prepaidRoamingAccountsDb.getMsisdn());
+			prepaidRoamingAccountsDto.setRoamingCsVoiceCallSeconds(prepaidRoamingAccountsDb.getRoamingCsVoiceCallSeconds());
+			prepaidRoamingAccountsDto.setRoaming4gDataOctets(prepaidRoamingAccountsDb.getRoaming4gDataOctets());
+			prepaidRoamingAccountsDto.setRoaming5gDataOctets(prepaidRoamingAccountsDb.getRoaming5gDataOctets());
+			prepaidRoamingAccountsDto.setRoamingVolteCallSeconds(prepaidRoamingAccountsDb.getRoamingVolteCallSeconds());
+			prepaidRoamingAccountsDto.setRoamingTotalDataOctetsAvailable(prepaidRoamingAccountsDb.getRoamingTotalDataOctetsAvailable());
+			prepaidRoamingAccountsDto.setRoamingTotalDataOctetsConsumed(prepaidRoamingAccountsDb.getRoamingTotalDataOctetsConsumed());
+			prepaidRoamingAccountsDto.setRoamingTotalCallSecondsAvailable(prepaidRoamingAccountsDb.getRoamingTotalCallSecondsAvailable());
+			prepaidRoamingAccountsDto.setRoamingTotalCallSecondsConsumed(prepaidRoamingAccountsDb.getRoamingTotalCallSecondsConsumed());
+			prepaidRoamingAccountsDto.setRoamingTotalSmsAvailable(prepaidRoamingAccountsDb.getRoamingTotalSmsAvailable());
+			prepaidRoamingAccountsDto.setRoamingTotalSmsConsumed(prepaidRoamingAccountsDb.getRoamingTotalSmsConsumed());
+			prepaidRoamingAccountsDtoList.add(prepaidRoamingAccountsDto);
+		}
+		return prepaidRoamingAccountsDtoList;
+	}
 }

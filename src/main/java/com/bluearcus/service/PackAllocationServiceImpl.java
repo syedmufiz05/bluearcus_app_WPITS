@@ -52,33 +52,34 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 	public ResponseEntity packAllocationForPrepaid(PackAllocationDto packAllocationDto) {
 		Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(packAllocationDto.getPackId());
 		if (ratingProfileVoucher.isPresent()) {
-			
+
 			RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
-			
+
 			int packActivationDays = findIntIntoString(ratingProfileVoucherDb.getRatesOffer());
-			
+
 			PackAllocationPrepaid packAllocationPrepaid = new PackAllocationPrepaid();
 			packAllocationPrepaid.setActivationDate(new Date());
-			
-			LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
+
+			LocalDateTime activationDate = CallSessionUsageServiceImpl
+					.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
 			System.out.println("activationDate:" + activationDate);
 
 			LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
 			System.out.println("expirationDate:" + expirationDate);
-			
+
 			Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
 			packAllocationPrepaid.setExpirationDate(expirationDateDb);
 			System.out.println("expirationDateDb:" + expirationDateDb);
-			
-			String activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocationPrepaid.getActivationDate());
-            System.out.println("activationDateDto:"+activationDateDto);
-            
+
+			String activationDateDto = CallSessionUsageServiceImpl
+					.fetchReadableDateTime(packAllocationPrepaid.getActivationDate());
+			System.out.println("activationDateDto:" + activationDateDto);
+
 			String expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
-			System.out.println("expirationDateDto:"+expirationDateDto);
-			
-			
-           Optional<PrepaidAccounts> prepaidAccountDb = prepaidAccountsRepository.findByImsi(packAllocationDto.getImsi());
-			
+			System.out.println("expirationDateDto:" + expirationDateDto);
+
+			Optional<PrepaidAccounts> prepaidAccountDb = prepaidAccountsRepository.findByMsisdn(packAllocationDto.getMsisdn());
+
 			if (prepaidAccountDb.isPresent()) {
 				PrepaidAccounts prepaidAccount = prepaidAccountDb.get();
 
@@ -89,7 +90,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
 					prepaidAccount.setTotalDataOctetsAvailable(convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
 				}
-				
+
 				else {
 					prepaidAccount.setTotalDataOctetsAvailable(convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
 				}
@@ -102,10 +103,12 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				prepaidAccount.setTotalCallSecondsConsumed(0L);
 				prepaidAccount.setTotalSmsConsumed(0L);
 				prepaidAccountsRepository.save(prepaidAccount);
-				
+
 				packAllocationPrepaid.setImsi(prepaidAccount.getImsi());
 				packAllocationPrepaid.setMsisdn(prepaidAccount.getMsisdn());
-				
+				packAllocationPrepaid.setPackName(ratingProfileVoucherDb.getPackName());
+				packAllocationPrepaid.setCustomerId(prepaidAccount.getCustomerId());
+
 				packAllocationPrepaidRepo.save(packAllocationPrepaid);
 
 				PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPrepaid.getId(),
@@ -115,50 +118,9 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
-			
-			
-			PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
-			prepaidAccounts.setCustomerId(0);
-			prepaidAccounts.setImsi(packAllocationDto.getImsi());
-			prepaidAccounts.setMsisdn(packAllocationDto.getMsisdn());
-			prepaidAccounts.setCalledStationId("");
-			prepaidAccounts.setMonitoringKey("");
-			prepaidAccounts.setAction("");
-			prepaidAccounts.setDataParameterType(ratingProfileVoucherDb.getDataBalanceParameter());
-			prepaidAccounts.setCsVoiceCallSeconds(0L);
-			if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
-				prepaidAccounts.setTotalDataOctetsAvailable(convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
-			}
-			else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
-				prepaidAccounts.setTotalDataOctetsAvailable(convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
-			}
-			else {
-				prepaidAccounts.setTotalDataOctetsAvailable(convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
-			}
-			prepaidAccounts.setTotalCallSecondsAvailable(convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue()));
-			prepaidAccounts.setTotalSmsAvailable(ratingProfileVoucherDb.getSmsBalance().longValue());
-			prepaidAccounts.setTotalDataOctetsConsumed(0L);
-			prepaidAccounts.setTotalOutputDataOctetsAvailable(0L);
-			prepaidAccounts.setTotalInputDataOctetsAvailable(0L);
-			prepaidAccounts.setTotalCallSecondsConsumed(0L);
-			prepaidAccounts.setTotalSmsConsumed(0L);
-			prepaidAccounts.setFourGDataOctets(0);
-		    prepaidAccounts.setFiveGDataOctets(0);
-		    prepaidAccounts.setVolteCallSeconds(0L);
-		    prepaidAccountsRepository.save(prepaidAccounts);
-		    
-		    packAllocationPrepaid.setImsi(prepaidAccounts.getImsi());
-			packAllocationPrepaid.setMsisdn(prepaidAccounts.getMsisdn());
-			
-		    packAllocationPrepaidRepo.save(packAllocationPrepaid);
-		    
-			PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPrepaid.getId(),
-					packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto, expirationDateDto,
-					ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
-					prepaidAccounts.getCustomerId());
-
-			return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid MSISDN"));
 		}
+
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Please select the valid pack"));
 	}
 	
@@ -184,7 +146,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 			String activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocationPostpaid.getActivationDate());
             String expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
 			
-			Optional<PostpaidAccounts> postpaidAccountDb = postpaidAccountsRepo.findByImsi(packAllocationDto.getImsi());
+			Optional<PostpaidAccounts> postpaidAccountDb = postpaidAccountsRepo.findByMsisdn(packAllocationDto.getMsisdn());
 			
 			if (postpaidAccountDb.isPresent()) {
 				PostpaidAccounts postpaidAccount = postpaidAccountDb.get();
@@ -212,6 +174,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				
 				packAllocationPostpaid.setImsi(postpaidAccount.getImsi());
 				packAllocationPostpaid.setMsisdn(postpaidAccount.getMsisdn());
+				packAllocationPostpaid.setCustomerId(postpaidAccount.getCustomerId());
 				packAllocationPostpaid.setPackName(ratingProfileVoucherDb.getPackName());
 				
 				packAllocationPostpaidRepo.save(packAllocationPostpaid);
@@ -223,49 +186,55 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
-			
-			
-			PostpaidAccounts postpaidAccount = new PostpaidAccounts();
-			postpaidAccount.setCustomerId(0);
-			postpaidAccount.setImsi(packAllocationDto.getImsi());
-			postpaidAccount.setMsisdn(packAllocationDto.getMsisdn());
-			postpaidAccount.setDataParameterType(ratingProfileVoucherDb.getDataBalanceParameter());
-			postpaidAccount.setCsVoiceCallSeconds(0L);
-			if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
-				postpaidAccount.setTotalDataOctetsAvailable(convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
-			}
-			else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
-				postpaidAccount.setTotalDataOctetsAvailable(convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
-			} 
-			else {
-				postpaidAccount.setTotalDataOctetsAvailable(convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
-			}
-			postpaidAccount.setTotalCallSecondsAvailable(convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue()));
-			postpaidAccount.setTotalSmsAvailable(ratingProfileVoucherDb.getSmsBalance().longValue());
-			postpaidAccount.setTotalDataOctetsConsumed(0L);
-			postpaidAccount.setTotalOutputDataOctetsAvailable(0L);
-			postpaidAccount.setTotalInputDataOctetsAvailable(0L);
-			postpaidAccount.setTotalCallSecondsConsumed(0L);
-			postpaidAccount.setTotalSmsConsumed(0L);
-			postpaidAccount.setFourGDataOctets(0);
-			postpaidAccount.setFiveGDataOctets(0);
-			postpaidAccount.setVolteCallSeconds(0L);
-			postpaidAccountsRepo.save(postpaidAccount);
-
-			packAllocationPostpaid.setImsi(postpaidAccount.getImsi());
-			packAllocationPostpaid.setMsisdn(postpaidAccount.getMsisdn());
-			packAllocationPostpaid.setPackName(ratingProfileVoucherDb.getPackName());
-			
-			packAllocationPostpaidRepo.save(packAllocationPostpaid);
-
-			PackAllocationDto packAllocationDtoNew = new PackAllocationDto(packAllocationPostpaid.getId(),
-					packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto, expirationDateDto,
-					ratingProfileVoucherDb.getId(), packAllocationPostpaid.getPackName(),
-					postpaidAccount.getCustomerId());
-
-			return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid MSISDN"));
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Please select the valid pack"));
+	}
+	
+	@Override
+	public ResponseEntity getAssignedPrepaidPack(Integer customerId) {
+		Optional<PackAllocationPrepaid> prepaidPack = packAllocationPrepaidRepo.findByCustomerId(customerId);
+		if (prepaidPack.isPresent()) {
+			PackAllocationPrepaid prepaidPackDb = prepaidPack.get();
+			PackAllocationDto packAllocationDto=new PackAllocationDto();
+			packAllocationDto.setId(prepaidPackDb.getId());
+			packAllocationDto.setCustomerId(prepaidPackDb.getCustomerId());
+			packAllocationDto.setActivationDate(CallSessionUsageServiceImpl.fetchReadableDateTime(prepaidPackDb.getActivationDate()));
+			packAllocationDto.setExpirationDate(CallSessionUsageServiceImpl.fetchReadableDateTime(prepaidPackDb.getExpirationDate()));
+			packAllocationDto.setImsi(prepaidPackDb.getImsi());
+			packAllocationDto.setMsisdn(prepaidPackDb.getMsisdn());
+		    packAllocationDto.setPackName(prepaidPackDb.getPackName());	
+		    
+			Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByPackName(prepaidPackDb.getPackName());
+			RatingProfileVoucher ratingProfileVoucherDb=ratingProfileVoucher.get();
+			
+			packAllocationDto.setPackId(ratingProfileVoucherDb.getId());
+			return new ResponseEntity<>(packAllocationDto, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Customer Id"));
+	}
+
+	@Override
+	public ResponseEntity getAssignedPostpaidPack(Integer customerId) {
+		Optional<PackAllocationPostpaid> postpaidPack = packAllocationPostpaidRepo.findByCustomerId(customerId);
+		if (postpaidPack.isPresent()) {
+			PackAllocationPostpaid postpaidPackDb = postpaidPack.get();
+			PackAllocationDto packAllocationDto=new PackAllocationDto();
+			packAllocationDto.setId(postpaidPackDb.getId());
+			packAllocationDto.setCustomerId(postpaidPackDb.getCustomerId());
+			packAllocationDto.setActivationDate(CallSessionUsageServiceImpl.fetchReadableDateTime(postpaidPackDb.getActivationDate()));
+			packAllocationDto.setExpirationDate(CallSessionUsageServiceImpl.fetchReadableDateTime(postpaidPackDb.getExpirationDate()));
+			packAllocationDto.setImsi(postpaidPackDb.getImsi());
+			packAllocationDto.setMsisdn(postpaidPackDb.getMsisdn());
+		    packAllocationDto.setPackName(postpaidPackDb.getPackName());	
+		    
+			Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findByPackName(postpaidPackDb.getPackName());
+			RatingProfileVoucher ratingProfileVoucherDb=ratingProfileVoucher.get();
+			
+			packAllocationDto.setPackId(ratingProfileVoucherDb.getId());
+			return new ResponseEntity<>(packAllocationDto, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Customer Id"));
 	}
 	
 	private static long convertGigabytesToBytes(Long gigaBytes) {

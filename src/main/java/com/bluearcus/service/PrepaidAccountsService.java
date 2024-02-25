@@ -2,6 +2,9 @@ package com.bluearcus.service;
 
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 
 public interface PrepaidAccountsService {
@@ -16,4 +19,6 @@ public interface PrepaidAccountsService {
     ResponseEntity getPrepaidAccount(Integer accountId);
 
     ResponseEntity getAvailableBalance(String imsi);
+    
+    List<PrepaidAccountsDto> getAllPrepaidAccounts();
 }

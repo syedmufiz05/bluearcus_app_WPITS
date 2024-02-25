@@ -22,6 +22,9 @@ public class PackAllocationPostpaid {
 	@Column(name = "id")
 	private Integer id;
 
+	@Column(name = "pack_name")
+	private String packName;
+
 	@Column(name = "activation_date")
 	private Date activationDate;
 
@@ -34,6 +37,6 @@ public class PackAllocationPostpaid {
 	@Column(name = "imsi")
 	private String imsi;
 
-	@Column(name = "pack_name")
-	private String packName;
+	@Column(name = "customer_id")
+	private Integer customerId;
 }
