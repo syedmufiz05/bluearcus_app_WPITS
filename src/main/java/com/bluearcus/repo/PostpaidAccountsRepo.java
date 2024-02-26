@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.bluearcus.model.PostpaidAccounts;
+import com.bluearcus.model.PrepaidAccounts;
 
 public interface PostpaidAccountsRepo extends JpaRepository<PostpaidAccounts, Integer> {
 	
@@ -12,4 +13,6 @@ public interface PostpaidAccountsRepo extends JpaRepository<PostpaidAccounts, In
 	Optional<PostpaidAccounts> findByMsisdn(String msisdn);
 	
 	Optional<PostpaidAccounts> findByCustomerId(Integer customerId);
+	
+	Optional<PostpaidAccounts> findByMsisdnAndImsi(String msisdn, String imsi);
 }

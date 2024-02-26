@@ -34,7 +34,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 
 	@Override
 	public ResponseEntity saveAccount(CrmAccountsDto crmAccountsDto) {
-		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findByMsisdn(crmAccountsDto.getMsisdn());
+		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findByImsi(crmAccountsDto.getImsi());
 		if (!crmAccountDb.isPresent()) {
 			CrmAccounts crmAccount = new CrmAccounts();
 			crmAccount.setCustomerId(crmAccountsDto.getCustomerId());
@@ -88,13 +88,13 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
 			return new ResponseEntity<>(crmAccountsDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "MSISDN already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI already exist"));
 	}
 
 	@Transactional
 	@Override
 	public ResponseEntity editAccount(Integer customerId, CrmAccountsDto crmAccountsDto) {
-		Optional<CrmAccounts> crmAccountsDb = crmAccountsRepo.findById(customerId);
+		Optional<CrmAccounts> crmAccountsDb = crmAccountsRepo.findByCustomerId(customerId);
 		CrmAccounts crmAccount = null;
 		if (crmAccountsDb.isPresent()) {
 			crmAccount = crmAccountsDb.get();
@@ -104,7 +104,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			if (crmAccountsDto.getCustomerType().equalsIgnoreCase("prepaid")) {
 				
 				// Delete customer record into the postpaid account
-				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findById(customerId);
+				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(customerId);
 				postpaidAccountsRepo.delete(postpaidAccount.get());
 				
 				PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
@@ -132,7 +132,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			else {
 				
 				//delete customer record into the prepaid account
-				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findById(customerId);
+				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByCustomerId(customerId);
 				prepaidAccountsRepository.delete(prepaidAccounts.get());
 				
 				PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
@@ -163,17 +163,17 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 	
 	@Override
 	public ResponseEntity deleteAccount(Integer customerId) {
-		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findById(customerId);
+		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findByCustomerId(customerId);
 		if (crmAccountDb.isPresent()) {
 			CrmAccounts crmAccount = crmAccountDb.get();
 			if (crmAccount.getCustomerType().equalsIgnoreCase("prepaid")) {
-				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findById(customerId);
+				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByCustomerId(customerId);
 				prepaidAccountsRepository.delete(prepaidAccounts.get());
 			} else {
-				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findById(customerId);
+				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(customerId);
 				postpaidAccountsRepo.delete(postpaidAccount.get());
 			}
-			crmAccountsRepo.deleteById(customerId);
+			crmAccountsRepo.deleteByCustomerId(customerId);
 			return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Deleted successfully"));
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid customer id"));

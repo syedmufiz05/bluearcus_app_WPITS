@@ -45,7 +45,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 
 	@Override
 	public ResponseEntity savePostpaidAccount(PostpaidAccountsDto postpaidAccountDto) {
-		Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findById(postpaidAccountDto.getAccountId() != null ? postpaidAccountDto.getAccountId() : 0);
+		Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByImsi(postpaidAccountDto.getImsi());
 		if (!postpaidAccount.isPresent()) {
 			PostpaidAccounts postpaidAccountDb = new PostpaidAccounts();
 			postpaidAccountDb.setCustomerId(postpaidAccountDto.getCustomerId() != null ? postpaidAccountDto.getCustomerId() : Integer.valueOf(""));
@@ -89,12 +89,12 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			
 			return new ResponseEntity(postpaidAccountDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI already exist"));
 	}
 	
 	@Override
 	public ResponseEntity savePostpaidDeduction(DeductionDto deductionDto) throws JsonProcessingException {
-		Optional<PostpaidAccounts> postpaidAccountsDb = postpaidAccountsRepo.findByImsi(deductionDto.getImsi() != null ? deductionDto.getImsi() : String.valueOf(0));
+		Optional<PostpaidAccounts> postpaidAccountsDb = postpaidAccountsRepo.findByImsi(deductionDto.getImsi());
 		if (postpaidAccountsDb.isPresent()) {
 			PostpaidAccounts postpaidAccounts = postpaidAccountsDb.get();
 			
@@ -148,7 +148,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 
 			return new ResponseEntity<>(postpaidAccountsDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Invalid MSISDN Id"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Invalid IMSI"));
 	}
 
 	@Override
@@ -230,7 +230,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			postpaidAvailBalanceDto.setTotalSmsAvailable(postpaidAccountsDb.getTotalSmsAvailable());
 			return new ResponseEntity<>(postpaidAvailBalanceDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI"));
 	}
 	
 	@Override

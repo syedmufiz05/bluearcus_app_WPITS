@@ -28,7 +28,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 
 	@Override
 	public ResponseEntity savePrepaidAccount(PrepaidAccountsDto prepaidAccountsDto) {
-		Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository.findByAccountId(prepaidAccountsDto.getAccountId() != null ? prepaidAccountsDto.getAccountId() : 0);
+		Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository.findByImsi(prepaidAccountsDto.getImsi());
 		if (!prepaidAccount.isPresent()) {
 			PrepaidAccounts prepaidAccountDb = new PrepaidAccounts();
 			prepaidAccountDb.setCustomerId(prepaidAccountsDto.getCustomerId() != null ? prepaidAccountsDto.getCustomerId() : Integer.valueOf(""));
@@ -76,12 +76,12 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 
 			return new ResponseEntity(prepaidAccountsDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Account Id already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI already exist"));
 	}
 
 	@Override
 	public ResponseEntity savePrepaidDeduction(DeductionDto deductionDto) {
-		Optional<PrepaidAccounts> prepaidAccountsDb = prepaidAccountsRepository.findByImsi(deductionDto.getImsi() != null ? deductionDto.getImsi() : String.valueOf(0));
+		Optional<PrepaidAccounts> prepaidAccountsDb = prepaidAccountsRepository.findByImsi(deductionDto.getImsi());
 		if (prepaidAccountsDb.isPresent()) {
 			PrepaidAccounts prepaidAccounts = prepaidAccountsDb.get();
 			
@@ -139,7 +139,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			
 			return new ResponseEntity<>(prepaidAccountsDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid MSISDN"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI"));
 	}
 
 	@Override
@@ -231,7 +231,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAvailBalanceDto.setTotalSmsAvailable(prepaidAccountsDb.getTotalSmsAvailable());
 			return new ResponseEntity<>(prepaidAvailBalanceDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Account Id"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI"));
 	}
 	
 	@Override

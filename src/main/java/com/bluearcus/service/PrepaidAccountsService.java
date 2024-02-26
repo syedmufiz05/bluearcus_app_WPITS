@@ -18,7 +18,7 @@ public interface PrepaidAccountsService {
 
     ResponseEntity getPrepaidAccount(Integer accountId);
 
-    ResponseEntity getAvailableBalance(String imsi);
+	ResponseEntity getAvailableBalance(String imsi);
     
     List<PrepaidAccountsDto> getAllPrepaidAccounts();
 }
