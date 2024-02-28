@@ -28,4 +28,7 @@ public class CrmAccounts {
 	
 	@Column(name="imsi")
 	private String imsi;
+	
+	@Column(name = "payment_status")
+	private Boolean paymentStatus;
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rates/offer")
-@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/","http://localhost:5500/","http://127.0.0.1:5500/"})
+@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/","http://localhost:5500/","http://127.0.0.1:5500/","http://127.0.0.1:5174/","http://172.5.10.2:9091/"})
 public class RatesOfferController {
 	@Autowired
 	private RatesOfferService ratesOfferService;
@@ -18,6 +18,16 @@ public class RatesOfferController {
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public ResponseEntity<RatesOfferDto> saveRatesOfferDetail(@RequestBody RatesOfferDto ratesOfferDto) {
 		return ratesOfferService.saveRatesOffer(ratesOfferDto);
+	}
+	
+	@RequestMapping(value = "/edit/{rates_id}", method = RequestMethod.PUT)
+	public ResponseEntity<RatesOfferDto> editRatesOfferDetail(@PathVariable("rates_id") Integer ratesId, @RequestBody RatesOfferDto ratesOfferDto) {
+		return ratesOfferService.editRatesOffer(ratesId, ratesOfferDto);
+	}
+	
+	@RequestMapping(value = "/delete/{rates_id}", method = RequestMethod.DELETE)
+	public ResponseEntity<RatesOfferDto> deleteRatesOfferDetail(@PathVariable("rates_id") Integer ratesId){
+		return ratesOfferService.deleteRatesOffer(ratesId);
 	}
 	
 	@RequestMapping(value = "/get/{rates_id}", method = RequestMethod.GET)

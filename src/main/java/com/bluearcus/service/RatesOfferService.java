@@ -8,7 +8,11 @@ import java.util.List;
 public interface RatesOfferService {
     public ResponseEntity saveRatesOffer(RatesOfferDto ratesOfferDto);
     
-    public ResponseEntity getRatesOffer(Integer ratesId);
+	public ResponseEntity editRatesOffer(Integer ratesId, RatesOfferDto ratesOfferDto);
+
+	public ResponseEntity getRatesOffer(Integer ratesId);
+
+	public ResponseEntity deleteRatesOffer(Integer ratesId);
 
     public List<String> getAllRatesOfferBulk();
     

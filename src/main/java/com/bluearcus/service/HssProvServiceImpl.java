@@ -31,8 +31,8 @@ public class HssProvServiceImpl implements HssProvService {
 	@Autowired
 	private AccessLogsRepository accessLogsRepository;
 
-	@Autowired
-	private HSSSocketClient hssSocketClient;
+//	@Autowired
+//	private HSSSocketClient hssSocketClient;
 
     @Override
     public ResponseEntity saveHssProvNew(HssProvDtoNew hssProvDtoNew, String authToken) throws JsonProcessingException {

@@ -366,63 +366,63 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid msisdn"));
 	}
 	
-	private static long convertGigabytesToBytes(Long gigaBytes) {
+	public static long convertGigabytesToBytes(Long gigaBytes) {
 		// 1 GB = 1024^3 bytes
 		BigDecimal gigaBytesBigDecimal = new BigDecimal(String.valueOf(gigaBytes));
 		BigDecimal bytesBigDecimal = gigaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 3)));
 		return bytesBigDecimal.longValue();
 	}
 	
-	private static int convertBytesToGigabytes(Long bytes) {
+	public static int convertBytesToGigabytes(Long bytes) {
 		long divider = 1024 * 1024 * 1024;
 		long gigabytes = bytes / divider;
 		int gbValue = (int) gigabytes;
 		return gbValue;
 	}
 	
-	private static long convertMegabytesToBytes(Long megaBytes) {
+	public static long convertMegabytesToBytes(Long megaBytes) {
 		// 1 MB = 1024^2 bytes
 		BigDecimal megaBytesBigDecimal = new BigDecimal(String.valueOf(megaBytes));
 		BigDecimal bytesBigDecimal = megaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 2)));
 		return bytesBigDecimal.longValue();
 	}
 	
-	private static int convertBytesToMegabytes(Long bytes) {
+	public static int convertBytesToMegabytes(Long bytes) {
 		long divider = 1024 * 1024;
 		long megabytes = bytes / divider;
 		int mbValue = (int) megabytes;
 		return mbValue;
 	}
 	
-	private static long convertKilobytesToBytes(Long kiloBytes) {
+	public static long convertKilobytesToBytes(Long kiloBytes) {
 		// 1 KB = 1024^1 bytes
 		BigDecimal kiloBytesBigDecimal = new BigDecimal(String.valueOf(kiloBytes));
 		BigDecimal bytesBigDecimal = kiloBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 1)));
 		return bytesBigDecimal.longValue();
 	}
 	
-	private static int convertBytesToKilobytes(Long bytes) {
+	public static int convertBytesToKilobytes(Long bytes) {
 		int divider = 1024;
 		long kilobytes = bytes / divider;
 		int kbValue = (int) kilobytes;
 		return kbValue;
 	}
 
-	private static long convertMinsToSeconds(Long mins) {
+	public static long convertMinsToSeconds(Long mins) {
 		// 1 Min = 60^1 seconds
 		BigDecimal minsBigDecimal = new BigDecimal(String.valueOf(mins));
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
 	}
 	
-	private static int convertSecondsToMins(Long seconds) {
+	public static int convertSecondsToMins(Long seconds) {
 		int divider = 60;
 		long mins = seconds / divider;
 		int minsValue = (int) mins;
 		return minsValue;
 	}
 	
-	private static int extractFirstIntValue(String value) {
+	public static int extractFirstIntValue(String value) {
 		Pattern pattern = Pattern.compile("\\b\\d+\\b");
 		Matcher matcher = pattern.matcher(value);
 
@@ -435,7 +435,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 		}
 	}
 	
-	private static String fetchReadableDateTime(Date date) {
+	public static String fetchReadableDateTime(Date date) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		String formattedDate = simpleDateFormat.format(date);
 		return formattedDate;

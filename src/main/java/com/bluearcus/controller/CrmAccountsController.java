@@ -16,7 +16,7 @@ import com.bluearcus.service.CrmAccountsService;
 
 @RestController
 @RequestMapping("/api/crm/account")
-@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/","http://localhost:5500/","http://127.0.0.1:5500/"})
+@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/","http://localhost:5500/","http://127.0.0.1:5500/","http://127.0.0.1:5174/","http://172.5.10.2:9091/"})
 public class CrmAccountsController {
 	@Autowired
 	private CrmAccountsService crmAccountsService;
@@ -29,6 +29,11 @@ public class CrmAccountsController {
 	@RequestMapping(value = "/edit/{customer_id}", method = RequestMethod.PUT)
 	public ResponseEntity<CrmAccountsDto> editAccount(@PathVariable("customer_id") Integer customerId, @RequestBody CrmAccountsDto crmAccountsDto) {
 		return crmAccountsService.editAccount(customerId,crmAccountsDto);
+	}
+	
+	@RequestMapping(value ="/edit/customer/{customer_id}/payment/{payment_status}", method = RequestMethod.POST)
+	public ResponseEntity<CrmAccountsDto> updatePaymentStatus(@PathVariable("customer_id") Integer customerId, @PathVariable("payment_status") Boolean paymentStatus) {
+		return crmAccountsService.updatePaymentStatus(customerId, paymentStatus);
 	}
 	
 	@RequestMapping(value = "/delete/{customer_id}", method = RequestMethod.DELETE)

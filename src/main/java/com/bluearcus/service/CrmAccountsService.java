@@ -11,6 +11,8 @@ public interface CrmAccountsService {
 
 	ResponseEntity editAccount(Integer customerId,CrmAccountsDto crmAccountsDto);
 	
+	ResponseEntity updatePaymentStatus(Integer customerId,Boolean paymentStatus);
+	
 	ResponseEntity deleteAccount(Integer customerId);
 
 	List<CrmAccountsDto> getAllAccounts();

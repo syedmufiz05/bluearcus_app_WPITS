@@ -4,6 +4,9 @@ import com.bluearcus.dto.RatesOfferDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.RatesOffer;
 import com.bluearcus.repo.RatesOfferRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +25,7 @@ public class RatesOfferServiceImpl implements RatesOfferService {
 
 	@Override
 	public ResponseEntity saveRatesOffer(RatesOfferDto ratesOfferDto) {
-		Optional<RatesOffer> ratesOffer = ratesOfferRepository
-				.findById(ratesOfferDto.getRatesId() != null ? ratesOfferDto.getRatesId() : 0);
+		Optional<RatesOffer> ratesOffer = ratesOfferRepository.findById(ratesOfferDto.getRatesId() != null ? ratesOfferDto.getRatesId() : 0);
 		if (!ratesOffer.isPresent()) {
 			RatesOffer ratesOfferDb = new RatesOffer();
 			ratesOfferDb.setPrice(ratesOfferDto.getPrice() != null ? ratesOfferDto.getPrice() : Integer.valueOf(""));
@@ -80,5 +82,33 @@ public class RatesOfferServiceImpl implements RatesOfferService {
 			currencyISOCodes.add(currency.getDisplayName() + " " + currency.getCurrencyCode());
 		}
 		return currencyISOCodes;
+	}
+
+	@Override
+	public ResponseEntity editRatesOffer(Integer ratesId, RatesOfferDto ratesOfferDto) {
+		Optional<RatesOffer> ratesOfferDb = ratesOfferRepository.findById(ratesId);
+		if (ratesOfferDb.isPresent()) {
+			RatesOffer ratesOffer = ratesOfferDb.get();
+			ratesOffer.setPrice(ratesOfferDto.getPrice() != null ? ratesOfferDto.getPrice() : ratesOffer.getPrice());
+			ratesOffer.setPriceType(ratesOfferDto.getPriceType() != null ? ratesOfferDto.getPriceType() : ratesOffer.getPriceType());
+			ratesOffer.setPeriod(ratesOfferDto.getPeriod() != null ? ratesOfferDto.getPeriod() : ratesOffer.getPeriod());
+			ratesOffer.setDescription(ratesOfferDto.getDescription() != null ? ratesOfferDto.getDescription() : ratesOffer.getDescription());
+			ratesOfferRepository.save(ratesOffer);
+			RatesOfferDto ratesOfferDtoNew = new RatesOfferDto(ratesOffer.getId(), ratesOffer.getPrice(),
+					ratesOffer.getPriceType(), ratesOffer.getPeriod(), ratesOffer.getDescription());
+			return new ResponseEntity<>(ratesOfferDtoNew, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Rates Id does n't exist"));
+	}
+
+	@Transactional
+	@Override
+	public ResponseEntity deleteRatesOffer(Integer ratesId) {
+		Optional<RatesOffer> ratesOffer = ratesOfferRepository.findById(ratesId);
+		if (ratesOffer.isPresent()) {
+			ratesOfferRepository.deleteById(ratesId);
+			return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Deleted Successfully..."));
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Rates Id does n't exist"));
 	}
 }

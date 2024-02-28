@@ -85,7 +85,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 				postpaidAccounts.setTotalSmsConsumed(0l);
 				postpaidAccountsRepo.save(postpaidAccounts);
 			}
-			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
+			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn() ,crmAccount.getPaymentStatus());
 			return new ResponseEntity<>(crmAccountsDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI already exist"));
@@ -155,11 +155,27 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 				postpaidAccountsRepo.save(postpaidAccounts);
 			}
 			
-			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn());
+			CrmAccountsDto crmAccountsDtoNew = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(), crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn() , crmAccount.getPaymentStatus());
 			return new ResponseEntity<>(crmAccountsDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
 	}
+	
+	@Override
+	public ResponseEntity updatePaymentStatus(Integer customerId, Boolean paymentStatus) {
+		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findByCustomerId(customerId);
+		if (crmAccountDb.isPresent()) {
+			CrmAccounts crmAccount = crmAccountDb.get();
+			crmAccount.setPaymentStatus(paymentStatus);
+			crmAccountsRepo.save(crmAccount);
+			CrmAccountsDto crmAccountsDto = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(),
+					crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn(),
+					crmAccount.getPaymentStatus());
+			return new ResponseEntity(crmAccountsDto, HttpStatus.OK);
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
+	}
+
 	
 	@Override
 	public ResponseEntity deleteAccount(Integer customerId) {
@@ -190,6 +206,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			crmAccountsDto.setCustomerType(crmAccounts.getCustomerType());
 			crmAccountsDto.setImsi(crmAccounts.getImsi());
 			crmAccountsDto.setMsisdn(crmAccounts.getMsisdn());
+			crmAccountsDto.setPaymentStatus(crmAccounts.getPaymentStatus());
 			crmAccountsDtoList.add(crmAccountsDto);
 		}
 		return crmAccountsDtoList;
