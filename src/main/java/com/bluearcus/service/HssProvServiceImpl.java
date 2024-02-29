@@ -32,7 +32,7 @@ public class HssProvServiceImpl implements HssProvService {
 	private AccessLogsRepository accessLogsRepository;
 
 //	@Autowired
-//	private HSSSocketClient hssSocketClient;
+//	private SocketClient socketClient;
 
     @Override
     public ResponseEntity saveHssProvNew(HssProvDtoNew hssProvDtoNew, String authToken) throws JsonProcessingException {
@@ -65,6 +65,10 @@ public class HssProvServiceImpl implements HssProvService {
             hssProvRepositoryNew.save(hssProvDb);
             saveAccessRequestPayload(hssProvDtoNew, hssProvDb, accessLogs);
             HssProvDtoNew hssProvDto = new HssProvDtoNew(hssProvDb.getId(), hssProvDb.getImsi(), hssProvDb.getMsisdn(), hssProvDb.getAmbr(), hssProvDb.getNssai(), hssProvDb.getArfb(), hssProvDb.getSar(), hssProvDb.getRat(), hssProvDb.getCn(), hssProvDb.getSmfSel(), hssProvDb.getSmDat(), hssProvDb.getEpsFlag(), hssProvDb.getEpsOdb(), hssProvDb.getHplmnOdb(), hssProvDb.getArd(), hssProvDb.getEpsTpl(), hssProvDb.getContextId(), hssProvDb.getApnContext(),accessLogs.getId());
+//			socketClient.connect();
+//			String msg = socketClient.sendCommand(setSocketMsgBody(hssProvDb));
+//			System.out.println("socket output:" + msg);
+//			socketClient.logout();
             return new ResponseEntity<>(hssProvDto, HttpStatus.OK);
         }
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI or MSISDN already exist"));

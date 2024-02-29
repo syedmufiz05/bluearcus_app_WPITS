@@ -5,13 +5,14 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 import com.bluearcus.dto.CrmAccountsDto;
+import com.bluearcus.dto.PaymentStatusDto;
 
 public interface CrmAccountsService {
 	ResponseEntity saveAccount(CrmAccountsDto crmAccountsDto);
 
 	ResponseEntity editAccount(Integer customerId,CrmAccountsDto crmAccountsDto);
 	
-	ResponseEntity updatePaymentStatus(Integer customerId,Boolean paymentStatus);
+	ResponseEntity updatePaymentStatus(PaymentStatusDto paymentStatusDto);
 	
 	ResponseEntity deleteAccount(Integer customerId);
 

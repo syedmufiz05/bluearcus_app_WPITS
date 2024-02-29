@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bluearcus.dto.CrmAccountsDto;
+import com.bluearcus.dto.PaymentStatusDto;
 import com.bluearcus.service.CrmAccountsService;
 
 @RestController
@@ -31,9 +32,9 @@ public class CrmAccountsController {
 		return crmAccountsService.editAccount(customerId,crmAccountsDto);
 	}
 	
-	@RequestMapping(value ="/edit/customer/{customer_id}/payment/{payment_status}", method = RequestMethod.POST)
-	public ResponseEntity<CrmAccountsDto> updatePaymentStatus(@PathVariable("customer_id") Integer customerId, @PathVariable("payment_status") Boolean paymentStatus) {
-		return crmAccountsService.updatePaymentStatus(customerId, paymentStatus);
+	@RequestMapping(value ="/update/customer/payment/status", method = RequestMethod.PUT)
+	public ResponseEntity<CrmAccountsDto> updatePaymentStatus(@RequestBody PaymentStatusDto paymentStatusDto) {
+		return crmAccountsService.updatePaymentStatus(paymentStatusDto);
 	}
 	
 	@RequestMapping(value = "/delete/{customer_id}", method = RequestMethod.DELETE)

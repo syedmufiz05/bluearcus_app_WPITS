@@ -165,11 +165,16 @@ public class PostpaidFlatFileService {
 		System.out.println("totalConsumedCalls:" + totalConsumedCalls);
 		
 		if (availableDataInBytes >= totalConsumedData && availableCallsInSeconds >= totalConsumedCalls) {
-			postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 0, packPrice, startDate, endDate, packOfferedData, packConsumedData, packOfferedCalls, packConsumedCalls, availableSms, packConsumedSms);
+			postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 0, packPrice, startDate, endDate,
+					packOfferedData, packConsumedData, packOfferedCalls, packConsumedCalls, availableSms,
+					packConsumedSms);
 			return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
 		}
-			postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 300, packPrice+300, startDate, endDate, packOfferedData, packConsumedData, packOfferedCalls, packConsumedCalls, availableSms, packConsumedSms);
-			 return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
+
+		postpaidCustomerBillDto = new PostpaidCustomerBillDto(packName, packPrice, 300, packPrice + 300, startDate,
+				endDate, packOfferedData, packConsumedData, packOfferedCalls, packConsumedCalls, availableSms,
+				packConsumedSms);
+		return new ResponseEntity<>(postpaidCustomerBillDto, HttpStatus.OK);
 
 	}
 

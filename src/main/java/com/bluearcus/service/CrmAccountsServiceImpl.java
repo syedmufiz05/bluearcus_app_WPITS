@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.bluearcus.dto.CrmAccountsDto;
+import com.bluearcus.dto.PaymentStatusDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.CrmAccounts;
 import com.bluearcus.model.PostpaidAccounts;
@@ -162,11 +163,11 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 	}
 	
 	@Override
-	public ResponseEntity updatePaymentStatus(Integer customerId, Boolean paymentStatus) {
-		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findByCustomerId(customerId);
+	public ResponseEntity updatePaymentStatus(PaymentStatusDto paymentStatusDto) {
+		Optional<CrmAccounts> crmAccountDb = crmAccountsRepo.findByCustomerId(paymentStatusDto.getCustomerId());
 		if (crmAccountDb.isPresent()) {
 			CrmAccounts crmAccount = crmAccountDb.get();
-			crmAccount.setPaymentStatus(paymentStatus);
+			crmAccount.setPaymentStatus(paymentStatusDto.getPaymentStatus());
 			crmAccountsRepo.save(crmAccount);
 			CrmAccountsDto crmAccountsDto = new CrmAccountsDto(crmAccount.getId(), crmAccount.getCustomerId(),
 					crmAccount.getCustomerType(), crmAccount.getImsi(), crmAccount.getMsisdn(),
