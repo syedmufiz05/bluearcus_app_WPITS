@@ -17,7 +17,7 @@ import com.bluearcus.service.CrmAccountsService;
 
 @RestController
 @RequestMapping("/api/crm/account")
-@CrossOrigin({"http://172.5.10.2:8090/","http://localhost:5173/","http://127.0.0.1:5173/","http://localhost:5500/","http://127.0.0.1:5500/","http://127.0.0.1:5174/","http://172.5.10.2:9091/"})
+@CrossOrigin("*")
 public class CrmAccountsController {
 	@Autowired
 	private CrmAccountsService crmAccountsService;
