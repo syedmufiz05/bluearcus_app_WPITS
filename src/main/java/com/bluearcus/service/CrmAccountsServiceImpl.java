@@ -67,7 +67,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 				prepaidAccountsRepository.save(prepaidAccounts);
 			}
 			else {
-				PostpaidAccounts postpaidAccounts=new PostpaidAccounts();
+				PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
 				postpaidAccounts.setCustomerId(crmAccountsDto.getCustomerId());
 				postpaidAccounts.setMsisdn(crmAccountsDto.getMsisdn());
 				postpaidAccounts.setImsi(crmAccountsDto.getImsi());
@@ -94,8 +94,8 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 
 	@Transactional
 	@Override
-	public ResponseEntity editAccount(Integer customerId, CrmAccountsDto crmAccountsDto) {
-		Optional<CrmAccounts> crmAccountsDb = crmAccountsRepo.findByCustomerId(customerId);
+	public ResponseEntity editAccount(CrmAccountsDto crmAccountsDto) {
+		Optional<CrmAccounts> crmAccountsDb = crmAccountsRepo.findByCustomerId(crmAccountsDto.getCustomerId());
 		CrmAccounts crmAccount = null;
 		if (crmAccountsDb.isPresent()) {
 			crmAccount = crmAccountsDb.get();
@@ -105,11 +105,11 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			if (crmAccountsDto.getCustomerType().equalsIgnoreCase("prepaid")) {
 				
 				// Delete customer record into the postpaid account
-				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(customerId);
+				Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(crmAccountsDto.getCustomerId());
 				postpaidAccountsRepo.delete(postpaidAccount.get());
 				
 				PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
-				prepaidAccounts.setCustomerId(customerId);
+				prepaidAccounts.setCustomerId(crmAccountsDto.getCustomerId());
 				prepaidAccounts.setMsisdn(crmAccount.getMsisdn());
 				prepaidAccounts.setImsi(crmAccount.getImsi());
 				prepaidAccounts.setCalledStationId("");
@@ -133,11 +133,11 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 			else {
 				
 				//delete customer record into the prepaid account
-				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByCustomerId(customerId);
+				Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByCustomerId(crmAccountsDto.getCustomerId());
 				prepaidAccountsRepository.delete(prepaidAccounts.get());
 				
 				PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
-				postpaidAccounts.setCustomerId(customerId);
+				postpaidAccounts.setCustomerId(crmAccountsDto.getCustomerId());
 				postpaidAccounts.setMsisdn(crmAccount.getMsisdn());
 				postpaidAccounts.setImsi(crmAccount.getImsi());
 				postpaidAccounts.setDataParameterType("");

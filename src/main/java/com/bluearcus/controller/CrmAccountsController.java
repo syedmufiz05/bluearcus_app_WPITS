@@ -27,9 +27,9 @@ public class CrmAccountsController {
 		return crmAccountsService.saveAccount(crmAccountsDto);
 	}
 
-	@RequestMapping(value = "/edit/{customer_id}", method = RequestMethod.PUT)
-	public ResponseEntity<CrmAccountsDto> editAccount(@PathVariable("customer_id") Integer customerId, @RequestBody CrmAccountsDto crmAccountsDto) {
-		return crmAccountsService.editAccount(customerId,crmAccountsDto);
+	@RequestMapping(value = "/update/customer", method = RequestMethod.PUT)
+	public ResponseEntity<CrmAccountsDto> editAccount(@RequestBody CrmAccountsDto crmAccountsDto) {
+		return crmAccountsService.editAccount(crmAccountsDto);
 	}
 	
 	@RequestMapping(value ="/update/customer/payment/status", method = RequestMethod.PUT)

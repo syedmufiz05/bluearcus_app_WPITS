@@ -10,7 +10,7 @@ import com.bluearcus.dto.PaymentStatusDto;
 public interface CrmAccountsService {
 	ResponseEntity saveAccount(CrmAccountsDto crmAccountsDto);
 
-	ResponseEntity editAccount(Integer customerId,CrmAccountsDto crmAccountsDto);
+	ResponseEntity editAccount(CrmAccountsDto crmAccountsDto);
 	
 	ResponseEntity updatePaymentStatus(PaymentStatusDto paymentStatusDto);
 	
