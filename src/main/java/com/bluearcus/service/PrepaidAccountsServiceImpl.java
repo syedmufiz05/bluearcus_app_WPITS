@@ -2,7 +2,7 @@ package com.bluearcus.service;
 
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
-import com.bluearcus.dto.PrepaidAvailBalanceDto;
+import com.bluearcus.dto.PrepaidDataBalanceDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.PrepaidAccounts;
 import com.bluearcus.repo.PrepaidAccountsRepository;
@@ -223,13 +223,14 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByImsi(imsi);
 		if (prepaidAccounts.isPresent()) {
 			PrepaidAccounts prepaidAccountsDb = prepaidAccounts.get();
-			PrepaidAvailBalanceDto prepaidAvailBalanceDto = new PrepaidAvailBalanceDto();
-			prepaidAvailBalanceDto.setTotalDataOctetsAvailable(prepaidAccountsDb.getTotalDataOctetsAvailable());
-			prepaidAvailBalanceDto.setTotalInputDataOctetsAvailable(prepaidAccountsDb.getTotalInputDataOctetsAvailable());
-			prepaidAvailBalanceDto.setTotalOutputDataOctetsAvailable(prepaidAccountsDb.getTotalOutputDataOctetsAvailable());
-			prepaidAvailBalanceDto.setTotalCallSecondsAvailable(prepaidAccountsDb.getTotalCallSecondsAvailable());
-			prepaidAvailBalanceDto.setTotalSmsAvailable(prepaidAccountsDb.getTotalSmsAvailable());
-			return new ResponseEntity<>(prepaidAvailBalanceDto, HttpStatus.OK);
+			if (prepaidAccountsDb.getTotalDataOctetsAvailable() != 0) {
+				PrepaidDataBalanceDto prepaidAvailBalanceDto = new PrepaidDataBalanceDto();
+				prepaidAvailBalanceDto.setTotalDataOctetsAvailable(prepaidAccountsDb.getTotalDataOctetsAvailable());
+				prepaidAvailBalanceDto.setTotalInputDataOctetsAvailable(prepaidAccountsDb.getTotalInputDataOctetsAvailable());
+				prepaidAvailBalanceDto.setTotalOutputDataOctetsAvailable(prepaidAccountsDb.getTotalOutputDataOctetsAvailable());
+				return new ResponseEntity<>(prepaidAvailBalanceDto, HttpStatus.OK);
+			}
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Data is Unavailable"));
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI"));
 	}
