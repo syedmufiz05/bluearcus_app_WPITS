@@ -2,7 +2,7 @@ package com.bluearcus.controller;
 
 import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
-import com.bluearcus.dto.PrepaidDataBalanceDto;
+import com.bluearcus.dto.PrepaidAvailBalanceDto;
 import com.bluearcus.service.PrepaidAccountsService;
 
 import jakarta.websocket.server.PathParam;
@@ -46,8 +46,8 @@ public class PrepaidAccountController {
 		return prepaidAccountsService.savePrepaidDeduction(deductionDto);
 	}
 
-	@RequestMapping(value = "/get/available/data", method = RequestMethod.GET)
-	public ResponseEntity<PrepaidDataBalanceDto> getAllAvailableBalance(@PathParam("imsi") String imsi) {
+	@RequestMapping(value = "/get/all/available/balance", method = RequestMethod.GET)
+	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@PathParam("imsi") String imsi) {
 		return prepaidAccountsService.getAvailableBalance(imsi);
 	}
 	
