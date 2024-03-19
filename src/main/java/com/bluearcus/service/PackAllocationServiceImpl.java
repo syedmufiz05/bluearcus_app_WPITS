@@ -52,33 +52,54 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 	public ResponseEntity packAllocationForPrepaid(PackAllocationDto packAllocationDto) {
 		Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(packAllocationDto.getPackId());
 		if (ratingProfileVoucher.isPresent()) {
+			
+			String activationDateDto, expirationDateDto;
+			PackAllocationPrepaid packAllocationPrepaid = null;
 
 			RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
 
 			int packActivationDays = findIntIntoString(ratingProfileVoucherDb.getRatesOffer());
+			
+			Optional<PackAllocationPrepaid> prepaidPack = packAllocationPrepaidRepo.findByCustomerId(packAllocationDto.getCustomerId());
+			
+			if (prepaidPack.isPresent()) {
+				packAllocationPrepaid = prepaidPack.get();
 
-			PackAllocationPrepaid packAllocationPrepaid = new PackAllocationPrepaid();
-			packAllocationPrepaid.setActivationDate(new Date());
+				packAllocationPrepaid.setActivationDate(new Date());
 
-			LocalDateTime activationDate = CallSessionUsageServiceImpl
-					.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
-			System.out.println("activationDate:" + activationDate);
+				LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
 
-			LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
-			System.out.println("expirationDate:" + expirationDate);
+				LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
 
-			Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
-			packAllocationPrepaid.setExpirationDate(expirationDateDb);
-			System.out.println("expirationDateDb:" + expirationDateDb);
+				Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
 
-			String activationDateDto = CallSessionUsageServiceImpl
-					.fetchReadableDateTime(packAllocationPrepaid.getActivationDate());
-			System.out.println("activationDateDto:" + activationDateDto);
+				packAllocationPrepaid.setExpirationDate(expirationDateDb);
 
-			String expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
-			System.out.println("expirationDateDto:" + expirationDateDto);
+				activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocationPrepaid.getActivationDate());
 
-			Optional<PrepaidAccounts> prepaidAccountDb = prepaidAccountsRepository.findByMsisdn(packAllocationDto.getMsisdn());
+				expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
+				
+			}
+			else {
+
+				packAllocationPrepaid = new PackAllocationPrepaid();
+
+				packAllocationPrepaid.setActivationDate(new Date());
+
+				LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
+
+				LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
+
+				Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
+
+				packAllocationPrepaid.setExpirationDate(expirationDateDb);
+
+				activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocationPrepaid.getActivationDate());
+
+				expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
+			}
+
+			Optional<PrepaidAccounts> prepaidAccountDb = prepaidAccountsRepository.findByImsi(packAllocationDto.getImsi());
 
 			if (prepaidAccountDb.isPresent()) {
 				PrepaidAccounts prepaidAccount = prepaidAccountDb.get();
@@ -118,7 +139,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid MSISDN"));
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI"));
 		}
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Please select the valid pack"));
@@ -146,7 +167,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 			String activationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(packAllocationPostpaid.getActivationDate());
             String expirationDateDto = CallSessionUsageServiceImpl.fetchReadableDateTime(expirationDateDb);
 			
-			Optional<PostpaidAccounts> postpaidAccountDb = postpaidAccountsRepo.findByMsisdn(packAllocationDto.getMsisdn());
+			Optional<PostpaidAccounts> postpaidAccountDb = postpaidAccountsRepo.findByImsi(packAllocationDto.getImsi());
 			
 			if (postpaidAccountDb.isPresent()) {
 				PostpaidAccounts postpaidAccount = postpaidAccountDb.get();

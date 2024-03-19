@@ -26,8 +26,7 @@ public class PrepaidAccountController {
 	}
 
 	@RequestMapping(value = "/edit/{account_id}", method = RequestMethod.PUT)
-	public ResponseEntity<PrepaidAccountsDto> editPrepaidAccount(@PathVariable("account_id") Integer accountId,
-			@RequestBody PrepaidAccountsDto prepaidAccountsDto) {
+	public ResponseEntity<PrepaidAccountsDto> editPrepaidAccount(@PathVariable("account_id") Integer accountId, @RequestBody PrepaidAccountsDto prepaidAccountsDto) {
 		return prepaidAccountsService.editPrepaidAccount(accountId, prepaidAccountsDto);
 	}
 
@@ -47,8 +46,8 @@ public class PrepaidAccountController {
 	}
 
 	@RequestMapping(value = "/get/all/available/balance", method = RequestMethod.GET)
-	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@PathParam("imsi") String imsi) {
-		return prepaidAccountsService.getAvailableBalance(imsi);
+	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@RequestParam("imsi") String imsi, @RequestParam("msisdn") String msisdn) {
+		return prepaidAccountsService.getAvailableBalance(imsi, msisdn);
 	}
 	
 	@RequestMapping(value = "/get/all/prepaid/account", method = RequestMethod.GET)

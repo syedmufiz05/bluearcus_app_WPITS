@@ -15,4 +15,8 @@ public interface PrepaidAccountsRepository extends JpaRepository<PrepaidAccounts
 
 	Optional<PrepaidAccounts> findByImsi(String imsi);
 	
+	Optional<PrepaidAccounts> findByImsiOrMsisdn(String imsi, String msisdn);
+	
+	Optional<PrepaidAccounts> findByImsiAndMsisdn(String imsi, String msisdn);
+
 }

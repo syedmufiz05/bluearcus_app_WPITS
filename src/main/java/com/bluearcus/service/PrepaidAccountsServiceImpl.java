@@ -219,8 +219,8 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	}
 
 	@Override
-	public ResponseEntity getAvailableBalance(String imsi) {
-		Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByImsi(imsi);
+	public ResponseEntity getAvailableBalance(String imsi, String msisdn) {
+		Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByImsiOrMsisdn(imsi, msisdn);
 		if (prepaidAccounts.isPresent()) {
 			PrepaidAccounts prepaidAccountsDb = prepaidAccounts.get();
 			PrepaidAvailBalanceDto prepaidAvailBalanceDto = new PrepaidAvailBalanceDto();
@@ -231,7 +231,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			prepaidAvailBalanceDto.setTotalSmsAvailable(prepaidAccountsDb.getTotalSmsAvailable());
 			return new ResponseEntity<>(prepaidAvailBalanceDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI Or MSISDN"));
 	}
 	
 	@Override
