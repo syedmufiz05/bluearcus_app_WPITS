@@ -25,7 +25,6 @@ public class PrepaidFlatFileService {
 
 			if (path.toFile().exists() == false) {
 				boolean b = path.toFile().mkdirs();
-				System.out.println(b);
 			}
 
 			String fileName = msisdn + ".txt";
@@ -41,9 +40,7 @@ public class PrepaidFlatFileService {
 			bufferedWriter.write(customerData);
 
 			bufferedWriter.close();
-
-			System.out.println("Dynamic text file created successfully at: " + filePath);
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

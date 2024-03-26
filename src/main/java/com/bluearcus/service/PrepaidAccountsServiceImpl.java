@@ -4,7 +4,9 @@ import com.bluearcus.dto.DeductionDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.dto.PrepaidAvailBalanceDto;
 import com.bluearcus.exception.CustomMessage;
+import com.bluearcus.model.AuditLogsPrepaid;
 import com.bluearcus.model.PrepaidAccounts;
+import com.bluearcus.repo.AuditLogsPrepaidRepo;
 import com.bluearcus.repo.PrepaidAccountsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,9 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	
 	@Autowired
 	private PrepaidFlatFileService prepaidFlatFileService;
+	
+	@Autowired
+	private AuditLogsPrepaidRepo auditLogsPrepaidRepo;
 
 	@Override
 	public ResponseEntity savePrepaidAccount(PrepaidAccountsDto prepaidAccountsDto) {
@@ -131,8 +136,14 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccounts.getTotalSmsAvailable(), prepaidAccounts.getTotalSmsConsumed());
 
 			String customerData = prepaidAccountsDto.toString();
-			System.out.println(customerData);
-			String date = new Date().toInstant().toString();	
+			String date = new Date().toInstant().toString();
+			
+			//Storing data for Logs...
+			AuditLogsPrepaid auditLogsPrepaid = new AuditLogsPrepaid();
+			auditLogsPrepaid.setCreatedDate(new Date());
+			auditLogsPrepaid.setReqPayload(customerData);
+			
+			auditLogsPrepaidRepo.save(auditLogsPrepaid);
 			
 			//Storing data for Flat file...
 			prepaidFlatFileService.storeUserData(prepaidAccounts.getMonitoringKey(), date, prepaidAccountsDto.getMsisdn(), customerData);

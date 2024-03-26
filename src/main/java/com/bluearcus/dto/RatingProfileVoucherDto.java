@@ -45,4 +45,7 @@ public class RatingProfileVoucherDto {
 
 	@JsonProperty("rates_offer")
 	private String ratesOffer;
+
+	@JsonProperty("pack_validity")
+	private String packValidity;
 }

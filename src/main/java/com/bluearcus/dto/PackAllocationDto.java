@@ -33,4 +33,13 @@ public class PackAllocationDto {
 
 	@JsonProperty("customer_id")
 	private Integer customerId;
+
+	@Override
+	public String toString() {
+		return "{ id = " + id + ", msisdn = " + msisdn + ", imsi = " + imsi + ", activation_date = " + activationDate
+				+ ", expiration_date = " + expirationDate + ", pack_id=" + packId + ", pack_name = " + packName
+				+ ", customer_id=" + customerId + "}";
+	}
+	
+	
 }

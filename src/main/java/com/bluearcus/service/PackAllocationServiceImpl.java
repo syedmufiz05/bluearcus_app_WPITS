@@ -18,11 +18,13 @@ import org.springframework.stereotype.Service;
 
 import com.bluearcus.dto.PackAllocationDto;
 import com.bluearcus.exception.CustomMessage;
+import com.bluearcus.model.AuditLogsPrepaid;
 import com.bluearcus.model.PackAllocationPostpaid;
 import com.bluearcus.model.PackAllocationPrepaid;
 import com.bluearcus.model.PostpaidAccounts;
 import com.bluearcus.model.PrepaidAccounts;
 import com.bluearcus.model.RatingProfileVoucher;
+import com.bluearcus.repo.AuditLogsPrepaidRepo;
 import com.bluearcus.repo.PackAllocationPostpaidRepo;
 import com.bluearcus.repo.PackAllocationPrepaidRepo;
 import com.bluearcus.repo.PostpaidAccountsRepo;
@@ -47,6 +49,9 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 	@Autowired
 	private RatingProfileVoucherRepository ratingProfileVoucherRepository;
+	
+	@Autowired
+	private AuditLogsPrepaidRepo auditLogsPrepaidRepo;
 
 	@Override
 	public ResponseEntity packAllocationForPrepaid(PackAllocationDto packAllocationDto) {
@@ -65,13 +70,13 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 			if (prepaidPack.isPresent()) {
 				packAllocationPrepaid = prepaidPack.get();
 
-				packAllocationPrepaid.setActivationDate(new Date());
+				LocalDateTime expirationDatePrevious = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getExpirationDate());
+				LocalDateTime expirationDateLatest = expirationDatePrevious.plusDays(packActivationDays);
+				
+				
+				//LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
 
-				LocalDateTime activationDate = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getActivationDate());
-
-				LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
-
-				Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDate);
+				Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDateLatest);
 
 				packAllocationPrepaid.setExpirationDate(expirationDateDb);
 
@@ -105,24 +110,31 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				PrepaidAccounts prepaidAccount = prepaidAccountDb.get();
 
 				if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
-					prepaidAccount.setTotalDataOctetsAvailable(convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+					long availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					prepaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
 				else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
-					prepaidAccount.setTotalDataOctetsAvailable(convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+					long availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					prepaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
 				else {
-					prepaidAccount.setTotalDataOctetsAvailable(convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+					long availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					prepaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
-				prepaidAccount.setTotalCallSecondsAvailable(convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue()));
-				prepaidAccount.setTotalSmsAvailable(ratingProfileVoucherDb.getSmsBalance().longValue());
-				prepaidAccount.setTotalDataOctetsConsumed(0L);
+				long availableCalls = prepaidAccount.getTotalCallSecondsAvailable() + convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue());
+				prepaidAccount.setTotalCallSecondsAvailable(availableCalls);
+				
+				long availableSms = prepaidAccount.getTotalSmsAvailable() + ratingProfileVoucherDb.getSmsBalance().longValue();
+				prepaidAccount.setTotalSmsAvailable(availableSms);
+				
+				prepaidAccount.setTotalDataOctetsConsumed(prepaidAccount.getTotalDataOctetsConsumed());
 				prepaidAccount.setTotalOutputDataOctetsAvailable(0L);
 				prepaidAccount.setTotalInputDataOctetsAvailable(0L);
-				prepaidAccount.setTotalCallSecondsConsumed(0L);
-				prepaidAccount.setTotalSmsConsumed(0L);
+				prepaidAccount.setTotalCallSecondsConsumed(prepaidAccount.getTotalCallSecondsConsumed());
+				prepaidAccount.setTotalSmsConsumed(prepaidAccount.getTotalSmsConsumed());
 				prepaidAccountsRepository.save(prepaidAccount);
 
 				packAllocationPrepaid.setImsi(prepaidAccount.getImsi());
@@ -136,6 +148,13 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 						packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto,
 						expirationDateDto, ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
 						prepaidAccount.getCustomerId());
+				
+				// Storing data for Logs...
+				AuditLogsPrepaid auditLogsPrepaid = new AuditLogsPrepaid();
+				auditLogsPrepaid.setCreatedDate(new Date());
+				auditLogsPrepaid.setReqPayload(packAllocationDtoNew.toString());
+				
+				auditLogsPrepaidRepo.save(auditLogsPrepaid);
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
@@ -217,7 +236,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		Optional<PackAllocationPrepaid> prepaidPack = packAllocationPrepaidRepo.findByCustomerId(customerId);
 		if (prepaidPack.isPresent()) {
 			PackAllocationPrepaid prepaidPackDb = prepaidPack.get();
-			PackAllocationDto packAllocationDto=new PackAllocationDto();
+			PackAllocationDto packAllocationDto = new PackAllocationDto();
 			packAllocationDto.setId(prepaidPackDb.getId());
 			packAllocationDto.setCustomerId(prepaidPackDb.getCustomerId());
 			packAllocationDto.setActivationDate(CallSessionUsageServiceImpl.fetchReadableDateTime(prepaidPackDb.getActivationDate()));
@@ -240,7 +259,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		Optional<PackAllocationPostpaid> postpaidPack = packAllocationPostpaidRepo.findByCustomerId(customerId);
 		if (postpaidPack.isPresent()) {
 			PackAllocationPostpaid postpaidPackDb = postpaidPack.get();
-			PackAllocationDto packAllocationDto=new PackAllocationDto();
+			PackAllocationDto packAllocationDto = new PackAllocationDto();
 			packAllocationDto.setId(postpaidPackDb.getId());
 			packAllocationDto.setCustomerId(postpaidPackDb.getCustomerId());
 			packAllocationDto.setActivationDate(CallSessionUsageServiceImpl.fetchReadableDateTime(postpaidPackDb.getActivationDate()));
@@ -299,9 +318,8 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 		while (matcher.find()) {
 			String match = matcher.group();
 			intValue = Integer.parseInt(match);
-			System.out.println("Found integer: " + intValue);
+
 		}
-		System.out.println("intValue:" + intValue);
 		return intValue;
 	}
 

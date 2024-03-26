@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class RatingProfileServiceImpl implements RatingProfileService {
@@ -47,7 +49,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 					ratingProfileVoucher.getAssignedCallBalance(), ratingProfileVoucher.getSmsBalance(),
 					ratingProfileVoucher.getDataBalance(), ratingProfileVoucher.getDataBalanceParameter(),
 					ratingProfileVoucher.getAssignedDataBalance(), ratingProfileVoucher.getCategoryName(),
-					ratingProfileVoucher.getRatesOffer());
+					ratingProfileVoucher.getRatesOffer(),null);
 			return new ResponseEntity<>(ratingProfileDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Duplicate Rating Profile Id"));
@@ -77,7 +79,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 					ratingProfileVoucherDb.getCallBalanceParameter(), ratingProfileVoucherDb.getAssignedCallBalance(),
 					ratingProfileVoucherDb.getSmsBalance(), ratingProfileVoucherDb.getDataBalance(),
 					ratingProfileVoucherDb.getDataBalanceParameter(), ratingProfileVoucherDb.getAssignedDataBalance(),
-					ratingProfileVoucherDb.getCategoryName(), ratingProfileVoucherDb.getRatesOffer());
+					ratingProfileVoucherDb.getCategoryName(), ratingProfileVoucherDb.getRatesOffer(), null);
 			return new ResponseEntity<>(ratingProfileVoucherDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Rating Profile Id"));
@@ -101,6 +103,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setAssignedDataBalance(ratingProfileVoucher.getAssignedDataBalance());
 			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
 			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
+			ratingProfileVoucherDto.setPackValidity(findIntIntoString(ratingProfileVoucher.getRatesOffer()) + " days");
 			ratingProfileVoucherDtoList.add(ratingProfileVoucherDto);
 		}
 		return ratingProfileVoucherDtoList;
@@ -209,12 +212,6 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 		return ratingProfileVoucherDtoList;
 	}
 	
-	private static List<String> convertStringToList(String data) {
-		String filteredData = data.replaceAll("[\\[\\]\"]", "");
-		String[] dataArray = filteredData.split(",");
-		return Arrays.asList(dataArray);
-	}
-
 	@Override
 	public List<String> getAllDataBalanceParams() {
 		List<String> dataBalance = new ArrayList<String>();
@@ -231,6 +228,23 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 		callBalance.add("Mins");
 		callBalance.add("Seconds");
 		return callBalance;
+	}
+	
+	private int findIntIntoString(String value) {
+		// Define a regular expression pattern to find integers
+		Pattern pattern = Pattern.compile("\\b\\d+\\b");
+
+		// Create a matcher with the input string
+		Matcher matcher = pattern.matcher(value);
+
+		int intValue = 0;
+
+		// Find and print all integers in the string
+		while (matcher.find()) {
+			String match = matcher.group();
+			intValue = Integer.parseInt(match);
+		}
+		return intValue;
 	}
 
 }
