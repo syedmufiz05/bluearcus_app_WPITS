@@ -1,13 +1,18 @@
 package com.bluearcus.service;
 
 import com.bluearcus.dto.DeductionDto;
+import com.bluearcus.dto.PrepaidAccountRecordsDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.dto.PrepaidAvailBalanceDto;
 import com.bluearcus.exception.CustomMessage;
-import com.bluearcus.model.AuditLogsPrepaid;
+import com.bluearcus.model.AuditLogsDeductionPrepaid;
 import com.bluearcus.model.PrepaidAccounts;
-import com.bluearcus.repo.AuditLogsPrepaidRepo;
+import com.bluearcus.repo.AuditLogsDeductionPrepaidRepo;
 import com.bluearcus.repo.PrepaidAccountsRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +35,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	private PrepaidFlatFileService prepaidFlatFileService;
 	
 	@Autowired
-	private AuditLogsPrepaidRepo auditLogsPrepaidRepo;
+	private AuditLogsDeductionPrepaidRepo auditLogsPrepaidRepo;
 
 	@Override
 	public ResponseEntity savePrepaidAccount(PrepaidAccountsDto prepaidAccountsDto) {
@@ -52,12 +58,16 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 				prepaidAccountDb.setTotalDataOctetsAvailable(convertGigabytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
 			}
 
-			else if (prepaidAccountsDto.getDataParameterType().equalsIgnoreCase("MB")) {
+			if (prepaidAccountsDto.getDataParameterType().equalsIgnoreCase("MB")) {
 				prepaidAccountDb.setTotalDataOctetsAvailable(convertMegabytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
 			}
 
-			else {
+			if (prepaidAccountsDto.getDataParameterType().equalsIgnoreCase("KB")) {
 				prepaidAccountDb.setTotalDataOctetsAvailable(convertKilobytesToBytes(prepaidAccountsDto.getTotalDataOctetsAvailable()));
+			}
+			
+			if (prepaidAccountsDto.getDataParameterType().equals("")) {
+				prepaidAccountDb.setTotalDataOctetsAvailable(prepaidAccountsDto.getTotalDataOctetsAvailable());
 			}
 			
 			prepaidAccountDb.setTotalInputDataOctetsAvailable(prepaidAccountsDto.getTotalInputDataOctetsAvailable());
@@ -85,13 +95,25 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	}
 
 	@Override
-	public ResponseEntity savePrepaidDeduction(DeductionDto deductionDto) {
+	public ResponseEntity savePrepaidDeduction(DeductionDto deductionDto) throws JsonProcessingException {
 		Optional<PrepaidAccounts> prepaidAccountsDb = prepaidAccountsRepository.findByImsi(deductionDto.getImsi());
 		if (prepaidAccountsDb.isPresent()) {
 			PrepaidAccounts prepaidAccounts = prepaidAccountsDb.get();
 			
 			prepaidAccounts.setCalledStationId(deductionDto.getCalledStationId() != null ? deductionDto.getCalledStationId() : "");
-			prepaidAccounts.setMonitoringKey(deductionDto.getMonitoringKey() != null ? deductionDto.getMonitoringKey() : "");
+			
+			if (deductionDto.getMonitoringKey().equalsIgnoreCase("Internet")) {
+				prepaidAccounts.setMonitoringKey("Data");
+			}
+			
+			if (deductionDto.getMonitoringKey().equalsIgnoreCase("Ims")) {
+				prepaidAccounts.setMonitoringKey("Call");
+			}
+			
+			if (deductionDto.getMonitoringKey().equalsIgnoreCase("Sms")) {
+				prepaidAccounts.setMonitoringKey("Sms");
+			}
+			
 			prepaidAccounts.setAction(deductionDto.getAction() != null ? deductionDto.getAction() : "");
 			
 			if (deductionDto.getConsumedTimeSeconds() != 0) {
@@ -114,7 +136,7 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 			if (deductionDto.getConsumedOctets().getInput() != 0) {
 				Long availableBalance = prepaidAccounts.getTotalDataOctetsAvailable();
 				Long consumedBalance = deductionDto.getConsumedOctets().getInput();
-				Long outputBalance = availableBalance - consumedBalance;
+				Long outputBalance = availableBalance - consumedBalance;                                                
 				prepaidAccounts.setTotalDataOctetsAvailable(outputBalance);
 				prepaidAccounts.setTotalInputDataOctetsAvailable(prepaidAccounts.getTotalInputDataOctetsAvailable() + deductionDto.getConsumedOctets().getInput());
 				prepaidAccounts.setTotalOutputDataOctetsAvailable(outputBalance);
@@ -135,13 +157,15 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 					prepaidAccounts.getTotalCallSecondsAvailable(), prepaidAccounts.getTotalCallSecondsConsumed(),
 					prepaidAccounts.getTotalSmsAvailable(), prepaidAccounts.getTotalSmsConsumed());
 
-			String customerData = prepaidAccountsDto.toString();
+			ObjectMapper objectMapper = new ObjectMapper();
+			String customerData = objectMapper.writeValueAsString(prepaidAccountsDto);
 			String date = new Date().toInstant().toString();
 			
-			//Storing data for Logs...
-			AuditLogsPrepaid auditLogsPrepaid = new AuditLogsPrepaid();
+			// Storing data for Logs...
+			AuditLogsDeductionPrepaid auditLogsPrepaid = new AuditLogsDeductionPrepaid();
 			auditLogsPrepaid.setCreatedDate(new Date());
 			auditLogsPrepaid.setReqPayload(customerData);
+			auditLogsPrepaid.setMsisdn(prepaidAccountsDto.getMsisdn());
 			
 			auditLogsPrepaidRepo.save(auditLogsPrepaid);
 			
@@ -272,6 +296,30 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		}
 		return prepaidAccountsDtoList;
 	}
+	
+	@Override
+	public List<PrepaidAccountRecordsDto> getAllDeductionRecords(String msisdn) throws JsonMappingException, JsonProcessingException {
+		List<AuditLogsDeductionPrepaid> auditLogsDeductionPrepaids = auditLogsPrepaidRepo.findAllByMsisdnOrderByCreatedDateDesc(msisdn);
+		List<PrepaidAccountRecordsDto> accountRecordList = new ArrayList<>();
+		for (AuditLogsDeductionPrepaid auditLogsDeductionPrepaid : auditLogsDeductionPrepaids) {
+			
+			PrepaidAccountRecordsDto accountRecordsDto = new PrepaidAccountRecordsDto();
+			accountRecordsDto.setDate(fetchReadableDateTime(auditLogsDeductionPrepaid.getCreatedDate()));
+			accountRecordsDto.setMsisdn(auditLogsDeductionPrepaid.getMsisdn());
+			
+			ObjectMapper objectMapper = new ObjectMapper();
+			
+			String data = auditLogsDeductionPrepaid.getReqPayload().replaceAll("\\\\", "");
+
+			data = data.substring(1, data.length() - 1);
+
+			PrepaidAccountsDto account = objectMapper.readValue(data,PrepaidAccountsDto.class);
+			
+			accountRecordsDto.setPrepaidAccountsDto(account);
+			accountRecordList.add(accountRecordsDto);
+		}
+		return accountRecordList;
+	}
 
 	private static long convertGigabytesToBytes(Long gigaBytes) {
 		// 1 GB = 1024^3 bytes
@@ -299,6 +347,12 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 		BigDecimal minsBigDecimal = new BigDecimal(String.valueOf(mins));
 		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
 		return secondsBigDecimal.longValue();
+	}
+	
+	public static String fetchReadableDateTime(Date date) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String formattedDate = simpleDateFormat.format(date);
+		return formattedDate;
 	}
 
 }

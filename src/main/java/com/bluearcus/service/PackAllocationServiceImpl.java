@@ -18,19 +18,25 @@ import org.springframework.stereotype.Service;
 
 import com.bluearcus.dto.PackAllocationDto;
 import com.bluearcus.exception.CustomMessage;
-import com.bluearcus.model.AuditLogsPrepaid;
+import com.bluearcus.model.AuditLogsDeductionPrepaid;
+import com.bluearcus.model.AuditLogsPackAllocatePostpaid;
+import com.bluearcus.model.AuditLogsPackAllocatePrepaid;
 import com.bluearcus.model.PackAllocationPostpaid;
 import com.bluearcus.model.PackAllocationPrepaid;
 import com.bluearcus.model.PostpaidAccounts;
 import com.bluearcus.model.PrepaidAccounts;
 import com.bluearcus.model.RatingProfileVoucher;
-import com.bluearcus.repo.AuditLogsPrepaidRepo;
+import com.bluearcus.repo.AuditLogsDeductionPrepaidRepo;
+import com.bluearcus.repo.AuditLogsPackAllocatePostpaidRepo;
+import com.bluearcus.repo.AuditLogsPackAllocatePrepaidRepo;
 import com.bluearcus.repo.PackAllocationPostpaidRepo;
 import com.bluearcus.repo.PackAllocationPrepaidRepo;
 import com.bluearcus.repo.PostpaidAccountsRepo;
 import com.bluearcus.repo.PrepaidAccountsRepository;
 import com.bluearcus.repo.RatingProfileRepository;
 import com.bluearcus.repo.RatingProfileVoucherRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class PackAllocationServiceImpl implements PackAllocationService {
@@ -51,10 +57,13 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 	private RatingProfileVoucherRepository ratingProfileVoucherRepository;
 	
 	@Autowired
-	private AuditLogsPrepaidRepo auditLogsPrepaidRepo;
+	private AuditLogsPackAllocatePrepaidRepo auditLogsPackAllocationRepo;
+	
+	@Autowired
+	private AuditLogsPackAllocatePostpaidRepo logsPackAllocatePostpaidRepo;
 
 	@Override
-	public ResponseEntity packAllocationForPrepaid(PackAllocationDto packAllocationDto) {
+	public ResponseEntity packAllocationForPrepaid(PackAllocationDto packAllocationDto) throws JsonProcessingException {
 		Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(packAllocationDto.getPackId());
 		if (ratingProfileVoucher.isPresent()) {
 			
@@ -73,9 +82,6 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				LocalDateTime expirationDatePrevious = CallSessionUsageServiceImpl.convertDateToLocalDateTime(packAllocationPrepaid.getExpirationDate());
 				LocalDateTime expirationDateLatest = expirationDatePrevious.plusDays(packActivationDays);
 				
-				
-				//LocalDateTime expirationDate = activationDate.plusDays(packActivationDays);
-
 				Date expirationDateDb = CallSessionUsageServiceImpl.convertLocalDateTimeToDate(expirationDateLatest);
 
 				packAllocationPrepaid.setExpirationDate(expirationDateDb);
@@ -108,19 +114,20 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 
 			if (prepaidAccountDb.isPresent()) {
 				PrepaidAccounts prepaidAccount = prepaidAccountDb.get();
+				long availableData;
 
 				if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
-					long availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
 					prepaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
 				else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
-					long availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
 					prepaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
 				else {
-					long availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					availableData = prepaidAccount.getTotalDataOctetsAvailable() + convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
 					prepaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
@@ -131,8 +138,8 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				prepaidAccount.setTotalSmsAvailable(availableSms);
 				
 				prepaidAccount.setTotalDataOctetsConsumed(prepaidAccount.getTotalDataOctetsConsumed());
-				prepaidAccount.setTotalOutputDataOctetsAvailable(0L);
-				prepaidAccount.setTotalInputDataOctetsAvailable(0L);
+				prepaidAccount.setTotalOutputDataOctetsAvailable(prepaidAccount.getTotalOutputDataOctetsAvailable());
+				prepaidAccount.setTotalInputDataOctetsAvailable(prepaidAccount.getTotalInputDataOctetsAvailable());
 				prepaidAccount.setTotalCallSecondsConsumed(prepaidAccount.getTotalCallSecondsConsumed());
 				prepaidAccount.setTotalSmsConsumed(prepaidAccount.getTotalSmsConsumed());
 				prepaidAccountsRepository.save(prepaidAccount);
@@ -149,12 +156,16 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 						expirationDateDto, ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
 						prepaidAccount.getCustomerId());
 				
-				// Storing data for Logs...
-				AuditLogsPrepaid auditLogsPrepaid = new AuditLogsPrepaid();
-				auditLogsPrepaid.setCreatedDate(new Date());
-				auditLogsPrepaid.setReqPayload(packAllocationDtoNew.toString());
+				ObjectMapper objectMapper = new ObjectMapper();
+				String data = objectMapper.writeValueAsString(packAllocationDtoNew);
 				
-				auditLogsPrepaidRepo.save(auditLogsPrepaid);
+				// Storing data for Logs...
+				AuditLogsPackAllocatePrepaid auditLogsPrepaid = new AuditLogsPackAllocatePrepaid();
+				auditLogsPrepaid.setCreatedDate(new Date());
+				auditLogsPrepaid.setReqPayload(data);
+				auditLogsPrepaid.setMsisdn(packAllocationDtoNew.getMsisdn());
+				
+				auditLogsPackAllocationRepo.save(auditLogsPrepaid);
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}
@@ -165,7 +176,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 	}
 	
 	@Override
-	public ResponseEntity packAllocationForPostpaid(PackAllocationDto packAllocationDto) {
+	public ResponseEntity packAllocationForPostpaid(PackAllocationDto packAllocationDto) throws JsonProcessingException {
 		Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(packAllocationDto.getPackId());
 		if (ratingProfileVoucher.isPresent()) {
 			
@@ -192,24 +203,32 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 				PostpaidAccounts postpaidAccount = postpaidAccountDb.get();
 
 				if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
-					postpaidAccount.setTotalDataOctetsAvailable(convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+					long availableData = postpaidAccount.getTotalDataOctetsAvailable() + convertGigabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					postpaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 
 				else if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
-					postpaidAccount.setTotalDataOctetsAvailable(convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+					long availableData = postpaidAccount.getTotalDataOctetsAvailable() + convertMegabytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					postpaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
 				
 				else {
-					postpaidAccount.setTotalDataOctetsAvailable(convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue()));
+					long availableData = postpaidAccount.getTotalDataOctetsAvailable() + convertKilobytesToBytes(ratingProfileVoucherDb.getDataBalance().longValue());
+					postpaidAccount.setTotalDataOctetsAvailable(availableData);
 				}
-
-				postpaidAccount.setTotalCallSecondsAvailable(convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue()));
-				postpaidAccount.setTotalSmsAvailable(ratingProfileVoucherDb.getSmsBalance().longValue());
-				postpaidAccount.setTotalDataOctetsConsumed(0L);
-				postpaidAccount.setTotalOutputDataOctetsAvailable(0L);
-				postpaidAccount.setTotalInputDataOctetsAvailable(0L);
-				postpaidAccount.setTotalCallSecondsConsumed(0L);
-				postpaidAccount.setTotalSmsConsumed(0L);
+				
+				long availableCalls = postpaidAccount.getTotalCallSecondsAvailable() + convertMinsToSeconds(ratingProfileVoucherDb.getCallBalance().longValue());
+				
+				postpaidAccount.setTotalCallSecondsAvailable(availableCalls);
+				
+				long availableSms = postpaidAccount.getTotalSmsAvailable() + ratingProfileVoucherDb.getSmsBalance().longValue();
+				
+				postpaidAccount.setTotalSmsAvailable(availableSms);
+				postpaidAccount.setTotalDataOctetsConsumed(postpaidAccount.getTotalDataOctetsConsumed());
+				postpaidAccount.setTotalOutputDataOctetsAvailable(postpaidAccount.getTotalOutputDataOctetsAvailable());
+				postpaidAccount.setTotalInputDataOctetsAvailable(postpaidAccount.getTotalInputDataOctetsAvailable());
+				postpaidAccount.setTotalCallSecondsConsumed(postpaidAccount.getTotalCallSecondsConsumed());
+				postpaidAccount.setTotalSmsConsumed(postpaidAccount.getTotalSmsConsumed());
 				postpaidAccountsRepo.save(postpaidAccount);
 				
 				packAllocationPostpaid.setImsi(postpaidAccount.getImsi());
@@ -223,6 +242,17 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 						packAllocationDto.getMsisdn(), packAllocationDto.getImsi(), activationDateDto,
 						expirationDateDto, ratingProfileVoucherDb.getId(), packAllocationPostpaid.getPackName(),
 						postpaidAccount.getCustomerId());
+				
+				ObjectMapper objectMapper = new ObjectMapper();
+				String data = objectMapper.writeValueAsString(packAllocationDtoNew);
+				
+				// Storing data for Logs...
+				AuditLogsPackAllocatePostpaid auditLogsPostpaid = new AuditLogsPackAllocatePostpaid();
+				auditLogsPostpaid.setCreatedDate(new Date());
+				auditLogsPostpaid.setReqPayload(data);
+				auditLogsPostpaid.setMsisdn(packAllocationDtoNew.getMsisdn());
+				
+				logsPackAllocatePostpaidRepo.save(auditLogsPostpaid);
 
 				return new ResponseEntity<>(packAllocationDtoNew, HttpStatus.OK);
 			}

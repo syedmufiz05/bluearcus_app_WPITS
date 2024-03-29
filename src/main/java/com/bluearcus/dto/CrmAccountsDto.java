@@ -2,7 +2,6 @@ package com.bluearcus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.bluearcus.model.PostpaidAccounts;
-import com.bluearcus.model.PrepaidAccounts;
 
 public interface PostpaidAccountsRepo extends JpaRepository<PostpaidAccounts, Integer> {
 	

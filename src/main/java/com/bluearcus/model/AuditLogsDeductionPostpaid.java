@@ -14,9 +14,9 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "audit_logs_prepaid")
+@Table(name = "audit_logs_deduction_postpaid")
 @Data
-public class AuditLogsPrepaid {
+public class AuditLogsDeductionPostpaid {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -27,6 +27,9 @@ public class AuditLogsPrepaid {
 
 	@Column(name = "req_payload", columnDefinition = "JSON")
 	private String reqPayload;
+
+	@Column(name = "msisdn")
+	private String msisdn;
 
 	public void setReqPayload(String reqPayload) {
 		try {

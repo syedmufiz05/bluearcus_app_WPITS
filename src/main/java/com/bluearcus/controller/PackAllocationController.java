@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bluearcus.dto.PackAllocationDto;
 import com.bluearcus.service.PackAllocationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
 @RequestMapping("/api/pack/allocation")
@@ -21,7 +22,7 @@ public class PackAllocationController {
 	private PackAllocationService packAllocationService;
 
 	@RequestMapping(value = "/prepaid", method = RequestMethod.POST)
-	public ResponseEntity<PackAllocationDto> savePackAllocationPrepaid(@RequestBody PackAllocationDto packAllocationDto) {
+	public ResponseEntity<PackAllocationDto> savePackAllocationPrepaid(@RequestBody PackAllocationDto packAllocationDto) throws JsonProcessingException {
 		return packAllocationService.packAllocationForPrepaid(packAllocationDto);
 	}
 	
@@ -31,7 +32,7 @@ public class PackAllocationController {
 	}
 
 	@RequestMapping(value = "/postpaid", method = RequestMethod.POST)
-	public ResponseEntity<PackAllocationDto> savePackAllocationPostpaid(@RequestBody PackAllocationDto packAllocationDto) {
+	public ResponseEntity<PackAllocationDto> savePackAllocationPostpaid(@RequestBody PackAllocationDto packAllocationDto) throws JsonProcessingException {
 		return packAllocationService.packAllocationForPostpaid(packAllocationDto);
 	}
 	

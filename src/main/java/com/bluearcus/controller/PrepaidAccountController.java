@@ -1,11 +1,12 @@
 package com.bluearcus.controller;
 
 import com.bluearcus.dto.DeductionDto;
+import com.bluearcus.dto.PrepaidAccountRecordsDto;
 import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.dto.PrepaidAvailBalanceDto;
 import com.bluearcus.service.PrepaidAccountsService;
-
-import jakarta.websocket.server.PathParam;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class PrepaidAccountController {
 	}
 
 	@RequestMapping(value = "/deduct", method = RequestMethod.POST)
-	public ResponseEntity<PrepaidAccountsDto> saveDeductionRecord(@RequestBody DeductionDto deductionDto) {
+	public ResponseEntity<PrepaidAccountsDto> saveDeductionRecord(@RequestBody DeductionDto deductionDto) throws JsonProcessingException {
 		return prepaidAccountsService.savePrepaidDeduction(deductionDto);
 	}
 
@@ -53,5 +54,10 @@ public class PrepaidAccountController {
 	@RequestMapping(value = "/get/all/prepaid/account", method = RequestMethod.GET)
 	public List<PrepaidAccountsDto> getAllPrepaidAccounts() {
 		return prepaidAccountsService.getAllPrepaidAccounts();
+	}
+	
+	@RequestMapping(value = "/get/all/deduction/details/{msisdn}", method = RequestMethod.GET)
+	public List<PrepaidAccountRecordsDto> getAllDeductionDetails(@PathVariable("msisdn") String msisdn) throws JsonMappingException, JsonProcessingException {
+		return prepaidAccountsService.getAllDeductionRecords(msisdn);
 	}
 }
