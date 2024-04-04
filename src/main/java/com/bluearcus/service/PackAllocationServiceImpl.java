@@ -281,7 +281,7 @@ public class PackAllocationServiceImpl implements PackAllocationService {
 			packAllocationDto.setPackId(ratingProfileVoucherDb.getId());
 			return new ResponseEntity<>(packAllocationDto, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Customer Id"));
+		return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Please assign a pack"));
 	}
 
 	@Override

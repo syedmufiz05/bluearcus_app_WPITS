@@ -21,8 +21,7 @@ public class DataSessionUsageController {
 	private DataSessionUsageService dataSessionUsageService;
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public ResponseEntity<DataSessionUsageDtoNew> saveDataSessionUsage(
-			@RequestBody DataSessionUsageDto dataSessionUsageDto) {
+	public ResponseEntity<DataSessionUsageDtoNew> saveDataSessionUsage(@RequestBody DataSessionUsageDto dataSessionUsageDto) {
 		return dataSessionUsageService.saveDataSessionUsage(dataSessionUsageDto);
 	}
 

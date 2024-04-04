@@ -198,7 +198,7 @@ public class CrmAccountsServiceImpl implements CrmAccountsService {
 
 	@Override
 	public List<CrmAccountsDto> getAllAccounts() {
-		List<CrmAccounts> crmAccountsDbList = crmAccountsRepo.findAll();
+	 	List<CrmAccounts> crmAccountsDbList = crmAccountsRepo.findAll();
 		List<CrmAccountsDto> crmAccountsDtoList = new ArrayList<>();
 		for (CrmAccounts crmAccounts : crmAccountsDbList) {
 			CrmAccountsDto crmAccountsDto = new CrmAccountsDto();

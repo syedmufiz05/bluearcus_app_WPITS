@@ -18,6 +18,7 @@ import java.util.Optional;
 
 @Service
 public class DataSessionUsageServiceImpl implements DataSessionUsageService {
+	
 	@Autowired
 	private DataSessionUsageRepo dataSessionUsageRepo;
 
@@ -50,8 +51,7 @@ public class DataSessionUsageServiceImpl implements DataSessionUsageService {
 					dataSessionUsage.getTotalOutputOctets(), dataSessionUsage.getSessionStatus());
 			return new ResponseEntity<>(dataSessionUsageDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI Id already exist"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI Id already exist"));
 	}
 
 	@Override

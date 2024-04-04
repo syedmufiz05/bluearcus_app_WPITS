@@ -65,10 +65,6 @@ public class HssProvServiceImpl implements HssProvService {
             hssProvRepositoryNew.save(hssProvDb);
             saveAccessRequestPayload(hssProvDtoNew, hssProvDb, accessLogs);
             HssProvDtoNew hssProvDto = new HssProvDtoNew(hssProvDb.getId(), hssProvDb.getImsi(), hssProvDb.getMsisdn(), hssProvDb.getAmbr(), hssProvDb.getNssai(), hssProvDb.getArfb(), hssProvDb.getSar(), hssProvDb.getRat(), hssProvDb.getCn(), hssProvDb.getSmfSel(), hssProvDb.getSmDat(), hssProvDb.getEpsFlag(), hssProvDb.getEpsOdb(), hssProvDb.getHplmnOdb(), hssProvDb.getArd(), hssProvDb.getEpsTpl(), hssProvDb.getContextId(), hssProvDb.getApnContext(),accessLogs.getId());
-//			socketClient.connect();
-//			String msg = socketClient.sendCommand(setSocketMsgBody(hssProvDb));
-//			System.out.println("socket output:" + msg);
-//			socketClient.logout();
             return new ResponseEntity<>(hssProvDto, HttpStatus.OK);
         }
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI or MSISDN already exist"));
@@ -81,10 +77,6 @@ public class HssProvServiceImpl implements HssProvService {
 		Optional<HssProvNew> hssProvNew = hssProvRepositoryNew.findByImsiOrMsisdn(imsi, msisdn);
 		if (hssProvNew.isPresent()) {
 			HssProvNew hssProvDb = hssProvNew.get();
-//            socketClient.connect();
-//            String msg = setSocketMsgBody(hssProvDb);
-//            socketClient.sendCommand(msg);
-//            socketClient.logout();
 			HssProvDtoNew hssProvDto=new HssProvDtoNew();
 			hssProvDto.setHssProvId(hssProvDb.getId());
 			hssProvDto.setImsi(hssProvDb.getImsi());
