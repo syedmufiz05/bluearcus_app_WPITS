@@ -39,12 +39,11 @@ public class CallSessionUsage {
     @Column(name = "session_state")
     private Boolean sessionState;
 
-    @CreationTimestamp
     @Column(name = "call_start_ts")
-    private Date callStartTs;
+    private String callStartTs;
 
     @Column(name = "call_end_ts")
-    private Date callEndTs;
+    private String callEndTs;
 
     @Column(name = "total_seconds")
     private Long totalSeconds;

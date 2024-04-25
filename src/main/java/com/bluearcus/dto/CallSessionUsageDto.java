@@ -1,7 +1,5 @@
 package com.bluearcus.dto;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,10 +31,10 @@ public class CallSessionUsageDto {
     private Boolean sessionState;
 
     @JsonProperty("call_start_ts")
-    private Date callStartTs;
+    private String callStartTs;
 
     @JsonProperty("call_end_ts")
-    private Date callEndTs;
+    private String callEndTs;
 
     @JsonProperty("total_seconds")
     private Long totalSeconds;

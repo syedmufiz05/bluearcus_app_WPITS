@@ -1,5 +1,6 @@
 package com.bluearcus.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,18 +10,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.bluearcus.dto.CrmAccountsDto;
 import com.bluearcus.dto.CustomerReportsDto;
 import com.bluearcus.dto.CustomerReportsDtoWithCount;
 import com.bluearcus.dto.PaymentStatusDto;
 import com.bluearcus.exception.CustomMessage;
-import com.bluearcus.model.CrmAccounts;
 import com.bluearcus.model.CustomerReports;
 import com.bluearcus.model.PostpaidAccounts;
 import com.bluearcus.model.PrepaidAccounts;
+import com.bluearcus.model.RatingProfileVoucher;
 import com.bluearcus.repo.CustomerReportsRepo;
 import com.bluearcus.repo.PostpaidAccountsRepo;
 import com.bluearcus.repo.PrepaidAccountsRepository;
+import com.bluearcus.repo.RatingProfileVoucherRepository;
 
 @Service
 public class CustomerReportsServiceImpl implements CustomerReportsService {
@@ -33,73 +34,194 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 
 	@Autowired
 	private PostpaidAccountsRepo postpaidAccountsRepo;
+	
+	@Autowired
+	private RatingProfileVoucherRepository ratingProfileVoucherRepository;
 
 	@Override
 	public ResponseEntity saveCustomerReport(CustomerReportsDto customerReportsDto) {
-		Optional<CustomerReports> crmAccountDb = customerReportsRepo.findByImsi(customerReportsDto.getImsi());
-		if (!crmAccountDb.isPresent()) {
-			CustomerReports customerReport = new CustomerReports();
-			customerReport.setFirstName(customerReportsDto.getFirstName());
-			customerReport.setLastName(customerReportsDto.getLastName());
-			customerReport.setEkycDate(customerReportsDto.getEkycDate());
-			customerReport.setEkycStatus(customerReportsDto.getEkycStatus());
-			customerReport.setEkycToken(customerReportsDto.getEkycToken());
-			customerReport.setCustomerId(customerReportsDto.getCustomerId());
-			customerReport.setCustomerType(customerReportsDto.getCustomerType());
-			customerReport.setImsi(customerReportsDto.getImsi());
-			customerReport.setMsisdn(customerReportsDto.getMsisdn());
-			customerReport.setPaymentStatus(customerReportsDto.getPaymentStatus());
+		Optional<CustomerReports> customerReportDb = customerReportsRepo.findByImsi(customerReportsDto.getImsi());
+		if (customerReportDb.isPresent()) {
+
+			CustomerReports customerReport = customerReportDb.get();
+			customerReport.setPackId(customerReportsDto.getPackId());
 			customerReportsRepo.save(customerReport);
+			
 			if (customerReport.getCustomerType().equalsIgnoreCase("prepaid")) {
-				PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
-				prepaidAccounts.setCustomerId(customerReportsDto.getCustomerId());
-				prepaidAccounts.setMsisdn(customerReportsDto.getMsisdn());
-				prepaidAccounts.setImsi(customerReportsDto.getImsi());
-				prepaidAccounts.setCalledStationId("");
-				prepaidAccounts.setMonitoringKey("");
-				prepaidAccounts.setAction("");
-				prepaidAccounts.setDataParameterType("");
-				prepaidAccounts.setCsVoiceCallSeconds(0l);
-				prepaidAccounts.setFourGDataOctets(0);
-				prepaidAccounts.setFiveGDataOctets(0);
-				prepaidAccounts.setVolteCallSeconds(0l);
-				prepaidAccounts.setTotalDataOctetsAvailable(0l);
-				prepaidAccounts.setTotalInputDataOctetsAvailable(0l);
-				prepaidAccounts.setTotalOutputDataOctetsAvailable(0l);
-				prepaidAccounts.setTotalDataOctetsConsumed(0l);
-				prepaidAccounts.setTotalCallSecondsAvailable(0l);
-				prepaidAccounts.setTotalCallSecondsConsumed(0l);
-				prepaidAccounts.setTotalSmsAvailable(0l);
-				prepaidAccounts.setTotalSmsConsumed(0l);
-				prepaidAccountsRepository.save(prepaidAccounts);
-			} else {
-				PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
-				postpaidAccounts.setCustomerId(customerReportsDto.getCustomerId());
-				postpaidAccounts.setMsisdn(customerReportsDto.getMsisdn());
-				postpaidAccounts.setImsi(customerReportsDto.getImsi());
-				postpaidAccounts.setDataParameterType("");
-				postpaidAccounts.setCsVoiceCallSeconds(0l);
-				postpaidAccounts.setFourGDataOctets(0);
-				postpaidAccounts.setFiveGDataOctets(0);
-				postpaidAccounts.setVolteCallSeconds(0l);
-				postpaidAccounts.setTotalDataOctetsAvailable(0l);
-				postpaidAccounts.setTotalInputDataOctetsAvailable(0l);
-				postpaidAccounts.setTotalOutputDataOctetsAvailable(0l);
-				postpaidAccounts.setTotalDataOctetsConsumed(0l);
-				postpaidAccounts.setTotalCallSecondsAvailable(0l);
-				postpaidAccounts.setTotalCallSecondsConsumed(0l);
-				postpaidAccounts.setTotalSmsAvailable(0l);
-				postpaidAccounts.setTotalSmsConsumed(0l);
-				postpaidAccountsRepo.save(postpaidAccounts);
+
+				if (customerReportsDto.getPackId() != 0) {
+					long packDataBalance = 0;
+					long packCallBalance = 0;
+					long packSmsBalance = 0;
+					
+					Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(customerReportsDto.getPackId());
+					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+					Integer callBalance = ratingProfileVoucherDb.getCallBalance();
+					Integer dataBalance = ratingProfileVoucherDb.getDataBalance();
+					Integer smsBalance = ratingProfileVoucherDb.getSmsBalance();
+					
+					if (dataBalance != 0) {
+
+						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
+							packDataBalance = convertGigabytesToBytes(dataBalance.longValue());
+						}
+						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
+							packDataBalance = convertMegabytesToBytes(dataBalance.longValue());
+						}
+						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("KB")) {
+							packDataBalance = convertKilobytesToBytes(dataBalance.longValue());
+						}
+						
+					}
+					
+					if (callBalance != 0) {
+						if (ratingProfileVoucherDb.getCallBalanceParameter().equalsIgnoreCase("Mins")) {
+							packCallBalance = convertMinsToSeconds(callBalance.longValue());
+						}
+					}
+					
+					packSmsBalance = smsBalance.longValue();
+					
+					Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository.findByCustomerId(customerReportsDto.getCustomerId());
+					
+					if (prepaidAccount.isPresent()) {
+						PrepaidAccounts prepaidAccountDb = prepaidAccount.get();
+						
+						prepaidAccountDb.setTotalDataOctetsAvailable(packDataBalance + prepaidAccountDb.getTotalDataOctetsAvailable());
+						prepaidAccountDb.setTotalCallSecondsAvailable(packCallBalance + prepaidAccountDb.getTotalCallSecondsAvailable());
+						prepaidAccountDb.setTotalSmsAvailable(packSmsBalance + prepaidAccountDb.getTotalSmsAvailable());
+						
+						prepaidAccountsRepository.save(prepaidAccountDb);
+					}
+
+				}
+
+			}
+			
+			if (customerReport.getCustomerType().equalsIgnoreCase("postpaid")) {
+				
+				if (customerReport.getPackId() != null) {
+					long packDataBalance = 0;
+					long packCallBalance = 0;
+					long packSmsBalance = 0;
+					
+					Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(customerReportsDto.getPackId());
+					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+					Integer callBalance = ratingProfileVoucherDb.getCallBalance();
+					Integer dataBalance = ratingProfileVoucherDb.getDataBalance();
+					Integer smsBalance = ratingProfileVoucherDb.getSmsBalance();
+					
+					if (dataBalance != 0) {
+
+						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
+							packDataBalance = convertGigabytesToBytes(dataBalance.longValue());
+						}
+						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
+							packDataBalance = convertMegabytesToBytes(dataBalance.longValue());
+						}
+						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("KB")) {
+							packDataBalance = convertKilobytesToBytes(dataBalance.longValue());
+						}
+						
+					}
+					
+					if (callBalance != 0) {
+						if (ratingProfileVoucherDb.getCallBalanceParameter().equalsIgnoreCase("Mins")) {
+							packCallBalance = convertMinsToSeconds(callBalance.longValue());
+						}
+					}
+					
+					packSmsBalance = smsBalance.longValue();
+					
+					Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(customerReportsDto.getCustomerId());
+					
+					if (postpaidAccount.isPresent()) {
+						PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
+						
+						postpaidAccountDb.setTotalDataOctetsAvailable(packDataBalance + postpaidAccountDb.getTotalDataOctetsAvailable());
+						postpaidAccountDb.setTotalCallSecondsAvailable(packCallBalance + postpaidAccountDb.getTotalCallSecondsAvailable());
+						postpaidAccountDb.setTotalSmsAvailable(packSmsBalance + postpaidAccountDb.getTotalSmsAvailable());
+						
+						postpaidAccountsRepo.save(postpaidAccountDb);
+					}
+
+				}
+
 			}
 			CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
 					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
 					customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-					customerReport.getPaymentStatus());
+					customerReportsDto.getPackId(), customerReport.getPaymentStatus());
 			return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI already exist"));
+
+		CustomerReports customerReport = new CustomerReports();
+		customerReport.setFirstName(customerReportsDto.getFirstName());
+		customerReport.setLastName(customerReportsDto.getLastName());
+		customerReport.setEkycDate(customerReportsDto.getEkycDate());
+		customerReport.setEkycStatus(customerReportsDto.getEkycStatus());
+		customerReport.setEkycToken(customerReportsDto.getEkycToken());
+		customerReport.setCustomerId(customerReportsDto.getCustomerId());
+		customerReport.setCustomerType(customerReportsDto.getCustomerType());
+		customerReport.setImsi(customerReportsDto.getImsi());
+		customerReport.setMsisdn(customerReportsDto.getMsisdn());
+		customerReport.setPackId(customerReportsDto.getPackId());
+		customerReport.setPaymentStatus(customerReportsDto.getPaymentStatus());
+		customerReportsRepo.save(customerReport);
+
+		if (customerReport.getCustomerType().equalsIgnoreCase("prepaid")) {
+
+			PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
+			prepaidAccounts.setCustomerId(customerReportsDto.getCustomerId());
+			prepaidAccounts.setMsisdn(customerReportsDto.getMsisdn());
+			prepaidAccounts.setImsi(customerReportsDto.getImsi());
+			prepaidAccounts.setCalledStationId("");
+			prepaidAccounts.setMonitoringKey("");
+			prepaidAccounts.setAction("");
+			prepaidAccounts.setDataParameterType("");
+			prepaidAccounts.setCsVoiceCallSeconds(0l);
+			prepaidAccounts.setFourGDataOctets(0);
+			prepaidAccounts.setFiveGDataOctets(0);
+			prepaidAccounts.setVolteCallSeconds(0l);
+			prepaidAccounts.setTotalDataOctetsAvailable(0l);
+			prepaidAccounts.setTotalInputDataOctetsAvailable(0l);
+			prepaidAccounts.setTotalOutputDataOctetsAvailable(0l);
+			prepaidAccounts.setTotalDataOctetsConsumed(0l);
+			prepaidAccounts.setTotalCallSecondsAvailable(0l);
+			prepaidAccounts.setTotalCallSecondsConsumed(0l);
+			prepaidAccounts.setTotalSmsAvailable(0l);
+			prepaidAccounts.setTotalSmsConsumed(0l);
+			prepaidAccountsRepository.save(prepaidAccounts);
+		}
+
+		if (customerReport.getCustomerType().equalsIgnoreCase("postpaid")) {
+
+			PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
+			postpaidAccounts.setCustomerId(customerReportsDto.getCustomerId());
+			postpaidAccounts.setMsisdn(customerReportsDto.getMsisdn());
+			postpaidAccounts.setImsi(customerReportsDto.getImsi());
+			postpaidAccounts.setDataParameterType("");
+			postpaidAccounts.setCsVoiceCallSeconds(0l);
+			postpaidAccounts.setFourGDataOctets(0);
+			postpaidAccounts.setFiveGDataOctets(0);
+			postpaidAccounts.setVolteCallSeconds(0l);
+			postpaidAccounts.setTotalDataOctetsAvailable(0l);
+			postpaidAccounts.setTotalInputDataOctetsAvailable(0l);
+			postpaidAccounts.setTotalOutputDataOctetsAvailable(0l);
+			postpaidAccounts.setTotalDataOctetsConsumed(0l);
+			postpaidAccounts.setTotalCallSecondsAvailable(0l);
+			postpaidAccounts.setTotalCallSecondsConsumed(0l);
+			postpaidAccounts.setTotalSmsAvailable(0l);
+			postpaidAccounts.setTotalSmsConsumed(0l);
+			postpaidAccountsRepo.save(postpaidAccounts);
+		}
+		CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
+				customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
+				customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
+				customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
+				customerReportsDto.getPackId(), customerReport.getPaymentStatus());
+		return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 	}
 
 	@Override
@@ -169,7 +291,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
 					customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-					customerReport.getPaymentStatus());
+					customerReport.getPackId(), customerReport.getPaymentStatus());
 			return new ResponseEntity<>(customerReportsDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
@@ -186,7 +308,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
 					customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-					customerReport.getPaymentStatus());
+					customerReport.getPackId(), customerReport.getPaymentStatus());
 			return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
@@ -227,6 +349,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			customerReportsDto.setCustomerType(customerReport.getCustomerType());
 			customerReportsDto.setImsi(customerReport.getImsi());
 			customerReportsDto.setMsisdn(customerReport.getMsisdn());
+			customerReportsDto.setPackId(customerReport.getPackId());
 			customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 			customerReportList.add(customerReportsDto);
 			customerCount = customerCount + 1;
@@ -254,6 +377,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setCustomerType(customerReport.getCustomerType());
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
+				customerReportsDto.setPackId(customerReport.getPackId());
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -283,6 +407,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setCustomerType(customerReport.getCustomerType());
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
+				customerReportsDto.setPackId(customerReport.getPackId());
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -312,6 +437,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setCustomerType(customerReport.getCustomerType());
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
+				customerReportsDto.setPackId(customerReport.getPackId());
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -341,6 +467,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setCustomerType(customerReport.getCustomerType());
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
+				customerReportsDto.setPackId(customerReport.getPackId());
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -367,10 +494,39 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			customerReportsDto.setCustomerType(customerReport.getCustomerType());
 			customerReportsDto.setImsi(customerReport.getImsi());
 			customerReportsDto.setMsisdn(customerReport.getMsisdn());
+			customerReportsDto.setPackId(customerReport.getPackId());
 			customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 			customerReportList.add(customerReportsDto);
 		}
 		return customerReportList;
 	}
+	
+	public static long convertGigabytesToBytes(Long gigaBytes) {
+		// 1 GB = 1024^3 bytes
+		BigDecimal gigaBytesBigDecimal = new BigDecimal(String.valueOf(gigaBytes));
+		BigDecimal bytesBigDecimal = gigaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 3)));
+		return bytesBigDecimal.longValue();
+	}
 
+	public static long convertMegabytesToBytes(Long megaBytes) {
+		// 1 MB = 1024^2 bytes
+		BigDecimal megaBytesBigDecimal = new BigDecimal(String.valueOf(megaBytes));
+		BigDecimal bytesBigDecimal = megaBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 2)));
+		return bytesBigDecimal.longValue();
+	}
+
+	public static long convertKilobytesToBytes(Long kiloBytes) {
+		// 1 KB = 1024^1 bytes
+		BigDecimal kiloBytesBigDecimal = new BigDecimal(String.valueOf(kiloBytes));
+		BigDecimal bytesBigDecimal = kiloBytesBigDecimal.multiply(BigDecimal.valueOf(Math.pow(1024, 1)));
+		return bytesBigDecimal.longValue();
+	}
+	
+	public static long convertMinsToSeconds(Long mins) {
+		// 1 Min = 60^1 seconds
+		BigDecimal minsBigDecimal = new BigDecimal(String.valueOf(mins));
+		BigDecimal secondsBigDecimal = minsBigDecimal.multiply(BigDecimal.valueOf(Math.pow(60, 1)));
+		return secondsBigDecimal.longValue();
+	}
+	
 }

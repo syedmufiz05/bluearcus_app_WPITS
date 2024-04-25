@@ -43,6 +43,9 @@ public class CustomerReportsDto {
 
 	@JsonProperty("imsi")
 	private String imsi;
+	
+	@JsonProperty("pack_id")
+	private Integer packId;
 
 	@JsonProperty("payment_status")
 	private Boolean paymentStatus;

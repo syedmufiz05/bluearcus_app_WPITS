@@ -45,7 +45,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
 					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
 					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getLocationInfo(),
-					callSessionUsageDb.getSessionState(), fetchReadableDateTime(callSessionUsageDb.getCallStartTs()),
+					callSessionUsageDb.getSessionState(), callSessionUsageDb.getCallStartTs(),
 					null, callSessionUsageDb.getTotalSeconds(),
 					callSessionUsageDb.getCallStatus());
 			
@@ -67,29 +67,28 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus());
 			callSessionUsageRepo.save(callSessionUsageDb);
 			
-			LocalDateTime callStart = convertDateToLocalDateTime(callSessionUsageDb.getCallStartTs());
-			System.out.println(callStart);
-			
-			LocalDateTime callEnd = callStart.plusMinutes(15);
-			System.out.println(callEnd);
-			
-			Date callEndForDb = convertLocalDateTimeToDate(callEnd);
-			System.out.println(callEndForDb);
-			
-			Duration callDuration = Duration.between(callStart,callEnd);
-			System.out.println("Call duration in seconds:" + callDuration.toSeconds());
-			
-			callSessionUsageDb.setCallEndTs(callEndForDb);
-			callSessionUsageDb.setTotalSeconds(callDuration.toSeconds());
-			
-			callSessionUsageRepo.save(callSessionUsageDb);
+//			LocalDateTime callStart = convertDateToLocalDateTime(callSessionUsageDb.getCallStartTs());
+//			System.out.println(callStart);
+//			
+//			LocalDateTime callEnd = callStart.plusMinutes(15);
+//			System.out.println(callEnd);
+//			
+//			Date callEndForDb = convertLocalDateTimeToDate(callEnd);
+//			System.out.println(callEndForDb);
+//			
+//			Duration callDuration = Duration.between(callStart,callEnd);
+//			System.out.println("Call duration in seconds:" + callDuration.toSeconds());
+//			
+//			callSessionUsageDb.setCallEndTs(callEndForDb);
+//			callSessionUsageDb.setTotalSeconds(callDuration.toSeconds());
+//			
+//			callSessionUsageRepo.save(callSessionUsageDb);
 			
 			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
 					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
 					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getLocationInfo(),
-					callSessionUsageDb.getSessionState(), fetchReadableDateTime(callSessionUsageDb.getCallStartTs()),
-					fetchReadableDateTime(callEndForDb), callSessionUsageDb.getTotalSeconds(),
-					callSessionUsageDb.getCallStatus());
+					callSessionUsageDb.getSessionState(), callSessionUsageDb.getCallStartTs(), null,
+					callSessionUsageDb.getTotalSeconds(), callSessionUsageDb.getCallStatus());
 
 			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
 		}
@@ -109,8 +108,8 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDtoNew.setCalledMsisdn(callSessionUsageDb.getCalledMsisdn());
 			callSessionUsageDtoNew.setLocationInfo(callSessionUsageDb.getLocationInfo());
 			callSessionUsageDtoNew.setSessionState(callSessionUsageDb.getSessionState());
-			callSessionUsageDtoNew.setCallStartTs(fetchReadableDateTime(callSessionUsageDb.getCallStartTs()));
-			callSessionUsageDtoNew.setCallEndTs(null);
+			callSessionUsageDtoNew.setCallStartTs(createReadableDateTime(callSessionUsageDb.getCallStartTs()));
+			callSessionUsageDtoNew.setCallEndTs(callSessionUsageDb.getCallEndTs());
 			callSessionUsageDtoNew.setTotalSeconds(callSessionUsageDb.getTotalSeconds());
 			callSessionUsageDtoNew.setCallStatus(callSessionUsageDb.getCallStatus());
 			callSessionUsageDtoList.add(callSessionUsageDtoNew);
@@ -131,8 +130,8 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDtoNew.setCalledMsisdn(callSessionUsageDb.getCalledMsisdn());
 			callSessionUsageDtoNew.setLocationInfo(callSessionUsageDb.getLocationInfo());
 			callSessionUsageDtoNew.setSessionState(callSessionUsageDb.getSessionState());
-			callSessionUsageDtoNew.setCallStartTs(fetchReadableDateTime(callSessionUsageDb.getCallStartTs()));
-			callSessionUsageDtoNew.setCallEndTs(fetchReadableDateTime(callSessionUsageDb.getCallEndTs()));
+			callSessionUsageDtoNew.setCallStartTs(callSessionUsageDb.getCallStartTs());
+			callSessionUsageDtoNew.setCallEndTs(callSessionUsageDb.getCallEndTs());
 			callSessionUsageDtoNew.setTotalSeconds(callSessionUsageDb.getTotalSeconds());
 			callSessionUsageDtoNew.setCallStatus(callSessionUsageDb.getCallStatus());
 			callSessionUsageDtoList.add(callSessionUsageDtoNew);
@@ -143,6 +142,18 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	public static String fetchReadableDateTime(Date date) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String formattedDate = simpleDateFormat.format(date);
+		return formattedDate;
+	}
+	
+	public static String createReadableDateTime(String dateTime) {
+		int value = dateTime.indexOf('.');
+		String formattedDate = "";
+		if (value != -1) {
+			formattedDate = dateTime.substring(0, value);
+			System.out.println("formattedDate:" + formattedDate);
+		} else {
+			return formattedDate = dateTime;
+		}
 		return formattedDate;
 	}
 	

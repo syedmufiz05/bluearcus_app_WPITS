@@ -1,6 +1,9 @@
 package com.bluearcus.model;
 
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,6 +47,9 @@ public class CustomerReports {
 
 	@Column(name = "imsi")
 	private String imsi;
+
+	@Column(name = "pack_id")
+	private Integer packId;
 
 	@Column(name = "payment_status")
 	private Boolean paymentStatus;
