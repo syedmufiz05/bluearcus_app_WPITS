@@ -24,6 +24,9 @@ public class CallSessionUsageDtoNew {
 
     @JsonProperty("called_msisdn")
     private String calledMsisdn;
+    
+    @JsonProperty("customer_type")
+    private String customerType;
 
     @JsonProperty("location_info")
     private String locationInfo;

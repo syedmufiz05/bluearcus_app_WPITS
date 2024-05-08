@@ -2,9 +2,6 @@ package com.bluearcus.model;
 
 import lombok.Data;
 
-import java.util.Date;
-
-import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,6 +26,9 @@ public class CallSessionUsage {
 
     @Column(name = "imsi")
     private String imsi;
+    
+    @Column(name = "customer_type")
+    private String customerType;
 
     @Column(name = "called_msisdn")
     private String calledMsisdn;

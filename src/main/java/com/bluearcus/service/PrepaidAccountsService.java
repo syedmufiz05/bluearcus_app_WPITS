@@ -6,6 +6,7 @@ import com.bluearcus.dto.PrepaidAccountsDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public interface PrepaidAccountsService {
 
 	ResponseEntity getPrepaidAccount(Integer accountId);
 
-	ResponseEntity getAvailableBalance(String imsi, String msisdn);
+	ResponseEntity getAvailableBalance(String imsi, String msisdn) throws URISyntaxException;
 
 	List<PrepaidAccountsDto> getAllPrepaidAccounts();
 

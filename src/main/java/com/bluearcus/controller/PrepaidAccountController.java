@@ -8,6 +8,7 @@ import com.bluearcus.service.PrepaidAccountsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class PrepaidAccountController {
 	}
 
 	@RequestMapping(value = "/get/all/available/balance", method = RequestMethod.GET)
-	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@RequestParam("imsi") String imsi, @RequestParam("msisdn") String msisdn) {
+	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@RequestParam("imsi") String imsi, @RequestParam("msisdn") String msisdn) throws URISyntaxException {
 		return prepaidAccountsService.getAvailableBalance(imsi, msisdn);
 	}
 	

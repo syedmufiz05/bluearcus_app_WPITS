@@ -14,12 +14,19 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -254,17 +261,39 @@ public class PrepaidAccountsServiceImpl implements PrepaidAccountsService {
 	}
 
 	@Override
-	public ResponseEntity getAvailableBalance(String imsi, String msisdn) {
+	public ResponseEntity getAvailableBalance(String imsi, String msisdn) throws URISyntaxException {
 		Optional<PrepaidAccounts> prepaidAccounts = prepaidAccountsRepository.findByImsiOrMsisdn(imsi, msisdn);
 		if (prepaidAccounts.isPresent()) {
 			PrepaidAccounts prepaidAccountsDb = prepaidAccounts.get();
-			PrepaidAvailBalanceDto prepaidAvailBalanceDto = new PrepaidAvailBalanceDto();
-			prepaidAvailBalanceDto.setTotalDataOctetsAvailable(prepaidAccountsDb.getTotalDataOctetsAvailable());
-			prepaidAvailBalanceDto.setTotalInputDataOctetsAvailable(prepaidAccountsDb.getTotalInputDataOctetsAvailable());
-			prepaidAvailBalanceDto.setTotalOutputDataOctetsAvailable(prepaidAccountsDb.getTotalOutputDataOctetsAvailable());
-			prepaidAvailBalanceDto.setTotalCallSecondsAvailable(prepaidAccountsDb.getTotalCallSecondsAvailable());
-			prepaidAvailBalanceDto.setTotalSmsAvailable(prepaidAccountsDb.getTotalSmsAvailable());
-			return new ResponseEntity<>(prepaidAvailBalanceDto, HttpStatus.OK);
+			if (prepaidAccountsDb.getTotalDataOctetsAvailable() != 0 && prepaidAccountsDb.getTotalCallSecondsAvailable() != 0 && prepaidAccountsDb.getTotalSmsAvailable() != 0) {
+				PrepaidAvailBalanceDto prepaidAvailBalanceDto = new PrepaidAvailBalanceDto();
+				prepaidAvailBalanceDto.setTotalDataOctetsAvailable(prepaidAccountsDb.getTotalDataOctetsAvailable());
+				prepaidAvailBalanceDto.setTotalInputDataOctetsAvailable(prepaidAccountsDb.getTotalInputDataOctetsAvailable());
+				prepaidAvailBalanceDto.setTotalOutputDataOctetsAvailable(prepaidAccountsDb.getTotalOutputDataOctetsAvailable());
+				prepaidAvailBalanceDto.setTotalCallSecondsAvailable(prepaidAccountsDb.getTotalCallSecondsAvailable());
+				prepaidAvailBalanceDto.setTotalSmsAvailable(prepaidAccountsDb.getTotalSmsAvailable());
+				return new ResponseEntity<>(prepaidAvailBalanceDto, HttpStatus.OK);
+			}
+			// Calling an API to disable outgoing calls,sms & data...
+			String url = "http://localhost:9697/api/hss/detail/restriction/subscriber/services/" + prepaidAccountsDb.getImsi();
+			
+			String requestBody = "{\"outgoing-calls\":false,\"incoming-calls\":true,\"outgoing-sms\":false,\"incoming-sms\":true}";
+			
+			RestTemplate restTemplate = new RestTemplate();
+			
+			HttpHeaders headers = new HttpHeaders();
+		    headers.add("Content-Type", "application/json");
+		    headers.add("Accept", "*/*");
+		    
+		    HttpEntity<String> requestEntity = new HttpEntity<String>(requestBody, headers);
+		    
+			ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
+
+//			URI uri = new URI("recharge_notification.html");
+//			HttpHeaders httpHeaders = new HttpHeaders();
+//			httpHeaders.setLocation(uri);
+
+			return ResponseEntity.status(HttpStatus.OK).body(new CustomMessage(HttpStatus.OK.value(), "Please recharge to continue services..."));
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI Or MSISDN"));
 	}

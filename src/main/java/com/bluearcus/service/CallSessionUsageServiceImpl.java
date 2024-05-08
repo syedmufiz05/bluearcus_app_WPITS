@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,9 +43,9 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			
 			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
 					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
-					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getLocationInfo(),
-					callSessionUsageDb.getSessionState(), callSessionUsageDb.getCallStartTs(),
-					null, callSessionUsageDb.getTotalSeconds(),
+					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getCustomerType(),
+					callSessionUsageDb.getLocationInfo(), callSessionUsageDb.getSessionState(),
+					callSessionUsageDb.getCallStartTs(), null, callSessionUsageDb.getTotalSeconds(),
 					callSessionUsageDb.getCallStatus());
 			
 			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
@@ -86,9 +85,10 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			
 			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
 					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
-					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getLocationInfo(),
-					callSessionUsageDb.getSessionState(), callSessionUsageDb.getCallStartTs(), null,
-					callSessionUsageDb.getTotalSeconds(), callSessionUsageDb.getCallStatus());
+					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getCustomerType(),
+					callSessionUsageDb.getLocationInfo(), callSessionUsageDb.getSessionState(),
+					callSessionUsageDb.getCallStartTs(), null, callSessionUsageDb.getTotalSeconds(),
+					callSessionUsageDb.getCallStatus());
 
 			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
 		}
@@ -106,6 +106,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDtoNew.setMsisdn(callSessionUsageDb.getMsisdn());
 			callSessionUsageDtoNew.setImsi(callSessionUsageDb.getImsi());
 			callSessionUsageDtoNew.setCalledMsisdn(callSessionUsageDb.getCalledMsisdn());
+			callSessionUsageDtoNew.setCustomerType(callSessionUsageDb.getCustomerType());
 			callSessionUsageDtoNew.setLocationInfo(callSessionUsageDb.getLocationInfo());
 			callSessionUsageDtoNew.setSessionState(callSessionUsageDb.getSessionState());
 			callSessionUsageDtoNew.setCallStartTs(createReadableDateTime(callSessionUsageDb.getCallStartTs()));
@@ -150,7 +151,6 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 		String formattedDate = "";
 		if (value != -1) {
 			formattedDate = dateTime.substring(0, value);
-			System.out.println("formattedDate:" + formattedDate);
 		} else {
 			return formattedDate = dateTime;
 		}
