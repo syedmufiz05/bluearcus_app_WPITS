@@ -15,6 +15,8 @@ public interface RatingProfileService {
 	ResponseEntity getRatingProfileVoucherByPackName(String packName);
 
 	List<RatingProfileVoucherDto> getAllRatingProfileVoucher();
+	
+	List<RatingProfileVoucherDto> getRatingProfileVoucherByPackFor(String packFor);
 
 	ResponseEntity deleteRatingProfileVoucher(Integer ratingProfileId);
 

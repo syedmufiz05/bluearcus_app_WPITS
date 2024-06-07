@@ -26,11 +26,13 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 
 	@Override
 	public ResponseEntity createRatingProfileVoucher(RatingProfileVoucherDto ratingProfileVoucherDto) {
-		Optional<RatingProfileVoucher> ratingProfileVoucherDb = ratingProfileVoucherRepository.findById(ratingProfileVoucherDto.getRatingProfileId() != null ? ratingProfileVoucherDto.getRatingProfileId() : 0);
+		Optional<RatingProfileVoucher> ratingProfileVoucherDb = ratingProfileVoucherRepository.findByPackName(ratingProfileVoucherDto.getPackName());
 		if (!ratingProfileVoucherDb.isPresent()) {
 			RatingProfileVoucher ratingProfileVoucher = new RatingProfileVoucher();
 			ratingProfileVoucher.setPackName(ratingProfileVoucherDto.getPackName() != null ? ratingProfileVoucherDto.getPackName() : "");
 			ratingProfileVoucher.setPackType(ratingProfileVoucherDto.getPackType() != null ? ratingProfileVoucherDto.getPackType() : "");
+			ratingProfileVoucher.setPackFor(ratingProfileVoucherDto.getPackFor() != null ? ratingProfileVoucherDto.getPackFor() : "");
+			ratingProfileVoucher.setIsFlexiblePlan(ratingProfileVoucherDto.getIsFlexiblePlan() != null ? ratingProfileVoucherDto.getIsFlexiblePlan() : false);
 			ratingProfileVoucher.setCategoryName(ratingProfileVoucherDto.getCategoryName() != null ? ratingProfileVoucherDto.getCategoryName() : "");
 			ratingProfileVoucher.setRatesOffer(ratingProfileVoucherDto.getRatesOffer() != null ? ratingProfileVoucherDto.getRatesOffer() : "");
 			ratingProfileVoucher.setCallBalance(ratingProfileVoucherDto.getCallBalance() != null ? ratingProfileVoucherDto.getCallBalance() : 0);
@@ -45,14 +47,15 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			
 			RatingProfileVoucherDto ratingProfileDtoNew = new RatingProfileVoucherDto(ratingProfileVoucher.getId(),
 					ratingProfileVoucher.getPackName(), ratingProfileVoucher.getPackType(),
+					ratingProfileVoucher.getPackFor(), ratingProfileVoucher.getIsFlexiblePlan(),
 					ratingProfileVoucher.getCallBalance(), ratingProfileVoucher.getCallBalanceParameter(),
 					ratingProfileVoucher.getAssignedCallBalance(), ratingProfileVoucher.getSmsBalance(),
 					ratingProfileVoucher.getDataBalance(), ratingProfileVoucher.getDataBalanceParameter(),
 					ratingProfileVoucher.getAssignedDataBalance(), ratingProfileVoucher.getCategoryName(),
-					ratingProfileVoucher.getRatesOffer(),null);
+					ratingProfileVoucher.getRatesOffer(), null);
 			return new ResponseEntity<>(ratingProfileDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Duplicate Rating Profile Id"));
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "Pack already exists"));
 	}
 
 	@Override
@@ -75,7 +78,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			
 			RatingProfileVoucherDto ratingProfileVoucherDtoNew = new RatingProfileVoucherDto(
 					ratingProfileVoucherDb.getId(), ratingProfileVoucherDb.getPackName(),
-					ratingProfileVoucherDb.getPackType(), ratingProfileVoucherDb.getCallBalance(),
+					ratingProfileVoucherDb.getPackType(), ratingProfileVoucherDb.getPackFor(),
+					ratingProfileVoucherDb.getIsFlexiblePlan(), ratingProfileVoucherDb.getCallBalance(),
 					ratingProfileVoucherDb.getCallBalanceParameter(), ratingProfileVoucherDb.getAssignedCallBalance(),
 					ratingProfileVoucherDb.getSmsBalance(), ratingProfileVoucherDb.getDataBalance(),
 					ratingProfileVoucherDb.getDataBalanceParameter(), ratingProfileVoucherDb.getAssignedDataBalance(),
@@ -94,6 +98,34 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setRatingProfileId(ratingProfileVoucher.getId());
 			ratingProfileVoucherDto.setPackName(ratingProfileVoucher.getPackName());
 			ratingProfileVoucherDto.setPackType(ratingProfileVoucher.getPackType());
+			ratingProfileVoucherDto.setPackFor(ratingProfileVoucher.getPackFor());
+			ratingProfileVoucherDto.setIsFlexiblePlan(ratingProfileVoucher.getIsFlexiblePlan());
+			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
+			ratingProfileVoucherDto.setCallBalanceParameter(ratingProfileVoucher.getCallBalanceParameter());
+			ratingProfileVoucherDto.setAssignedCallBalance(ratingProfileVoucher.getAssignedCallBalance());
+			ratingProfileVoucherDto.setSmsBalance(ratingProfileVoucher.getSmsBalance());
+			ratingProfileVoucherDto.setDataBalance(ratingProfileVoucher.getDataBalance());
+			ratingProfileVoucherDto.setDataBalanceParameter(ratingProfileVoucher.getDataBalanceParameter());
+			ratingProfileVoucherDto.setAssignedDataBalance(ratingProfileVoucher.getAssignedDataBalance());
+			ratingProfileVoucherDto.setCategoryName(ratingProfileVoucher.getCategoryName());
+			ratingProfileVoucherDto.setRatesOffer(ratingProfileVoucher.getRatesOffer());
+			ratingProfileVoucherDto.setPackValidity(findIntIntoString(ratingProfileVoucher.getRatesOffer()) + " days");
+			ratingProfileVoucherDtoList.add(ratingProfileVoucherDto);
+		}
+		return ratingProfileVoucherDtoList;
+	}
+	
+	@Override
+	public List<RatingProfileVoucherDto> getRatingProfileVoucherByPackFor(String packFor) {
+		List<RatingProfileVoucher> ratingProfileVoucherDbList = ratingProfileVoucherRepository.findByPackFor(packFor);
+		List<RatingProfileVoucherDto> ratingProfileVoucherDtoList = new ArrayList<>();
+		for (RatingProfileVoucher ratingProfileVoucher : ratingProfileVoucherDbList) {
+			RatingProfileVoucherDto ratingProfileVoucherDto = new RatingProfileVoucherDto();
+			ratingProfileVoucherDto.setRatingProfileId(ratingProfileVoucher.getId());
+			ratingProfileVoucherDto.setPackName(ratingProfileVoucher.getPackName());
+			ratingProfileVoucherDto.setPackType(ratingProfileVoucher.getPackType());
+			ratingProfileVoucherDto.setPackFor(ratingProfileVoucher.getPackFor());
+			ratingProfileVoucherDto.setIsFlexiblePlan(ratingProfileVoucher.getIsFlexiblePlan());
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setCallBalanceParameter(ratingProfileVoucher.getCallBalanceParameter());
 			ratingProfileVoucherDto.setAssignedCallBalance(ratingProfileVoucher.getAssignedCallBalance());
@@ -118,6 +150,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setRatingProfileId(ratingProfileVoucher.getId());
 			ratingProfileVoucherDto.setPackName(ratingProfileVoucher.getPackName());
 			ratingProfileVoucherDto.setPackType(ratingProfileVoucher.getPackType());
+			ratingProfileVoucherDto.setPackFor(ratingProfileVoucher.getPackFor());
+			ratingProfileVoucherDto.setIsFlexiblePlan(ratingProfileVoucher.getIsFlexiblePlan());
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setCallBalanceParameter(ratingProfileVoucher.getCallBalanceParameter());
 			ratingProfileVoucherDto.setAssignedCallBalance(ratingProfileVoucher.getAssignedCallBalance());
@@ -141,6 +175,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setRatingProfileId(ratingProfileVoucher.getId());
 			ratingProfileVoucherDto.setPackName(ratingProfileVoucher.getPackName());
 			ratingProfileVoucherDto.setPackType(ratingProfileVoucher.getPackType());
+			ratingProfileVoucherDto.setPackFor(ratingProfileVoucher.getPackFor());
+			ratingProfileVoucherDto.setIsFlexiblePlan(ratingProfileVoucher.getIsFlexiblePlan());
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setCallBalanceParameter(ratingProfileVoucher.getCallBalanceParameter());
 			ratingProfileVoucherDto.setAssignedCallBalance(ratingProfileVoucher.getAssignedCallBalance());
@@ -175,6 +211,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setRatingProfileId(ratingProfileVoucher.getId());
 			ratingProfileVoucherDto.setPackName(ratingProfileVoucher.getPackName());
 			ratingProfileVoucherDto.setPackType(ratingProfileVoucher.getPackType());
+			ratingProfileVoucherDto.setPackFor(ratingProfileVoucher.getPackFor());
+			ratingProfileVoucherDto.setIsFlexiblePlan(ratingProfileVoucher.getIsFlexiblePlan());
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setCallBalanceParameter(ratingProfileVoucher.getCallBalanceParameter());
 			ratingProfileVoucherDto.setAssignedCallBalance(ratingProfileVoucher.getAssignedCallBalance());
@@ -198,6 +236,8 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 			ratingProfileVoucherDto.setRatingProfileId(ratingProfileVoucher.getId());
 			ratingProfileVoucherDto.setPackName(ratingProfileVoucher.getPackName());
 			ratingProfileVoucherDto.setPackType(ratingProfileVoucher.getPackType());
+			ratingProfileVoucherDto.setPackFor(ratingProfileVoucher.getPackFor());
+			ratingProfileVoucherDto.setIsFlexiblePlan(ratingProfileVoucher.getIsFlexiblePlan());
 			ratingProfileVoucherDto.setCallBalance(ratingProfileVoucher.getCallBalance());
 			ratingProfileVoucherDto.setCallBalanceParameter(ratingProfileVoucher.getCallBalanceParameter());
 			ratingProfileVoucherDto.setAssignedCallBalance(ratingProfileVoucher.getAssignedCallBalance());

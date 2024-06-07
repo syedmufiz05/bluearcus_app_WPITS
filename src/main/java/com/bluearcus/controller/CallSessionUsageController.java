@@ -6,6 +6,7 @@ import com.bluearcus.service.CallSessionUsageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +24,11 @@ public class CallSessionUsageController {
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public ResponseEntity<CallSessionUsageDtoNew> saveCallSession(@RequestBody CallSessionUsageDto callSessionUsageDto) {
 		return callSessionUsageService.saveCallSessionUsage(callSessionUsageDto);
+	}
+	
+	@RequestMapping(value = "/edit/call_status/{call_status}", method = RequestMethod.PUT)
+	public ResponseEntity<CallSessionUsageDtoNew> editCallSession(@PathVariable(value = "call_status") Boolean callStatus, @RequestBody CallSessionUsageDto callSessionUsageDto) {
+		return callSessionUsageService.updateCallSessionUsage(callStatus, callSessionUsageDto);
 	}
 
 	@RequestMapping(value = "/fetch/calling/time", method = RequestMethod.POST)

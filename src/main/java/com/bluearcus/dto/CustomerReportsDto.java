@@ -46,6 +46,9 @@ public class CustomerReportsDto {
 	
 	@JsonProperty("pack_id")
 	private Integer packId;
+	
+	@JsonProperty("pack_name")
+	private String packName;
 
 	@JsonProperty("payment_status")
 	private Boolean paymentStatus;

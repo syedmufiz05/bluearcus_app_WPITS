@@ -56,6 +56,11 @@ public class RatingProfileController {
 		return ratingProfileService.getAllRatingProfileVoucher();
 	}
 	
+	@RequestMapping(value = "/get/all/{pack_for}", method = RequestMethod.GET)
+	public List<RatingProfileVoucherDto> getRatingProfileVoucherByPackFor(@PathVariable("pack_for") String packFor) {
+		return ratingProfileService.getRatingProfileVoucherByPackFor(packFor);
+	}
+	
 	@RequestMapping(value = "/get/all/data/parameters", method = RequestMethod.GET)
 	public List<String> getAllDataParameters() {
 		return ratingProfileService.getAllDataBalanceParams();

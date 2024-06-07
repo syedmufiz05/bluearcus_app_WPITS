@@ -22,6 +22,8 @@ public interface RatingProfileVoucherRepository extends JpaRepository<RatingProf
 	Optional<RatingProfileVoucher> findByCallBalance(Integer callBalance);
 	
 	List<RatingProfileVoucher> findByCategoryName(String ctgName);
+	
+	List<RatingProfileVoucher> findByPackFor(String packFor);
 
 	@Query("select ratingProfileVoucher from RatingProfileVoucher ratingProfileVoucher where (ratingProfileVoucher.packName) like LOWER(CONCAT('%', :keyword, '%')) or (ratingProfileVoucher.packType) like LOWER(CONCAT('%', :keyword, '%')) or (ratingProfileVoucher.categoryName) like LOWER(CONCAT('%', :keyword, '%'))")
 	List<RatingProfileVoucher> searchVoucherByName(@Param("keyword") String keyword);

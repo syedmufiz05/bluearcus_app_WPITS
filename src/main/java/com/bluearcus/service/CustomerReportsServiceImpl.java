@@ -6,13 +6,20 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.bluearcus.dto.CustomerReportsDto;
 import com.bluearcus.dto.CustomerReportsDtoWithCount;
 import com.bluearcus.dto.PaymentStatusDto;
+import com.bluearcus.dto.PostpaidAccountsDto;
+import com.bluearcus.dto.PrepaidAccountsDto;
 import com.bluearcus.exception.CustomMessage;
 import com.bluearcus.model.CustomerReports;
 import com.bluearcus.model.PostpaidAccounts;
@@ -22,6 +29,8 @@ import com.bluearcus.repo.CustomerReportsRepo;
 import com.bluearcus.repo.PostpaidAccountsRepo;
 import com.bluearcus.repo.PrepaidAccountsRepository;
 import com.bluearcus.repo.RatingProfileVoucherRepository;
+
+import static com.bluearcus.common.Constants.IP_ADDRESS;
 
 @Service
 public class CustomerReportsServiceImpl implements CustomerReportsService {
@@ -42,7 +51,9 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 	public ResponseEntity saveCustomerReport(CustomerReportsDto customerReportsDto) {
 		Optional<CustomerReports> customerReportDb = customerReportsRepo.findByImsi(customerReportsDto.getImsi());
 		if (customerReportDb.isPresent()) {
-
+			
+			RatingProfileVoucher ratingProfileVoucherDb = null;
+			
 			CustomerReports customerReport = customerReportDb.get();
 			customerReport.setPackId(customerReportsDto.getPackId());
 			customerReportsRepo.save(customerReport);
@@ -55,7 +66,12 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 					long packSmsBalance = 0;
 					
 					Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(customerReportsDto.getPackId());
-					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
+					
+					if (!ratingProfileVoucher.isPresent()) {
+						return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid pack id"));
+					}
+					
+					ratingProfileVoucherDb = ratingProfileVoucher.get();
 					Integer callBalance = ratingProfileVoucherDb.getCallBalance();
 					Integer dataBalance = ratingProfileVoucherDb.getDataBalance();
 					Integer smsBalance = ratingProfileVoucherDb.getSmsBalance();
@@ -82,77 +98,38 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 					
 					packSmsBalance = smsBalance.longValue();
 					
-					Optional<PrepaidAccounts> prepaidAccount = prepaidAccountsRepository.findByCustomerId(customerReportsDto.getCustomerId());
+					// Calling API to get Prepaid Account...
+					String urlForGetAccount = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/get/" + customerReportsDto.getCustomerId();
 					
-					if (prepaidAccount.isPresent()) {
-						PrepaidAccounts prepaidAccountDb = prepaidAccount.get();
-						
-						prepaidAccountDb.setTotalDataOctetsAvailable(packDataBalance + prepaidAccountDb.getTotalDataOctetsAvailable());
-						prepaidAccountDb.setTotalCallSecondsAvailable(packCallBalance + prepaidAccountDb.getTotalCallSecondsAvailable());
-						prepaidAccountDb.setTotalSmsAvailable(packSmsBalance + prepaidAccountDb.getTotalSmsAvailable());
-						
-						prepaidAccountsRepository.save(prepaidAccountDb);
-					}
+					RestTemplate restTemplate = new RestTemplate();
+					
+					PrepaidAccountsDto prepaidAccountDb = restTemplate.getForObject(urlForGetAccount,PrepaidAccountsDto.class);
+
+					PrepaidAccountsDto prepaidAccountDto = new PrepaidAccountsDto();
+
+					prepaidAccountDto.setTotalDataOctetsAvailable(packDataBalance + prepaidAccountDb.getTotalDataOctetsAvailable());
+					prepaidAccountDto.setTotalCallSecondsAvailable(packCallBalance + prepaidAccountDb.getTotalCallSecondsAvailable());
+					prepaidAccountDto.setTotalSmsAvailable(packSmsBalance + prepaidAccountDb.getTotalSmsAvailable());
+					
+					// Calling API to update Prepaid Account Details...
+					String url = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/edit/" + customerReportsDto.getCustomerId();
+					
+					HttpHeaders httpHeaders = new HttpHeaders();
+					httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+					
+					HttpEntity<PrepaidAccountsDto> requestEntity = new HttpEntity<PrepaidAccountsDto>(prepaidAccountDto, httpHeaders);
+					
+					restTemplate.exchange(url, HttpMethod.PUT, requestEntity, PostpaidAccountsDto.class);
 
 				}
 
 			}
 			
-			if (customerReport.getCustomerType().equalsIgnoreCase("postpaid")) {
-				
-				if (customerReport.getPackId() != null) {
-					long packDataBalance = 0;
-					long packCallBalance = 0;
-					long packSmsBalance = 0;
-					
-					Optional<RatingProfileVoucher> ratingProfileVoucher = ratingProfileVoucherRepository.findById(customerReportsDto.getPackId());
-					RatingProfileVoucher ratingProfileVoucherDb = ratingProfileVoucher.get();
-					Integer callBalance = ratingProfileVoucherDb.getCallBalance();
-					Integer dataBalance = ratingProfileVoucherDb.getDataBalance();
-					Integer smsBalance = ratingProfileVoucherDb.getSmsBalance();
-					
-					if (dataBalance != 0) {
-
-						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("GB")) {
-							packDataBalance = convertGigabytesToBytes(dataBalance.longValue());
-						}
-						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("MB")) {
-							packDataBalance = convertMegabytesToBytes(dataBalance.longValue());
-						}
-						if (ratingProfileVoucherDb.getDataBalanceParameter().equalsIgnoreCase("KB")) {
-							packDataBalance = convertKilobytesToBytes(dataBalance.longValue());
-						}
-						
-					}
-					
-					if (callBalance != 0) {
-						if (ratingProfileVoucherDb.getCallBalanceParameter().equalsIgnoreCase("Mins")) {
-							packCallBalance = convertMinsToSeconds(callBalance.longValue());
-						}
-					}
-					
-					packSmsBalance = smsBalance.longValue();
-					
-					Optional<PostpaidAccounts> postpaidAccount = postpaidAccountsRepo.findByCustomerId(customerReportsDto.getCustomerId());
-					
-					if (postpaidAccount.isPresent()) {
-						PostpaidAccounts postpaidAccountDb = postpaidAccount.get();
-						
-						postpaidAccountDb.setTotalDataOctetsAvailable(packDataBalance + postpaidAccountDb.getTotalDataOctetsAvailable());
-						postpaidAccountDb.setTotalCallSecondsAvailable(packCallBalance + postpaidAccountDb.getTotalCallSecondsAvailable());
-						postpaidAccountDb.setTotalSmsAvailable(packSmsBalance + postpaidAccountDb.getTotalSmsAvailable());
-						
-						postpaidAccountsRepo.save(postpaidAccountDb);
-					}
-
-				}
-
-			}
 			CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
 					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
-					customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-					customerReportsDto.getPackId(), customerReport.getPaymentStatus());
+					customerReport.getCustomerType(), customerReport.getMsisdn(), customerReport.getImsi(),
+					customerReportsDto.getPackId(),ratingProfileVoucherDb.getPackName(),customerReport.getPaymentStatus());
 			return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 		}
 
@@ -171,8 +148,8 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 		customerReportsRepo.save(customerReport);
 
 		if (customerReport.getCustomerType().equalsIgnoreCase("prepaid")) {
-
-			PrepaidAccounts prepaidAccounts = new PrepaidAccounts();
+			
+			PrepaidAccountsDto prepaidAccounts = new PrepaidAccountsDto();
 			prepaidAccounts.setCustomerId(customerReportsDto.getCustomerId());
 			prepaidAccounts.setMsisdn(customerReportsDto.getMsisdn());
 			prepaidAccounts.setImsi(customerReportsDto.getImsi());
@@ -192,12 +169,24 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			prepaidAccounts.setTotalCallSecondsConsumed(0l);
 			prepaidAccounts.setTotalSmsAvailable(0l);
 			prepaidAccounts.setTotalSmsConsumed(0l);
-			prepaidAccountsRepository.save(prepaidAccounts);
+
+			// Calling external API to create a prepaid account...
+			String url = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/save";
+			
+			RestTemplate restTemplate = new RestTemplate();
+
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+			
+			HttpEntity<PrepaidAccountsDto> requestEntity = new HttpEntity<PrepaidAccountsDto>(prepaidAccounts, httpHeaders);
+			
+		    restTemplate.exchange(url, HttpMethod.POST, requestEntity, PrepaidAccountsDto.class);
+
 		}
 
 		if (customerReport.getCustomerType().equalsIgnoreCase("postpaid")) {
 
-			PostpaidAccounts postpaidAccounts = new PostpaidAccounts();
+			PostpaidAccountsDto postpaidAccounts = new PostpaidAccountsDto();
 			postpaidAccounts.setCustomerId(customerReportsDto.getCustomerId());
 			postpaidAccounts.setMsisdn(customerReportsDto.getMsisdn());
 			postpaidAccounts.setImsi(customerReportsDto.getImsi());
@@ -214,13 +203,25 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			postpaidAccounts.setTotalCallSecondsConsumed(0l);
 			postpaidAccounts.setTotalSmsAvailable(0l);
 			postpaidAccounts.setTotalSmsConsumed(0l);
-			postpaidAccountsRepo.save(postpaidAccounts);
+
+			// Calling external API to create a postpaid account...
+			String url = "http://" + IP_ADDRESS + ":9699/api/postpaid/account/save";
+
+			RestTemplate restTemplate = new RestTemplate();
+
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<PostpaidAccountsDto> requestEntity = new HttpEntity<PostpaidAccountsDto>(postpaidAccounts, httpHeaders);
+
+			restTemplate.exchange(url, HttpMethod.POST, requestEntity, PostpaidAccountsDto.class);
+
 		}
 		CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
 				customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 				customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
-				customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-				customerReportsDto.getPackId(), customerReport.getPaymentStatus());
+				customerReport.getCustomerType(), customerReport.getMsisdn(), customerReport.getImsi(),
+				customerReportsDto.getPackId(), null, customerReport.getPaymentStatus());
 		return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 	}
 
@@ -291,7 +292,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
 					customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-					customerReport.getPackId(), customerReport.getPaymentStatus());
+					customerReport.getPackId(), null, customerReport.getPaymentStatus());
 			return new ResponseEntity<>(customerReportsDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
@@ -304,11 +305,25 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			CustomerReports customerReport = customerReportDb.get();
 			customerReport.setPaymentStatus(paymentStatusDto.getPaymentStatus());
 			customerReportsRepo.save(customerReport);
+			
+			Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+			
+			if (ratingProfile.isPresent()) {
+				RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+				CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
+						customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
+						customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
+						customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
+						customerReport.getPackId(), ratingProfileVoucher.getPackName(),
+						customerReport.getPaymentStatus());
+				return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
+			}
+			
 			CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
 					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
 					customerReport.getCustomerType(), customerReport.getImsi(), customerReport.getMsisdn(),
-					customerReport.getPackId(), customerReport.getPaymentStatus());
+					customerReport.getPackId(), null, customerReport.getPaymentStatus());
 			return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Customer Id does n't exist"));
@@ -350,6 +365,17 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			customerReportsDto.setImsi(customerReport.getImsi());
 			customerReportsDto.setMsisdn(customerReport.getMsisdn());
 			customerReportsDto.setPackId(customerReport.getPackId());
+			
+			Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+			
+			if (ratingProfile.isPresent()) {
+				RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+				customerReportsDto.setPackName(ratingProfileVoucher.getPackName());
+			}
+			else {
+				customerReportsDto.setPackName(null);
+			}
+			
 			customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 			customerReportList.add(customerReportsDto);
 			customerCount = customerCount + 1;
@@ -378,6 +404,16 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
 				customerReportsDto.setPackId(customerReport.getPackId());
+				
+				Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+
+				if (ratingProfile.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+					customerReportsDto.setPackName(ratingProfileVoucher.getPackName());
+				} else {
+					customerReportsDto.setPackName(null);
+				}
+				
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -408,6 +444,17 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
 				customerReportsDto.setPackId(customerReport.getPackId());
+				
+				Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+				
+				if (ratingProfile.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+					customerReportsDto.setPackName(ratingProfileVoucher.getPackName());
+				}
+				else {
+					customerReportsDto.setPackName(null);
+				}
+
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -438,6 +485,17 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
 				customerReportsDto.setPackId(customerReport.getPackId());
+				
+				Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+				
+				if (ratingProfile.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+					customerReportsDto.setPackName(ratingProfileVoucher.getPackName());
+				} 
+				else {
+					customerReportsDto.setPackName(null);
+				}
+				
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -468,6 +526,17 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReportsDto.setImsi(customerReport.getImsi());
 				customerReportsDto.setMsisdn(customerReport.getMsisdn());
 				customerReportsDto.setPackId(customerReport.getPackId());
+				
+				Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+				
+				if (ratingProfile.isPresent()) {
+					RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+					customerReportsDto.setPackName(ratingProfileVoucher.getPackName());
+				} 
+				else {
+					customerReportsDto.setPackName(null);
+				}
+				
 				customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 				customerReportList.add(customerReportsDto);
 				customerCount = customerCount + 1;
@@ -495,6 +564,17 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			customerReportsDto.setImsi(customerReport.getImsi());
 			customerReportsDto.setMsisdn(customerReport.getMsisdn());
 			customerReportsDto.setPackId(customerReport.getPackId());
+			
+			Optional<RatingProfileVoucher> ratingProfile = ratingProfileVoucherRepository.findById(customerReport.getPackId());
+			
+			if (ratingProfile.isPresent()) {
+				RatingProfileVoucher ratingProfileVoucher = ratingProfile.get();
+				customerReportsDto.setPackName(ratingProfileVoucher.getPackName());
+			} 
+			else {
+				customerReportsDto.setPackName(null);
+			}
+			
 			customerReportsDto.setPaymentStatus(customerReport.getPaymentStatus());
 			customerReportList.add(customerReportsDto);
 		}

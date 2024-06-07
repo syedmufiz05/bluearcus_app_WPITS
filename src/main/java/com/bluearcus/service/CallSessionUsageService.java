@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface CallSessionUsageService {
 	ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto);
+	
+	ResponseEntity updateCallSessionUsage(Boolean callStatus, CallSessionUsageDto callSessionUsageDto);
 
 	List<CallSessionUsageDtoNew> getAllCallSessionUsage();
 	

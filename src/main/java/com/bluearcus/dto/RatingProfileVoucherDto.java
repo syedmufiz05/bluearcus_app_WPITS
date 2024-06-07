@@ -14,10 +14,16 @@ public class RatingProfileVoucherDto {
 	private Integer ratingProfileId;
 
 	@JsonProperty("pack_name")
-	public String packName;
+	private String packName;
 
 	@JsonProperty("pack_type")
-	public String packType;
+	private String packType;
+	
+	@JsonProperty("pack_for")
+	private String packFor;
+	
+	@JsonProperty("is_flexible_plan")
+	private Boolean isFlexiblePlan;
 
 	@JsonProperty("call_balance")
 	public Integer callBalance;

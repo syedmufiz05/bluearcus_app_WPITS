@@ -28,17 +28,37 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	
 	@Override
 	public ResponseEntity saveCallSessionUsage(CallSessionUsageDto callSessionUsageDto) {
-		Optional<CallSessionUsage> callSessionUsage = callSessionUsageRepo.findByImsi(callSessionUsageDto.getImsi());
-		if (!callSessionUsage.isPresent()) {
-			CallSessionUsage callSessionUsageDb = new CallSessionUsage();
-			callSessionUsageDb.setPeerSessionId(callSessionUsageDto.getPeerSessionId());
-			callSessionUsageDb.setMsisdn(callSessionUsageDto.getMsisdn());
-			callSessionUsageDb.setImsi(callSessionUsageDto.getImsi());
-			callSessionUsageDb.setCalledMsisdn(callSessionUsageDto.getCalledMsisdn());
-			callSessionUsageDb.setLocationInfo(callSessionUsageDto.getLocationInfo());
-			callSessionUsageDb.setSessionState(callSessionUsageDto.getSessionState());
+		CallSessionUsage callSessionUsageDb = new CallSessionUsage();
+		callSessionUsageDb.setPeerSessionId(callSessionUsageDto.getPeerSessionId());
+		callSessionUsageDb.setMsisdn(callSessionUsageDto.getMsisdn());
+		callSessionUsageDb.setImsi(callSessionUsageDto.getImsi());
+		callSessionUsageDb.setCalledMsisdn(callSessionUsageDto.getCalledMsisdn());
+		callSessionUsageDb.setCallStartTs(callSessionUsageDto.getCallStartTs());
+		callSessionUsageDb.setCustomerType(callSessionUsageDto.getCustomerType());
+		callSessionUsageDb.setLocationInfo(callSessionUsageDto.getLocationInfo());
+		callSessionUsageDb.setSessionState(callSessionUsageDto.getSessionState());
+		callSessionUsageDb.setTotalSeconds(callSessionUsageDto.getTotalSeconds());
+		callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus());
+		callSessionUsageRepo.save(callSessionUsageDb);
+
+		CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
+				callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
+				callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getCustomerType(),
+				callSessionUsageDb.getLocationInfo(), callSessionUsageDb.getSessionState(),
+				callSessionUsageDb.getCallStartTs(), null, callSessionUsageDb.getTotalSeconds(),
+				callSessionUsageDb.getCallStatus());
+
+		return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
+	}
+	
+	@Override
+	public ResponseEntity updateCallSessionUsage(Boolean callStatus, CallSessionUsageDto callSessionUsageDto) {
+		Optional<CallSessionUsage> callSessionUsage = callSessionUsageRepo.findByCalledMsisdnAndCallStatus(callSessionUsageDto.getCalledMsisdn(), callStatus);
+		if (callSessionUsage.isPresent()) {
+			CallSessionUsage callSessionUsageDb = callSessionUsage.get();
+			callSessionUsageDb.setCallEndTs(callSessionUsageDto.getCallEndTs());
 			callSessionUsageDb.setTotalSeconds(callSessionUsageDto.getTotalSeconds());
-			callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus());
+			callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus() != null ? callSessionUsageDto.getCallStatus() : callSessionUsageDb.getCallStatus());
 			callSessionUsageRepo.save(callSessionUsageDb);
 			
 			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
@@ -50,7 +70,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			
 			return new ResponseEntity<>(callSessionUsageDtoNew, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI Id already exist"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Msisdn does n't exist"));
 	}
 	
 	@Override
@@ -65,24 +85,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDb.setSessionState(true);
 			callSessionUsageDb.setCallStatus(callSessionUsageDto.getCallStatus());
 			callSessionUsageRepo.save(callSessionUsageDb);
-			
-//			LocalDateTime callStart = convertDateToLocalDateTime(callSessionUsageDb.getCallStartTs());
-//			System.out.println(callStart);
-//			
-//			LocalDateTime callEnd = callStart.plusMinutes(15);
-//			System.out.println(callEnd);
-//			
-//			Date callEndForDb = convertLocalDateTimeToDate(callEnd);
-//			System.out.println(callEndForDb);
-//			
-//			Duration callDuration = Duration.between(callStart,callEnd);
-//			System.out.println("Call duration in seconds:" + callDuration.toSeconds());
-//			
-//			callSessionUsageDb.setCallEndTs(callEndForDb);
-//			callSessionUsageDb.setTotalSeconds(callDuration.toSeconds());
-//			
-//			callSessionUsageRepo.save(callSessionUsageDb);
-			
+
 			CallSessionUsageDtoNew callSessionUsageDtoNew = new CallSessionUsageDtoNew(callSessionUsageDb.getId(),
 					callSessionUsageDb.getPeerSessionId(), callSessionUsageDb.getMsisdn(), callSessionUsageDb.getImsi(),
 					callSessionUsageDb.getCalledMsisdn(), callSessionUsageDb.getCustomerType(),
@@ -109,7 +112,7 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 			callSessionUsageDtoNew.setCustomerType(callSessionUsageDb.getCustomerType());
 			callSessionUsageDtoNew.setLocationInfo(callSessionUsageDb.getLocationInfo());
 			callSessionUsageDtoNew.setSessionState(callSessionUsageDb.getSessionState());
-			callSessionUsageDtoNew.setCallStartTs(createReadableDateTime(callSessionUsageDb.getCallStartTs()));
+			callSessionUsageDtoNew.setCallStartTs(callSessionUsageDb.getCallStartTs());
 			callSessionUsageDtoNew.setCallEndTs(callSessionUsageDb.getCallEndTs());
 			callSessionUsageDtoNew.setTotalSeconds(callSessionUsageDb.getTotalSeconds());
 			callSessionUsageDtoNew.setCallStatus(callSessionUsageDb.getCallStatus());
@@ -166,5 +169,5 @@ public class CallSessionUsageServiceImpl implements CallSessionUsageService {
 	public static Date convertLocalDateTimeToDate(LocalDateTime localDateTime) {
 		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
-	
+
 }

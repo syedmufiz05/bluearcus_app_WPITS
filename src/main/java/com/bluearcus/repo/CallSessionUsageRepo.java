@@ -17,4 +17,6 @@ public interface CallSessionUsageRepo extends JpaRepository<CallSessionUsage, In
     List<CallSessionUsageDto> fetchAllCallSessionUsage();
     
     List<CallSessionUsage> findTop5ByOrderByIdDesc();
+    
+    Optional<CallSessionUsage> findByCalledMsisdnAndCallStatus(String calledMsisdn, Boolean status);
 }

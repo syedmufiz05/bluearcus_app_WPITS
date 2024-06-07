@@ -18,31 +18,37 @@ public class RatingProfileVoucher {
 	private Integer id;
 
 	@Column(name = "pack_name")
-	public String packName;
+	private String packName;
 
 	@Column(name = "pack_type")
-	public String packType;
+	private String packType;
+	
+	@Column(name = "pack_for")
+	private String packFor;
+	
+	@Column(name = "is_flexible_plan")
+	private Boolean isFlexiblePlan;
 
 	@Column(name = "call_balance")
-	public Integer callBalance;
+	private Integer callBalance;
 
 	@Column(name = "call_balance_parameter")
-	public String callBalanceParameter;
+	private String callBalanceParameter;
 
 	@Column(name = "assigned_call_balance")
-	public String assignedCallBalance;
+	private String assignedCallBalance;
 
 	@Column(name = "sms_balance")
-	public Integer smsBalance;
+	private Integer smsBalance;
 
 	@Column(name = "data_balance")
-	public Integer dataBalance;
+	private Integer dataBalance;
 
 	@Column(name = "data_balance_parameter")
-	public String dataBalanceParameter;
+	private String dataBalanceParameter;
 
 	@Column(name = "assigned_data_balance")
-	public String assignedDataBalance;
+	private String assignedDataBalance;
 
 	@Column(name = "category_name")
 	private String categoryName;
