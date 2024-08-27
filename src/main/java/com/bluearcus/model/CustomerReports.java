@@ -2,8 +2,6 @@ package com.bluearcus.model;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,10 +40,10 @@ public class CustomerReports {
 	@Column(name = "customer_type")
 	private String customerType;
 
-	@Column(name = "msisdn")
+	@Column(name = "msisdn", unique = true)
 	private String msisdn;
 
-	@Column(name = "imsi")
+	@Column(name = "imsi", unique = true)
 	private String imsi;
 
 	@Column(name = "pack_id")

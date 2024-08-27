@@ -1,6 +1,7 @@
 package com.bluearcus.service;
 
 import java.math.BigDecimal;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,15 +51,16 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 	@Override
 	public ResponseEntity saveCustomerReport(CustomerReportsDto customerReportsDto) {
 		Optional<CustomerReports> customerReportDb = customerReportsRepo.findByImsi(customerReportsDto.getImsi());
+		CustomerReports customerReport = new CustomerReports();
 		if (customerReportDb.isPresent()) {
 			
 			RatingProfileVoucher ratingProfileVoucherDb = null;
 			
-			CustomerReports customerReport = customerReportDb.get();
-			customerReport.setPackId(customerReportsDto.getPackId());
-			customerReportsRepo.save(customerReport);
+			CustomerReports customerReportExisting = customerReportDb.get();
+			customerReportExisting.setPackId(customerReportsDto.getPackId());
+			customerReportsRepo.save(customerReportExisting);
 			
-			if (customerReport.getCustomerType().equalsIgnoreCase("prepaid")) {
+			if (customerReportExisting.getCustomerType().equalsIgnoreCase("prepaid")) {
 
 				if (customerReportsDto.getPackId() != 0) {
 					long packDataBalance = 0;
@@ -125,27 +127,33 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 
 			}
 			
-			CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),
-					customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
-					customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
-					customerReport.getCustomerType(), customerReport.getMsisdn(), customerReport.getImsi(),
-					customerReportsDto.getPackId(),ratingProfileVoucherDb.getPackName(),customerReport.getPaymentStatus());
+			CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReportExisting.getId(),
+					customerReportExisting.getFirstName(), customerReportExisting.getLastName(), customerReportExisting.getEkycStatus(),
+					customerReportExisting.getEkycToken(), customerReportExisting.getEkycDate(), customerReportExisting.getCustomerId(),
+					customerReportExisting.getCustomerType(), customerReportExisting.getMsisdn(), customerReportExisting.getImsi(),
+					customerReportsDto.getPackId(),
+					ratingProfileVoucherDb != null ? ratingProfileVoucherDb.getPackName() : "",
+					customerReportExisting.getPaymentStatus());
 			return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 		}
-
-		CustomerReports customerReport = new CustomerReports();
-		customerReport.setFirstName(customerReportsDto.getFirstName());
-		customerReport.setLastName(customerReportsDto.getLastName());
-		customerReport.setEkycDate(customerReportsDto.getEkycDate());
-		customerReport.setEkycStatus(customerReportsDto.getEkycStatus());
-		customerReport.setEkycToken(customerReportsDto.getEkycToken());
-		customerReport.setCustomerId(customerReportsDto.getCustomerId());
-		customerReport.setCustomerType(customerReportsDto.getCustomerType());
-		customerReport.setImsi(customerReportsDto.getImsi());
-		customerReport.setMsisdn(customerReportsDto.getMsisdn());
-		customerReport.setPackId(customerReportsDto.getPackId());
-		customerReport.setPaymentStatus(customerReportsDto.getPaymentStatus());
-		customerReportsRepo.save(customerReport);
+		
+		
+		try {
+			customerReport.setFirstName(customerReportsDto.getFirstName());
+			customerReport.setLastName(customerReportsDto.getLastName());
+			customerReport.setEkycDate(customerReportsDto.getEkycDate());
+			customerReport.setEkycStatus(customerReportsDto.getEkycStatus());
+			customerReport.setEkycToken(customerReportsDto.getEkycToken());
+			customerReport.setCustomerId(customerReportsDto.getCustomerId());
+			customerReport.setCustomerType(customerReportsDto.getCustomerType());
+			customerReport.setImsi(customerReportsDto.getImsi());
+			customerReport.setMsisdn(customerReportsDto.getMsisdn());
+			customerReport.setPackId(customerReportsDto.getPackId());
+			customerReport.setPaymentStatus(customerReportsDto.getPaymentStatus());
+			customerReportsRepo.save(customerReport);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI Or MSISDN Already Exist"));
+		}
 
 		if (customerReport.getCustomerType().equalsIgnoreCase("prepaid")) {
 			
@@ -221,7 +229,7 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 				customerReport.getFirstName(), customerReport.getLastName(), customerReport.getEkycStatus(),
 				customerReport.getEkycToken(), customerReport.getEkycDate(), customerReport.getCustomerId(),
 				customerReport.getCustomerType(), customerReport.getMsisdn(), customerReport.getImsi(),
-				customerReportsDto.getPackId(), null, customerReport.getPaymentStatus());
+				customerReportsDto.getPackId(), customerReportsDto.getPackName(), customerReport.getPaymentStatus());
 		return new ResponseEntity<>(customerReportDtoNew, HttpStatus.OK);
 	}
 
