@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,10 +40,13 @@ public class CustomerReportsDto {
 	@JsonProperty("customer_type")
 	private String customerType;
 
+	@Pattern(regexp = "\\d+", message = "MSISDN accepts only digits")
 	@JsonProperty("msisdn")
 	private String msisdn;
 
 	@JsonProperty("imsi")
+	@Pattern(regexp = "\\d+", message = "IMSI accepts only digits")
+	@Size(min = 15, max = 15, message = "IMSI length should be 15")
 	private String imsi;
 	
 	@JsonProperty("pack_id")

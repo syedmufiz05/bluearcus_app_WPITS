@@ -17,7 +17,7 @@ public class AucController {
 	@Autowired
 	private AucServiceImpl aucService;
 
-	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	@PostMapping("/save")
 	public ResponseEntity<AucDto> saveAucDetails(@RequestBody AucDto aucDto, HttpServletRequest httpServletRequest)
 			throws JsonProcessingException {
 		String authToken = httpServletRequest.getHeader("Authorization").replace("Bearer", "");

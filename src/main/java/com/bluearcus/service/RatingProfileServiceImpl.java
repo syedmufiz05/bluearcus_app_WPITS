@@ -279,7 +279,7 @@ public class RatingProfileServiceImpl implements RatingProfileService {
 
 		int intValue = 0;
 
-		// Find and print all integers in the string
+		// Find and print last integer in the string
 		while (matcher.find()) {
 			String match = matcher.group();
 			intValue = Integer.parseInt(match);

@@ -2,6 +2,8 @@ package com.bluearcus.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +18,13 @@ public class PrepaidAccountsDto {
 	@JsonProperty("customer_id")
 	private Integer customerId;
 
+	@Pattern(regexp = "\\d+", message = "MSISDN accepts only digits")
 	@JsonProperty("msisdn")
 	private String msisdn;
 
 	@JsonProperty("imsi")
+	@Pattern(regexp = "\\d+", message = "IMSI accepts only digits")
+	@Size(min = 15, max = 15, message = "IMSI length should be 15")
 	private String imsi;
 
 	@JsonProperty("called_station_id")

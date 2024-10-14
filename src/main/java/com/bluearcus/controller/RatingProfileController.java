@@ -16,42 +16,42 @@ public class RatingProfileController {
 	@Autowired
 	private RatingProfileService ratingProfileService;
 
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
+	@PostMapping("/create")
 	public ResponseEntity<RatingProfileVoucherDto> createRatingProfileVoucher(@RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
 		return ratingProfileService.createRatingProfileVoucher(ratingProfileVoucherDto);
 	}
 
-	@RequestMapping(value = "/edit/{rating_profile_id}", method = RequestMethod.PUT)
+	@PutMapping("/edit/{rating_profile_id}")
 	public ResponseEntity<RatingProfileVoucherDto> editRatingProfileVoucher(@PathVariable("rating_profile_id") Integer ratingProfileId , @RequestBody RatingProfileVoucherDto ratingProfileVoucherDto) {
 		return ratingProfileService.editRatingProfileVoucher(ratingProfileId, ratingProfileVoucherDto);
 	}
 
-	@RequestMapping(value = "/delete/{rating_profile_id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/delete/{rating_profile_id}")
 	public ResponseEntity<RatingProfileVoucherDto> deleteRatingProfileVoucher(@PathVariable("rating_profile_id") Integer ratingProfileId) {
 		return ratingProfileService.deleteRatingProfileVoucher(ratingProfileId);
 	}
 
-	@RequestMapping(value = "/get/{rating_profile_id}", method = RequestMethod.GET)
+	@GetMapping("/get/{rating_profile_id}")
 	public ResponseEntity<RatingProfileVoucherDto> getRatingProfileVoucher(@PathVariable("rating_profile_id") Integer ratingProfileId) {
 		return ratingProfileService.getRatingProfileVoucher(ratingProfileId);
 	}
 	
-	@RequestMapping(value = "/get/pack/name", method = RequestMethod.GET)
+	@GetMapping("/get/pack/name")
 	public ResponseEntity<RatingProfileVoucherDto> getVoucherViaPackName(@RequestParam("pack_name") String packName) {
 		return ratingProfileService.getRatingProfileVoucherByPackName(packName);
 	}
 	
-	@RequestMapping(value = "/get/ctg/name", method = RequestMethod.GET)
+	@GetMapping("/get/ctg/name")
 	public List<RatingProfileVoucherDto> getVoucherViaCtgName(@RequestParam("ctg_name") String ctgName) {
 		return ratingProfileService.getVoucherByCtgName(ctgName);
 	}
 	
-	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public List<RatingProfileVoucherDto> getRatingProfileVoucherByCategory(@RequestParam ("keyword") String keyword) {
+	@GetMapping("/search")
+	public List<RatingProfileVoucherDto> getRatingProfileVoucherByCategory(@RequestParam String keyword) {
 		return ratingProfileService.searchVoucherByName(keyword);
 	}
 
-	@RequestMapping(value = "/get/all", method = RequestMethod.GET)
+	@GetMapping("/get/all")
 	public List<RatingProfileVoucherDto> getAllRatingProfileVoucher() {
 		return ratingProfileService.getAllRatingProfileVoucher();
 	}
@@ -61,12 +61,12 @@ public class RatingProfileController {
 		return ratingProfileService.getRatingProfileVoucherByPackFor(packFor);
 	}
 	
-	@RequestMapping(value = "/get/all/data/parameters", method = RequestMethod.GET)
+	@GetMapping("/get/all/data/parameters")
 	public List<String> getAllDataParameters() {
 		return ratingProfileService.getAllDataBalanceParams();
 	}
 
-	@RequestMapping(value = "/get/all/call/parameters", method = RequestMethod.GET)
+	@GetMapping("/get/all/call/parameters")
 	public List<String> getAllCallParameters() {
 		return ratingProfileService.getAllCallBalanceParams();
 	}
