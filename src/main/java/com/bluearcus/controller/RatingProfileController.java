@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rating/profile")
-@CrossOrigin("*")
 public class RatingProfileController {
 	@Autowired
 	private RatingProfileService ratingProfileService;
