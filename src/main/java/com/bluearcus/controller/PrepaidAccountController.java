@@ -22,43 +22,43 @@ public class PrepaidAccountController {
 	@Autowired
 	private PrepaidAccountsService prepaidAccountsService;
 
-	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	@PostMapping("/save")
 	public ResponseEntity<PrepaidAccountsDto> savePrepaidAccount(@RequestBody PrepaidAccountsDto prepaidAccountsDto) {
 		return prepaidAccountsService.savePrepaidAccount(prepaidAccountsDto);
 	}
 
-	@RequestMapping(value = "/edit/{account_id}", method = RequestMethod.PUT)
+	@PutMapping("/edit/{account_id}")
 	public ResponseEntity<PrepaidAccountsDto> editPrepaidAccount(@PathVariable("account_id") Integer accountId, @RequestBody PrepaidAccountsDto prepaidAccountsDto) {
 		return prepaidAccountsService.editPrepaidAccount(accountId, prepaidAccountsDto);
 	}
 
-	@RequestMapping(value = "/delete/{account_id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/delete/{account_id}")
 	public ResponseEntity deletePrepaidAccount(@PathVariable("account_id") Integer accountId) {
 		return prepaidAccountsService.deletePrepaidAccount(accountId);
 	}
 
-	@RequestMapping(value = "/get/{account_id}", method = RequestMethod.GET)
+	@GetMapping("/get/{account_id}")
 	public ResponseEntity<PrepaidAccountsDto> getPrepaidAccount(@PathVariable("account_id") Integer accountId) {
 		return prepaidAccountsService.getPrepaidAccount(accountId);
 	}
 
-	@RequestMapping(value = "/deduct", method = RequestMethod.POST)
+	@PostMapping("/deduct")
 	public ResponseEntity<PrepaidAccountsDto> saveDeductionRecord(@RequestBody DeductionDto deductionDto) throws JsonProcessingException {
 		return prepaidAccountsService.savePrepaidDeduction(deductionDto);
 	}
 
-	@RequestMapping(value = "/get/all/available/balance", method = RequestMethod.GET)
-	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@RequestParam("imsi") String imsi, @RequestParam("msisdn") String msisdn) throws URISyntaxException {
+	@GetMapping("/get/all/available/balance")
+	public ResponseEntity<PrepaidAvailBalanceDto> getAllAvailableBalance(@RequestParam String imsi, @RequestParam String msisdn) throws URISyntaxException {
 		return prepaidAccountsService.getAvailableBalance(imsi, msisdn);
 	}
 	
-	@RequestMapping(value = "/get/all/prepaid/account", method = RequestMethod.GET)
+	@GetMapping("/get/all/prepaid/account")
 	public List<PrepaidAccountsDto> getAllPrepaidAccounts() {
 		return prepaidAccountsService.getAllPrepaidAccounts();
 	}
 	
-	@RequestMapping(value = "/get/all/deduction/details/{msisdn}", method = RequestMethod.GET)
-	public List<PrepaidAccountRecordsDto> getAllDeductionDetails(@PathVariable("msisdn") String msisdn) throws JsonMappingException, JsonProcessingException {
+	@GetMapping("/get/all/deduction/details/{msisdn}")
+	public List<PrepaidAccountRecordsDto> getAllDeductionDetails(@PathVariable String msisdn) throws JsonMappingException, JsonProcessingException {
 		return prepaidAccountsService.getAllDeductionRecords(msisdn);
 	}
 }

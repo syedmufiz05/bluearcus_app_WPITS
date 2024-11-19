@@ -19,30 +19,30 @@ public class CategoryController {
 	@Autowired
 	private CategoryService categoryService;
 
-	@RequestMapping(value = "/detail/add", method = RequestMethod.POST)
+	@PostMapping("/detail/add")
 	public CategoryDto addCategory(@RequestParam("ctg_name") String ctgName, HttpServletRequest httpServletRequest)
 			throws JsonProcessingException {
 		String authToken = httpServletRequest.getHeader("Authorization").replace("Bearer", "");
 		return categoryService.addCategory(ctgName, authToken);
 	}
 
-	@RequestMapping(value = "/detail/get/{category_id}", method = RequestMethod.GET)
+	@GetMapping("/detail/get/{category_id}")
 	public ResponseEntity<CategoryDto> getCategory(@PathVariable("category_id") Integer categoryId) {
 		return categoryService.getCategory(categoryId);
 	}
 
-	@RequestMapping(value = "/detail/get/all", method = RequestMethod.GET)
+	@GetMapping("/detail/get/all")
 	public List<CategoryDto> getAllCategory() {
 		return categoryService.getAllCategory();
 	}
 
-	@RequestMapping(value = "/detail/edit/{category_id}", method = RequestMethod.PUT)
+	@PutMapping("/detail/edit/{category_id}")
 	public ResponseEntity<CategoryDto> editCategory(@PathVariable("category_id") Integer categoryId,
 			@RequestParam("category_name") String categoryName) throws JsonProcessingException {
 		return categoryService.editCategory(categoryId, categoryName);
 	}
 
-	@RequestMapping(value = "/detail/delete/{category_id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/detail/delete/{category_id}")
 	public String deleteCategory(@PathVariable("category_id") Integer categoryId) {
 		return categoryService.deleteCategory(categoryId);
 	}

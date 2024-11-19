@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.bluearcus.dto.CustomerReportsDto;
@@ -46,6 +49,8 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 	
 	@Autowired
 	private RatingProfileVoucherRepository ratingProfileVoucherRepository;
+	
+	private Logger logger = LoggerFactory.getLogger(CustomerReportsServiceImpl.class);
 
 	@Override
 	public ResponseEntity saveCustomerReport(CustomerReportsDto customerReportsDto) {
@@ -100,27 +105,43 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 					packSmsBalance = smsBalance.longValue();
 					
 					// Calling API to get Prepaid Account...
-					String urlForGetAccount = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/get/" + customerReportsDto.getCustomerId();
+					
+					String urlForGetAccount = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/get?imsi=" + customerReportsDto.getImsi() + "&msisdn=" + customerReportsDto.getMsisdn();
 					
 					RestTemplate restTemplate = new RestTemplate();
 					
-					PrepaidAccountsDto prepaidAccountDb = restTemplate.getForObject(urlForGetAccount,PrepaidAccountsDto.class);
+					PrepaidAccountsDto prepaidAccountDto = null;
+					
+					try {
 
-					PrepaidAccountsDto prepaidAccountDto = new PrepaidAccountsDto();
+						PrepaidAccountsDto prepaidAccountDb = restTemplate.getForObject(urlForGetAccount, PrepaidAccountsDto.class);
 
-					prepaidAccountDto.setTotalDataOctetsAvailable(packDataBalance + prepaidAccountDb.getTotalDataOctetsAvailable());
-					prepaidAccountDto.setTotalCallSecondsAvailable(packCallBalance + prepaidAccountDb.getTotalCallSecondsAvailable());
-					prepaidAccountDto.setTotalSmsAvailable(packSmsBalance + prepaidAccountDb.getTotalSmsAvailable());
+						prepaidAccountDto = new PrepaidAccountsDto();
+						prepaidAccountDto.setImsi(customerReportsDto.getImsi());
+						prepaidAccountDto.setMsisdn(customerReportsDto.getMsisdn());
+						prepaidAccountDto.setTotalDataOctetsAvailable(packDataBalance + prepaidAccountDb.getTotalDataOctetsAvailable());
+						prepaidAccountDto.setTotalCallSecondsAvailable(packCallBalance + prepaidAccountDb.getTotalCallSecondsAvailable());
+						prepaidAccountDto.setTotalSmsAvailable(packSmsBalance + prepaidAccountDb.getTotalSmsAvailable());
+
+					} catch (HttpClientErrorException e) {
+						logger.info("invalid imsi {} msisdn {}", customerReportsDto.getImsi(), customerReportsDto.getMsisdn());
+						return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid IMSI or MSISDN"));
+					}
 					
-					// Calling API to update Prepaid Account Details...
-					String url = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/edit/" + customerReportsDto.getCustomerId();
-					
-					HttpHeaders httpHeaders = new HttpHeaders();
-					httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-					
-					HttpEntity<PrepaidAccountsDto> requestEntity = new HttpEntity<PrepaidAccountsDto>(prepaidAccountDto, httpHeaders);
-					
-					restTemplate.exchange(url, HttpMethod.PUT, requestEntity, PostpaidAccountsDto.class);
+					try {
+						// Calling API to update Prepaid Account Details...
+						String url = "http://" + IP_ADDRESS + ":9698/api/prepaid/account/edit/" + customerReportsDto.getCustomerId();
+						
+						HttpHeaders httpHeaders = new HttpHeaders();
+						httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+						
+						HttpEntity<PrepaidAccountsDto> requestEntity = new HttpEntity<PrepaidAccountsDto>(prepaidAccountDto, httpHeaders);
+						
+						restTemplate.exchange(url, HttpMethod.PUT, requestEntity, PrepaidAccountsDto.class);
+					} catch (HttpClientErrorException e) {
+						logger.info("invalid customer_id {}", customerReportsDto.getCustomerId());
+						return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomMessage(HttpStatus.NOT_FOUND.value(), "Invalid Customer Id"));
+					}
 
 				}
 
@@ -187,7 +208,12 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 			
 			HttpEntity<PrepaidAccountsDto> requestEntity = new HttpEntity<PrepaidAccountsDto>(prepaidAccounts, httpHeaders);
 			
-		    restTemplate.exchange(url, HttpMethod.POST, requestEntity, PrepaidAccountsDto.class);
+			try {
+				restTemplate.exchange(url, HttpMethod.POST, requestEntity, PrepaidAccountsDto.class);
+			} catch (HttpClientErrorException e) {
+                logger.info("Duplicate imsi {} msisdn {}", customerReportsDto.getImsi(), customerReportsDto.getMsisdn());
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI or MSISDN already exist"));
+			}
 
 		}
 
@@ -221,7 +247,12 @@ public class CustomerReportsServiceImpl implements CustomerReportsService {
 
 			HttpEntity<PostpaidAccountsDto> requestEntity = new HttpEntity<PostpaidAccountsDto>(postpaidAccounts, httpHeaders);
 
-			restTemplate.exchange(url, HttpMethod.POST, requestEntity, PostpaidAccountsDto.class);
+			try {
+				restTemplate.exchange(url, HttpMethod.POST, requestEntity, PostpaidAccountsDto.class);
+			} catch (HttpClientErrorException e) {
+                logger.info("Duplicate imsi {} msisdn {}", customerReportsDto.getImsi(), customerReportsDto.getMsisdn());
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(new CustomMessage(HttpStatus.CONFLICT.value(), "IMSI or MSISDN already exist"));
+			}
 
 		}
 		CustomerReportsDto customerReportDtoNew = new CustomerReportsDto(customerReport.getId(),

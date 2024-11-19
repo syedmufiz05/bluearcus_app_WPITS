@@ -50,7 +50,7 @@ public class CustomerReportsDto {
 	private String imsi;
 	
 	@JsonProperty("pack_id")
-	private Integer packId;
+	private int packId;
 	
 	@JsonProperty("pack_name")
 	private String packName;

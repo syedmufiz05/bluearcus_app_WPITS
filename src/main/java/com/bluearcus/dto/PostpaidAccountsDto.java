@@ -21,6 +21,9 @@ public class PostpaidAccountsDto {
 
 	@JsonProperty("imsi")
 	private String imsi;
+	
+	@JsonProperty("parent_msisdn")
+	private String parentMsisdn;
 
 	@JsonProperty("data_parameter_type")
 	private String dataParameterType;

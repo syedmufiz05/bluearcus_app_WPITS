@@ -51,6 +51,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			postpaidAccountDb.setCustomerId(postpaidAccountDto.getCustomerId() != null ? postpaidAccountDto.getCustomerId() : Integer.valueOf(""));
 			postpaidAccountDb.setMsisdn(postpaidAccountDto.getMsisdn() != null ? postpaidAccountDto.getMsisdn() : "");
 			postpaidAccountDb.setImsi(postpaidAccountDto.getImsi() != null ? postpaidAccountDto.getImsi() : "");
+
 			postpaidAccountDb.setDataParameterType(postpaidAccountDto.getDataParameterType() != null ? postpaidAccountDto.getDataParameterType() : "");
 			postpaidAccountDb.setCsVoiceCallSeconds(convertMinsToSeconds(postpaidAccountDto.getCsVoiceCallSeconds()));
 			postpaidAccountDb.setFourGDataOctets(postpaidAccountDto.getFourGDataOctets() != null ? postpaidAccountDto.getFourGDataOctets() : Integer.valueOf(""));
@@ -78,7 +79,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			postpaidAccountDb.setTotalSmsConsumed(postpaidAccountDto.getTotalSmsConsumed());
 			postpaidAccountsRepo.save(postpaidAccountDb);
 			PostpaidAccountsDto postpaidAccountDtoNew = new PostpaidAccountsDto(postpaidAccountDb.getAccountId(),
-					postpaidAccountDb.getCustomerId(), postpaidAccountDb.getMsisdn(), postpaidAccountDb.getImsi(),
+					postpaidAccountDb.getCustomerId(), postpaidAccountDb.getMsisdn(), postpaidAccountDb.getImsi(),null,
 					postpaidAccountDb.getDataParameterType(), postpaidAccountDb.getCsVoiceCallSeconds(),
 					postpaidAccountDb.getFourGDataOctets(), postpaidAccountDb.getFiveGDataOctets(),
 					postpaidAccountDb.getVolteCallSeconds(), postpaidAccountDb.getTotalDataOctetsAvailable(),
@@ -129,7 +130,7 @@ public class PostpaidAccountsServiceImpl implements PostpaidAccountsService {
 			postpaidAccountsRepo.save(postpaidAccounts);
 
 			PostpaidAccountsDto postpaidAccountsDto = new PostpaidAccountsDto(postpaidAccounts.getAccountId(),
-					postpaidAccounts.getCustomerId(), postpaidAccounts.getMsisdn(), postpaidAccounts.getImsi(),
+					postpaidAccounts.getCustomerId(), postpaidAccounts.getMsisdn(), postpaidAccounts.getImsi(),null,
 					postpaidAccounts.getDataParameterType(), postpaidAccounts.getCsVoiceCallSeconds(),
 					postpaidAccounts.getFourGDataOctets(), postpaidAccounts.getFiveGDataOctets(),
 					postpaidAccounts.getVolteCallSeconds(), postpaidAccounts.getTotalDataOctetsAvailable(),

@@ -2,9 +2,12 @@ package com.bluearcus.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import com.bluearcus.dto.CrmAccountsDto;
 import com.bluearcus.dto.CustomerReportsDto;
 import com.bluearcus.dto.CustomerReportsDtoWithCount;
@@ -18,9 +21,12 @@ import jakarta.validation.Valid;
 public class CustomerReportsController {
 	@Autowired
 	private CustomerReportsService customerReportsService;
+	
+	private Logger logger = LoggerFactory.getLogger(CustomerReportsController.class);
 
 	@PostMapping("/save")
 	public ResponseEntity<CustomerReportsDto> saveCustomerReport(@Valid @RequestBody CustomerReportsDto customerReportsDto) {
+		logger.info("crm request {}", customerReportsDto);
 		return customerReportsService.saveCustomerReport(customerReportsDto);
 	}
 	
